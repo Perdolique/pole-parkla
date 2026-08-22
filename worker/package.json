@@ -1,0 +1,22 @@
+{
+  "name": "pole-parkla-recognition-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.24.0",
+  "scripts": {
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run test",
+    "cf-typegen": "wrangler types --env-file .dev.vars.example",
+    "deploy:dry": "wrangler deploy --dry-run",
+    "lint": "oxlint --deny-warnings src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "26.2.0",
+    "oxlint": "1.79.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.124.0"
+  }
+}

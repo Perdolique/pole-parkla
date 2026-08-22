@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pole_parkla_canvas">#F3F5EF</color>
+    <color name="pole_parkla_launcher_background">#174B38</color>
+    <color name="pole_parkla_launcher_foreground">#D8FF63</color>
+</resources>

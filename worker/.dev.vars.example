@@ -1,0 +1,2 @@
+APP_BEARER_TOKEN=replace-with-a-long-random-app-token
+OPENAI_GATEWAY_TOKEN=replace-with-an-authenticated-ai-gateway-token
