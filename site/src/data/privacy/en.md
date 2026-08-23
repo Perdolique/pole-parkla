@@ -6,7 +6,7 @@ lastUpdated: 2026-08-23
 
 ## Controller and contact
 
-Pole parkla is developed and operated by **Perdolique**. Questions about privacy or this policy can be sent to [hello@poleparkla.ee](mailto:hello@poleparkla.ee).
+Pole parkla is developed and operated by [**Perdolique**](https://perd.dev). Questions about privacy or this policy can be sent to [hello@poleparkla.ee](mailto:hello@poleparkla.ee).
 
 This policy covers the Pole parkla Android application and the website at `poleparkla.ee`. Pole parkla has no user accounts, advertising, analytics, crash-reporting SDK, or background synchronisation.
 

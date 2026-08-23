@@ -15,9 +15,7 @@ const text = ui[locale]
   <nav class="footer-inner" aria-label={text.footerLabel}>
     <a href={getLocalizedPath(locale, 'privacy')}>{text.privacyLink}</a>
     <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a>
-    {siteConfig.sourceUrl
-      ? <a href={siteConfig.sourceUrl} rel="noreferrer">{siteConfig.developerName}</a>
-      : <span>{siteConfig.developerName}</span>}
+    <a href="https://perd.dev">{siteConfig.developerName}</a>
   </nav>
 </footer>
 
@@ -38,8 +36,7 @@ const text = ui[locale]
     margin-inline: auto;
   }
 
-  a,
-  span {
+  a {
     color: inherit;
     font-size: var(--font-size-small);
   }
@@ -56,7 +53,7 @@ const text = ui[locale]
     justify-self: center;
   }
 
-  :is(a, span):last-child {
+  a:last-child {
     justify-self: end;
   }
 
@@ -69,19 +66,18 @@ const text = ui[locale]
 
     a,
     a:nth-child(2),
-    :is(a, span):last-child {
+    a:last-child {
       justify-self: stretch;
     }
 
-    a,
-    span {
+    a {
       display: flex;
       align-items: center;
       min-height: 48px;
       border-bottom: 1px solid rgb(243 245 239 / 18%);
     }
 
-    :is(a, span):last-child {
+    a:last-child {
       border-bottom: 0;
     }
   }

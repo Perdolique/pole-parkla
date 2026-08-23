@@ -6,7 +6,7 @@ lastUpdated: 2026-08-23
 
 ## Vastutav töötleja ja kontakt
 
-Pole parkla arendaja ja käitaja on **Perdolique**. Privaatsuse või selle poliitika kohta saab küsimusi saata aadressile [hello@poleparkla.ee](mailto:hello@poleparkla.ee).
+Pole parkla arendaja ja käitaja on [**Perdolique**](https://perd.dev). Privaatsuse või selle poliitika kohta saab küsimusi saata aadressile [hello@poleparkla.ee](mailto:hello@poleparkla.ee).
 
 See poliitika hõlmab Pole parkla Androidi rakendust ja veebisaiti `poleparkla.ee`. Pole parklal ei ole kasutajakontosid, reklaame, analüütikat, krahhiaruannete SDK-d ega taustsünkroonimist.
 

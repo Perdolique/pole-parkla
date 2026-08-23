@@ -6,7 +6,7 @@ lastUpdated: 2026-08-23
 
 ## Оператор и контактные данные
 
-Разработчик и оператор Pole parkla — **Perdolique**. Вопросы о приватности и этой политике можно отправлять на [hello@poleparkla.ee](mailto:hello@poleparkla.ee).
+Разработчик и оператор Pole parkla — [**Perdolique**](https://perd.dev). Вопросы о приватности и этой политике можно отправлять на [hello@poleparkla.ee](mailto:hello@poleparkla.ee).
 
 Политика распространяется на Android-приложение Pole parkla и сайт `poleparkla.ee`. В Pole parkla нет пользовательских аккаунтов, рекламы, аналитики, SDK для отчётов о сбоях и фоновой синхронизации.
 

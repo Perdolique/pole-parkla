@@ -72,9 +72,11 @@ img {
 
 a {
   color: var(--color-forest);
+  transition: opacity 180ms ease;
 }
 
 a:hover {
+  opacity: 0.72;
   text-decoration-thickness: 2px;
 }
 
@@ -154,5 +156,9 @@ a:hover {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  a {
+    transition: none;
   }
 }

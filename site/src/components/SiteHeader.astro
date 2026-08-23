@@ -119,6 +119,10 @@ const text = ui[locale]
     display: none;
   }
 
+  .mobile-menu::details-content {
+    transition: content-visibility 180ms allow-discrete;
+  }
+
   summary {
     display: grid;
     width: 48px;
@@ -167,6 +171,21 @@ const text = ui[locale]
     color: var(--color-canvas);
     background: var(--color-forest);
     border-top: 1px solid rgb(243 245 239 / 18%);
+    opacity: 0;
+    translate: 0 calc(var(--space-8) * -1);
+    transition:
+      opacity 180ms ease,
+      translate 180ms ease;
+  }
+
+  .mobile-menu[open] .mobile-panel {
+    opacity: 1;
+    translate: 0;
+
+    @starting-style {
+      opacity: 0;
+      translate: 0 calc(var(--space-8) * -1);
+    }
   }
 
   .mobile-panel nav {
@@ -189,6 +208,13 @@ const text = ui[locale]
 
     .mobile-menu {
       display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-menu::details-content,
+    .mobile-panel {
+      transition: none;
     }
   }
 </style>

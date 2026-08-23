@@ -1,8 +1,15 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "pole-parkla-site",
+  "name": "pole-parkla",
   "compatibility_date": "2026-08-23",
   "preview_urls": true,
+
+  "routes": [
+    {
+      "pattern": "poleparkla.ee",
+      "custom_domain": true
+    }
+  ],
 
   "assets": {
     "directory": "./dist",
