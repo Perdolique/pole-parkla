@@ -24,7 +24,10 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -42,6 +45,23 @@ data class PhotoExifMetadata(
     val capturedAtEpochMillis: Long? = null,
     val location: LocationSnapshot? = null,
 )
+
+internal suspend fun decodeBitmapWithCancellationCleanup(
+    dispatcher: CoroutineDispatcher,
+    decode: () -> Bitmap,
+): Bitmap {
+    val pendingResult = AtomicReference<Bitmap?>()
+    return try {
+        withContext(dispatcher) {
+            decode().also(pendingResult::set)
+        }.also { delivered ->
+            pendingResult.compareAndSet(delivered, null)
+        }
+    } catch (error: CancellationException) {
+        pendingResult.getAndSet(null)?.recycle()
+        throw error
+    }
+}
 
 class PhotoStore(
     private val context: Context,
@@ -180,7 +200,7 @@ class PhotoStore(
         bounds: NormalizedPhotoRect,
         maxLongSide: Int = PLATE_CROP_MAX_LONG_SIDE,
     ): Bitmap = plateCropDecodeMutex.withLock {
-        withContext(Dispatchers.IO) {
+        decodeBitmapWithCancellationCleanup(Dispatchers.IO) {
             require(
                 bounds.left in 0f..1f &&
                     bounds.top in 0f..1f &&

@@ -118,6 +118,61 @@ class ReportWizardComponentsTest {
     }
 
     @Test
+    fun evidenceWithoutBoundsUsesTheFullPhotoFallbackWithoutStartingACrop() {
+        composeRule.setContent {
+            PoleParklaTheme {
+                VehicleWizardStep(
+                    report = report().copy(
+                        plate = "003 PUK",
+                        plateObservations = listOf(observation("003 PUK", "photo").copy(bounds = null)),
+                    ),
+                    photoStore = photoStore,
+                    busy = false,
+                    cloudConfigured = false,
+                    defaultProvider = CloudProvider.WORKERS_AI,
+                    onOpenPhoto = {},
+                    onRecognize = {},
+                    onConfirm = { _, _, _ -> },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("plate_evidence_fallback", useUnmergedTree = true).assertExists()
+        composeRule.onNodeWithTag("plate_evidence_loading", useUnmergedTree = true).assertDoesNotExist()
+        composeRule.onNodeWithTag("plate_evidence_crop", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun boundedCropDecodeFailureEnablesTheFullPhotoFallback() {
+        composeRule.setContent {
+            PoleParklaTheme {
+                VehicleWizardStep(
+                    report = report().copy(
+                        plate = "003 PUK",
+                        plateObservations = listOf(observation("003 PUK", "photo")),
+                    ),
+                    photoStore = photoStore,
+                    busy = false,
+                    cloudConfigured = false,
+                    defaultProvider = CloudProvider.WORKERS_AI,
+                    onOpenPhoto = {},
+                    onRecognize = {},
+                    onConfirm = { _, _, _ -> },
+                )
+            }
+        }
+
+        composeRule.waitUntil(5_000) {
+            runCatching {
+                composeRule.onNodeWithTag("plate_evidence_fallback", useUnmergedTree = true).assertExists()
+                true
+            }.getOrDefault(false)
+        }
+        composeRule.onNodeWithTag("plate_evidence_loading", useUnmergedTree = true).assertDoesNotExist()
+        composeRule.onNodeWithTag("plate_evidence_crop", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
     fun tappingProblemCommitsItImmediately() {
         var chosen: ViolationType? = null
         composeRule.setContent {

@@ -16,6 +16,12 @@ import java.io.FileOutputStream
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -59,6 +65,23 @@ class PhotoStoreInstrumentedTest {
         assertArrayEquals(source.readBytes(), mailCopy.readBytes())
         assertNotNull(ExifInterface(mailCopy).latLong)
         assertNull(ExifInterface(cloudCopy).latLong)
+    }
+
+    @Test
+    fun completedBitmapIsRecycledWhenCallerIsCancelledBeforeDelivery() = runBlocking {
+        val bitmap = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888)
+        val decoded = CountDownLatch(1)
+        val job = launch(start = CoroutineStart.UNDISPATCHED) {
+            decodeBitmapWithCancellationCleanup(Dispatchers.IO) {
+                bitmap.also { decoded.countDown() }
+            }
+        }
+
+        assertTrue(decoded.await(5, TimeUnit.SECONDS))
+        assertTrue(job.isActive)
+        job.cancelAndJoin()
+
+        assertTrue(bitmap.isRecycled)
     }
 
     @Test

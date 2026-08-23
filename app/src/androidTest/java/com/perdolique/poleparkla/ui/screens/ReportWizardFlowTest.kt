@@ -14,13 +14,16 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.assertCountEquals
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -256,18 +259,7 @@ class ReportWizardFlowTest {
 
     @Test
     fun editingVehicleFromSummaryReturnsStraightToSummary() {
-        runBlocking {
-            container.reportRepository.mutateReport(REPORT_ID) {
-                it.copy(
-                    vehicleConfirmed = true,
-                    locationConfirmed = true,
-                    locationNeedsReview = false,
-                    violationType = com.perdolique.poleparkla.model.ViolationType.CYCLE_PATH,
-                    subject = "Subject",
-                    body = "Body",
-                )
-            }
-        }
+        completeReport()
         composeRule.setContent {
             PoleParklaTheme {
                 ReportWizardScreen(
@@ -308,6 +300,99 @@ class ReportWizardFlowTest {
             "999 XYZ",
             runBlocking { requireNotNull(container.reportRepository.getReport(REPORT_ID)).plate },
         )
+    }
+
+    @Test
+    fun vehicleDraftIsDiscardedBySystemAndTopBarBackAcrossRepeatedTransitions() {
+        completeReport()
+        setWizardContent()
+        waitForSummary()
+
+        composeRule.onNodeWithTag("summary_vehicle").performClick()
+        waitForVehicle()
+        composeRule.onNodeWithTag("vehicle_plate").performTextReplacement("111 AAA")
+        composeRule.mainClock.autoAdvance = false
+        try {
+            composeRule.runOnIdle {
+                composeRule.activity.onBackPressedDispatcher.onBackPressed()
+            }
+            composeRule.mainClock.advanceTimeBy(150)
+            composeRule.waitForIdle()
+            val hiddenFromAccessibility = SemanticsMatcher.expectValue(
+                SemanticsProperties.HideFromAccessibility,
+                Unit,
+            )
+            composeRule.onNodeWithTag("wizard_scene_vehicle").assert(hiddenFromAccessibility)
+            composeRule.onNodeWithTag("wizard_scene_summary").assert(hiddenFromAccessibility)
+            composeRule.onNodeWithTag("wizard_transition_input_blocker").assertExists()
+
+            composeRule.mainClock.advanceTimeBy(200)
+            composeRule.waitForIdle()
+            composeRule.onNodeWithTag("wizard_transition_input_blocker").assertDoesNotExist()
+        } finally {
+            composeRule.mainClock.autoAdvance = true
+        }
+        waitForSummary()
+        composeRule.onNodeWithText("003 PUK").assertExists()
+
+        composeRule.onNodeWithTag("summary_vehicle").performClick()
+        waitForVehicle()
+        composeRule.onNodeWithTag("vehicle_plate").assertTextContains("003 PUK")
+        composeRule.onNodeWithTag("vehicle_plate").performTextReplacement("222 BBB")
+        composeRule.onNodeWithContentDescription(context.getString(R.string.back)).performClick()
+        waitForSummary()
+        composeRule.onNodeWithText("003 PUK").assertExists()
+        assertEquals(
+            "003 PUK",
+            runBlocking { requireNotNull(container.reportRepository.getReport(REPORT_ID)).plate },
+        )
+    }
+
+    @Test
+    fun summaryToVehicleAnimationKeepsBothScenesAndTheMatchedFixtureCropUntilCompletion() {
+        completeReport()
+        setWizardContent()
+        waitForSummary()
+        composeRule.waitUntil(15_000) {
+            runCatching {
+                composeRule.onAllNodesWithTag("plate_evidence_crop", useUnmergedTree = true)
+                    .assertCountEquals(1)
+                true
+            }.getOrDefault(false)
+        }
+
+        composeRule.mainClock.autoAdvance = false
+        try {
+            composeRule.onNodeWithTag("summary_vehicle").performClick()
+            composeRule.mainClock.advanceTimeBy(150)
+            composeRule.waitForIdle()
+
+            composeRule.onNodeWithTag("wizard_scene_summary").assertExists()
+            composeRule.onNodeWithTag("wizard_scene_vehicle").assertExists()
+            composeRule.onAllNodesWithTag("plate_evidence_crop", useUnmergedTree = true)
+                .assertCountEquals(2)
+            val cropNodes = composeRule.onAllNodesWithTag("plate_evidence_crop", useUnmergedTree = true)
+                .fetchSemanticsNodes()
+            assertTrue(cropNodes.all { it.config[PlateSharedElementMatchedKey] })
+            assertEquals(
+                1,
+                cropNodes.map { it.config[PlateEvidenceBitmapIdentityKey] }.distinct().size,
+            )
+            val summaryLeft = composeRule.onNodeWithTag("wizard_scene_summary")
+                .fetchSemanticsNode().boundsInRoot.left
+            val vehicleLeft = composeRule.onNodeWithTag("wizard_scene_vehicle")
+                .fetchSemanticsNode().boundsInRoot.left
+            assertTrue(vehicleLeft < summaryLeft)
+
+            composeRule.mainClock.advanceTimeBy(200)
+            composeRule.waitForIdle()
+            composeRule.onNodeWithTag("wizard_scene_summary").assertDoesNotExist()
+            composeRule.onNodeWithTag("wizard_scene_vehicle").assertExists()
+            composeRule.onAllNodesWithTag("plate_evidence_crop", useUnmergedTree = true)
+                .assertCountEquals(1)
+        } finally {
+            composeRule.mainClock.autoAdvance = true
+        }
     }
 
     @Test
@@ -392,6 +477,39 @@ class ReportWizardFlowTest {
         }
         composeRule.onNodeWithTag("vehicle_save").performClick()
         composeRule.onNodeWithTag("location_save").assertExists()
+    }
+
+    private fun completeReport() = runBlocking {
+        container.reportRepository.mutateReport(REPORT_ID) {
+            it.copy(
+                vehicleConfirmed = true,
+                locationConfirmed = true,
+                locationNeedsReview = false,
+                violationType = ViolationType.CYCLE_PATH,
+                subject = "Subject",
+                body = "Body",
+            )
+        }
+    }
+
+    private fun waitForSummary() {
+        composeRule.waitUntil(5_000) {
+            runCatching {
+                composeRule.onNodeWithTag("summary_vehicle").assertExists()
+                composeRule.onNodeWithTag("wizard_scene_vehicle").assertDoesNotExist()
+                true
+            }.getOrDefault(false)
+        }
+    }
+
+    private fun waitForVehicle() {
+        composeRule.waitUntil(5_000) {
+            runCatching {
+                composeRule.onNodeWithTag("vehicle_plate").assertExists()
+                composeRule.onNodeWithTag("wizard_scene_summary").assertDoesNotExist()
+                true
+            }.getOrDefault(false)
+        }
     }
 
     private companion object {

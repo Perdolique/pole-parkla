@@ -11,6 +11,18 @@ import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -30,6 +42,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,9 +59,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -57,11 +73,16 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -98,6 +119,7 @@ import com.perdolique.poleparkla.ui.MailPreparation
 import com.perdolique.poleparkla.ui.PhotoEditorMetadata
 import com.perdolique.poleparkla.ui.PoleParklaViewModel
 import com.perdolique.poleparkla.ui.ReportWizardStep
+import com.perdolique.poleparkla.ui.components.ManagedBitmapLoadState
 import com.perdolique.poleparkla.ui.components.PhotoThumbnail
 import com.perdolique.poleparkla.ui.components.PoleParklaSystemBars
 import com.perdolique.poleparkla.ui.components.PpBadge
@@ -113,6 +135,7 @@ import com.perdolique.poleparkla.ui.components.PpSheet
 import com.perdolique.poleparkla.ui.components.PpSheetHeader
 import com.perdolique.poleparkla.ui.components.PpTopBar
 import com.perdolique.poleparkla.ui.components.rememberManagedBitmap
+import com.perdolique.poleparkla.ui.components.rememberManagedBitmapLoadState
 import com.perdolique.poleparkla.ui.findActivity
 import com.perdolique.poleparkla.ui.openAppSettings
 import com.perdolique.poleparkla.ui.resolveWizardStep
@@ -124,6 +147,36 @@ import java.time.format.FormatStyle
 import java.util.Locale
 
 private val REPORT_TIME_ZONE: ZoneId = ZoneId.of("Europe/Tallinn")
+private const val WIZARD_TRANSITION_DURATION_MILLIS = 300
+private const val WIZARD_TRANSITION_DISTANCE_PERCENT = 12
+
+internal val PlateEvidenceBitmapIdentityKey = SemanticsPropertyKey<Int>("PlateEvidenceBitmapIdentity")
+internal val PlateSharedElementMatchedKey = SemanticsPropertyKey<Boolean>("PlateSharedElementMatched")
+
+private var SemanticsPropertyReceiver.plateEvidenceBitmapIdentity by PlateEvidenceBitmapIdentityKey
+private var SemanticsPropertyReceiver.plateSharedElementMatched by PlateSharedElementMatchedKey
+
+internal data class PlateEvidenceKey(
+    val reportId: String,
+    val photoId: String,
+    val bounds: NormalizedPhotoRect,
+)
+
+internal data class RetainedPlateCrop(
+    val key: PlateEvidenceKey,
+    val loadState: ManagedBitmapLoadState,
+)
+
+internal data class PlateSharedTransition(
+    val sharedTransitionScope: SharedTransitionScope,
+    val animatedVisibilityScope: AnimatedVisibilityScope,
+)
+
+private data class PrimaryPlateEvidence(
+    val key: PlateEvidenceKey,
+    val photo: ReportPhoto,
+    val observation: PlateObservation,
+)
 
 @Composable
 fun ReportWizardScreen(
@@ -216,82 +269,177 @@ fun ReportWizardScreen(
     }
     BackHandler(onBack = handleBack)
 
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        PpTopBar(
-            title = wizardTitle(step),
-            onBack = handleBack,
-            actions = {
-                PpBadge(
-                    text = stringResource(R.string.wizard_progress, step.ordinal + 1, 4),
-                    isComplete = step == ReportWizardStep.SUMMARY,
+    val primaryPlateEvidence = remember(
+        current.id,
+        current.plate,
+        current.plateObservations,
+        current.photos,
+    ) {
+        current.primaryPlateEvidence(exactPlateCandidate(current.plate, current.plateObservations))
+    }
+    val retainedPlateCrop = if (primaryPlateEvidence == null) {
+        null
+    } else {
+        val cropState by rememberManagedBitmapLoadState(primaryPlateEvidence.key) {
+            photoStore.decodePlateCrop(
+                primaryPlateEvidence.photo,
+                requireNotNull(primaryPlateEvidence.observation.bounds),
+            )
+        }
+        RetainedPlateCrop(primaryPlateEvidence.key, cropState)
+    }
+
+    val wizardTransition = updateTransition(step, label = "report wizard transition")
+    SharedTransitionLayout {
+        val sharedTransitionScope = this
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            wizardTransition.AnimatedContent(
+                transitionSpec = {
+                    val forward = targetState.ordinal > initialState.ordinal
+                    val direction = if (forward) 1 else -1
+                    val animationSpec = tween<IntOffset>(
+                        durationMillis = WIZARD_TRANSITION_DURATION_MILLIS,
+                        easing = FastOutSlowInEasing,
+                    )
+                    val enter =
+                        slideInHorizontally(
+                            animationSpec = animationSpec,
+                            initialOffsetX = { width ->
+                                wizardTransitionOffset(width, direction)
+                            },
+                        ) + fadeIn(
+                            animationSpec = tween(
+                                durationMillis = WIZARD_TRANSITION_DURATION_MILLIS,
+                                easing = FastOutSlowInEasing,
+                            ),
+                        )
+                    val exit =
+                        slideOutHorizontally(
+                            animationSpec = animationSpec,
+                            targetOffsetX = { width ->
+                                wizardTransitionOffset(width, -direction)
+                            },
+                        ) + fadeOut(
+                            animationSpec = tween(
+                                durationMillis = WIZARD_TRANSITION_DURATION_MILLIS,
+                                easing = FastOutSlowInEasing,
+                            ),
+                        )
+                    enter.togetherWith(exit)
+                },
+                modifier = Modifier.fillMaxSize(),
+            ) { visibleStep ->
+                val sharedTransition = PlateSharedTransition(
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = this,
                 )
-            },
-        )
-        when (step) {
-            ReportWizardStep.VEHICLE -> VehicleWizardStep(
-                report = current,
-                photoStore = photoStore,
-                busy = busy,
-                cloudConfigured = cloudConfigured,
-                defaultProvider = settings.cloudProvider,
-                onOpenPhoto = { fullPhoto = it },
-                onRecognize = requestCloudRecognition,
-                onConfirm = { plate, make, model ->
-                    viewModel.updateVehicleDetails(reportId, plate, make, model)
-                    val nextStep = current.copy(
-                        plate = plate.trim().uppercase(Locale.ROOT),
-                        vehicleConfirmed = true,
-                    ).resolveWizardStep()
-                    returnFromEditOrContinue(nextStep)
-                },
-            )
-            ReportWizardStep.LOCATION -> LocationWizardStep(
-                report = current,
-                viewModel = viewModel,
-                onConfirm = {
-                    val nextStep = if (current.violationType == null) {
-                        ReportWizardStep.PROBLEM
-                    } else {
-                        ReportWizardStep.SUMMARY
+                val sceneInteractive = !wizardTransition.isRunning && visibleStep == wizardTransition.targetState
+                Box(
+                    Modifier.fillMaxSize()
+                        .testTag("wizard_scene_${visibleStep.name.lowercase(Locale.ROOT)}")
+                        .then(
+                            if (sceneInteractive) {
+                                Modifier
+                            } else {
+                                Modifier.semantics { hideFromAccessibility() }
+                            },
+                        ),
+                ) {
+                    Column(Modifier.fillMaxSize()) {
+                        PpTopBar(
+                            title = wizardTitle(visibleStep),
+                            onBack = handleBack,
+                            actions = {
+                                PpBadge(
+                                    text = stringResource(R.string.wizard_progress, visibleStep.ordinal + 1, 4),
+                                    isComplete = visibleStep == ReportWizardStep.SUMMARY,
+                                )
+                            },
+                        )
+                        when (visibleStep) {
+                            ReportWizardStep.VEHICLE -> VehicleWizardStep(
+                                report = current,
+                                photoStore = photoStore,
+                                busy = busy,
+                                cloudConfigured = cloudConfigured,
+                                defaultProvider = settings.cloudProvider,
+                                retainedPlateCrop = retainedPlateCrop,
+                                sharedTransition = sharedTransition,
+                                onOpenPhoto = { fullPhoto = it },
+                                onRecognize = requestCloudRecognition,
+                                onConfirm = { plate, make, model ->
+                                    viewModel.updateVehicleDetails(reportId, plate, make, model)
+                                    val nextStep = current.copy(
+                                        plate = plate.trim().uppercase(Locale.ROOT),
+                                        vehicleConfirmed = true,
+                                    ).resolveWizardStep()
+                                    returnFromEditOrContinue(nextStep)
+                                },
+                            )
+                            ReportWizardStep.LOCATION -> LocationWizardStep(
+                                report = current,
+                                viewModel = viewModel,
+                                onConfirm = {
+                                    val nextStep = if (current.violationType == null) {
+                                        ReportWizardStep.PROBLEM
+                                    } else {
+                                        ReportWizardStep.SUMMARY
+                                    }
+                                    returnFromEditOrContinue(nextStep)
+                                },
+                            )
+                            ReportWizardStep.PROBLEM -> ProblemWizardStep(
+                                report = current,
+                                templates = templates,
+                                onSelect = { type, templateId ->
+                                    val wasEditing = editingFromSummary
+                                    viewModel.chooseViolation(reportId, type, templateId)
+                                    editingFromSummary = false
+                                    summaryHasWizardBack = !wasEditing
+                                    step = ReportWizardStep.SUMMARY
+                                },
+                            )
+                            ReportWizardStep.SUMMARY -> ReportSummaryStep(
+                                report = current,
+                                profile = settings.profile,
+                                templates = templates,
+                                photoStore = photoStore,
+                                busy = busy,
+                                editorsEnabled = mailPreparation is MailPreparation.Idle,
+                                retainedPlateCrop = retainedPlateCrop,
+                                sharedTransition = sharedTransition,
+                                onPhotos = { showPhotoEditor = true },
+                                onVehicle = {
+                                    editingFromSummary = true
+                                    step = ReportWizardStep.VEHICLE
+                                },
+                                onLocation = {
+                                    editingFromSummary = true
+                                    step = ReportWizardStep.LOCATION
+                                },
+                                onProblem = {
+                                    editingFromSummary = true
+                                    step = ReportWizardStep.PROBLEM
+                                },
+                                onRecipient = { showRecipientEditor = true },
+                                onSender = onEditSettings,
+                                onOpenMail = { viewModel.prepareMail(reportId) },
+                            )
+                        }
                     }
-                    returnFromEditOrContinue(nextStep)
-                },
-            )
-            ReportWizardStep.PROBLEM -> ProblemWizardStep(
-                report = current,
-                templates = templates,
-                onSelect = { type, templateId ->
-                    val wasEditing = editingFromSummary
-                    viewModel.chooseViolation(reportId, type, templateId)
-                    editingFromSummary = false
-                    summaryHasWizardBack = !wasEditing
-                    step = ReportWizardStep.SUMMARY
-                },
-            )
-            ReportWizardStep.SUMMARY -> ReportSummaryStep(
-                report = current,
-                profile = settings.profile,
-                templates = templates,
-                photoStore = photoStore,
-                busy = busy,
-                editorsEnabled = mailPreparation is MailPreparation.Idle,
-                onPhotos = { showPhotoEditor = true },
-                onVehicle = {
-                    editingFromSummary = true
-                    step = ReportWizardStep.VEHICLE
-                },
-                onLocation = {
-                    editingFromSummary = true
-                    step = ReportWizardStep.LOCATION
-                },
-                onProblem = {
-                    editingFromSummary = true
-                    step = ReportWizardStep.PROBLEM
-                },
-                onRecipient = { showRecipientEditor = true },
-                onSender = onEditSettings,
-                onOpenMail = { viewModel.prepareMail(reportId) },
-            )
+                }
+            }
+            if (wizardTransition.isRunning) {
+                Box(
+                    Modifier.matchParentSize().testTag("wizard_transition_input_blocker").pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
+                            }
+                        }
+                    },
+                )
+            }
         }
     }
 
@@ -384,6 +532,8 @@ internal fun VehicleWizardStep(
     busy: Boolean,
     cloudConfigured: Boolean,
     defaultProvider: CloudProvider,
+    retainedPlateCrop: RetainedPlateCrop? = null,
+    sharedTransition: PlateSharedTransition? = null,
     onOpenPhoto: (ReportPhoto) -> Unit,
     onRecognize: (CloudProvider) -> Unit,
     onConfirm: (String, String, String) -> Unit,
@@ -424,6 +574,8 @@ internal fun VehicleWizardStep(
                         report = report,
                         candidate = selectedCandidate,
                         photoStore = photoStore,
+                        retainedPlateCrop = retainedPlateCrop,
+                        sharedTransition = sharedTransition,
                         onOpenPhoto = onOpenPhoto,
                         modifier = Modifier.weight(1f),
                     )
@@ -450,7 +602,14 @@ internal fun VehicleWizardStep(
                     Modifier.fillMaxSize().verticalScroll(scroll).padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    VehicleEvidence(report, selectedCandidate, photoStore, onOpenPhoto)
+                    VehicleEvidence(
+                        report = report,
+                        candidate = selectedCandidate,
+                        photoStore = photoStore,
+                        retainedPlateCrop = retainedPlateCrop,
+                        sharedTransition = sharedTransition,
+                        onOpenPhoto = onOpenPhoto,
+                    )
                     VehicleFields(
                         plate = plate,
                         make = make,
@@ -615,6 +774,8 @@ private fun VehicleEvidence(
     report: Report,
     candidate: PlateCandidate?,
     photoStore: PhotoStore,
+    retainedPlateCrop: RetainedPlateCrop?,
+    sharedTransition: PlateSharedTransition?,
     onOpenPhoto: (ReportPhoto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -633,6 +794,8 @@ private fun VehicleEvidence(
                     photo = mainPhoto,
                     bounds = mainObservation?.bounds,
                     photoStore = photoStore,
+                    retainedPlateCrop = retainedPlateCrop,
+                    sharedTransition = sharedTransition,
                     contentDescription = stringResource(R.string.plate_evidence),
                     modifier = Modifier.fillMaxWidth().height(220.dp).padding(8.dp),
                 )
@@ -671,21 +834,97 @@ private fun EvidenceImage(
     photo: ReportPhoto,
     bounds: NormalizedPhotoRect?,
     photoStore: PhotoStore,
+    retainedPlateCrop: RetainedPlateCrop? = null,
+    sharedTransition: PlateSharedTransition? = null,
     contentDescription: String,
     modifier: Modifier = Modifier,
 ) {
-    val crop by rememberManagedBitmap(photo.filePath to bounds) {
-        bounds?.let { photoStore.decodePlateCrop(photo, it) }
+    if (bounds == null) {
+        PhotoThumbnail(
+            photo = photo,
+            photoStore = photoStore,
+            contentDescription = contentDescription,
+            modifier = modifier.testTag("plate_evidence_fallback"),
+        )
+        return
     }
-    if (crop != null) {
-        Image(
-            bitmap = requireNotNull(crop).asImageBitmap(),
+
+    val evidenceKey = PlateEvidenceKey(photo.reportId, photo.id, bounds)
+    val usesRetainedCrop = retainedPlateCrop?.key == evidenceKey
+    val localLoadState = if (usesRetainedCrop) {
+        null
+    } else {
+        val state by rememberManagedBitmapLoadState(evidenceKey) {
+            photoStore.decodePlateCrop(photo, bounds)
+        }
+        state
+    }
+    val loadState = if (usesRetainedCrop) {
+        requireNotNull(retainedPlateCrop).loadState
+    } else {
+        requireNotNull(localLoadState)
+    }
+    val sharedElementModifier = if (
+        usesRetainedCrop &&
+        loadState is ManagedBitmapLoadState.Ready &&
+        sharedTransition != null
+    ) {
+        with(sharedTransition.sharedTransitionScope) {
+            val sharedContentState = rememberSharedContentState(evidenceKey)
+            Modifier.sharedElement(
+                sharedContentState = sharedContentState,
+                animatedVisibilityScope = sharedTransition.animatedVisibilityScope,
+                boundsTransform = { _, _ ->
+                    tween(
+                        durationMillis = WIZARD_TRANSITION_DURATION_MILLIS,
+                        easing = FastOutSlowInEasing,
+                    )
+                },
+            ).semantics {
+                plateSharedElementMatched = sharedContentState.isMatchFound
+            }
+        }
+    } else {
+        Modifier
+    }
+    PlateEvidenceBitmap(
+        loadState = loadState,
+        contentDescription = contentDescription,
+        modifier = modifier,
+        readyModifier = sharedElementModifier.then(modifier),
+        fallback = { fallbackModifier ->
+            PhotoThumbnail(photo, photoStore, contentDescription, fallbackModifier)
+        },
+    )
+}
+
+@Composable
+internal fun PlateEvidenceBitmap(
+    loadState: ManagedBitmapLoadState,
+    contentDescription: String,
+    modifier: Modifier,
+    readyModifier: Modifier = modifier,
+    fallback: @Composable (Modifier) -> Unit,
+) {
+    when (loadState) {
+        ManagedBitmapLoadState.Loading -> Box(
+            modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .semantics { this.contentDescription = contentDescription }
+                .testTag("plate_evidence_loading"),
+        )
+        is ManagedBitmapLoadState.Ready -> Image(
+            bitmap = loadState.bitmap.asImageBitmap(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Fit,
-            modifier = modifier,
+            modifier = readyModifier.semantics {
+                plateEvidenceBitmapIdentity = System.identityHashCode(loadState.bitmap)
+            }.testTag("plate_evidence_crop"),
         )
-    } else {
-        PhotoThumbnail(photo, photoStore, contentDescription, modifier)
+        ManagedBitmapLoadState.Failed -> fallback(
+            modifier.testTag("plate_evidence_fallback"),
+        )
     }
 }
 
@@ -1258,6 +1497,8 @@ internal fun ReportSummaryStep(
     photoStore: PhotoStore,
     busy: Boolean,
     editorsEnabled: Boolean,
+    retainedPlateCrop: RetainedPlateCrop? = null,
+    sharedTransition: PlateSharedTransition? = null,
     onPhotos: () -> Unit,
     onVehicle: () -> Unit,
     onLocation: () -> Unit,
@@ -1292,7 +1533,14 @@ internal fun ReportSummaryStep(
                 SummaryPhotoCard(report, photoStore, if (editorsEnabled) onPhotos else null)
                 val cards: List<@Composable () -> Unit> = listOf(
                     {
-                        SummaryVehicleCard(report, bestCandidate, photoStore, if (editorsEnabled) onVehicle else null)
+                        SummaryVehicleCard(
+                            report = report,
+                            candidate = bestCandidate,
+                            photoStore = photoStore,
+                            retainedPlateCrop = retainedPlateCrop,
+                            sharedTransition = sharedTransition,
+                            onClick = if (editorsEnabled) onVehicle else null,
+                        )
                     },
                     {
                         SummaryRow(
@@ -1383,7 +1631,7 @@ internal fun ReportSummaryStep(
 private fun SummaryPhotoCard(report: Report, photoStore: PhotoStore, onClick: (() -> Unit)?) {
     PpCard(onClick = onClick, modifier = Modifier.fillMaxWidth().testTag("summary_photos")) {
         Row(
-            Modifier.fillMaxWidth().padding(10.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -1402,7 +1650,7 @@ private fun SummaryPhotoCard(report: Report, photoStore: PhotoStore, onClick: ((
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Icon(PpIcons.ChevronRight, contentDescription = null)
+            SummaryEditIndicator(visible = onClick != null)
         }
     }
 }
@@ -1412,6 +1660,8 @@ private fun SummaryVehicleCard(
     report: Report,
     candidate: PlateCandidate?,
     photoStore: PhotoStore,
+    retainedPlateCrop: RetainedPlateCrop?,
+    sharedTransition: PlateSharedTransition?,
     onClick: (() -> Unit)?,
 ) {
     val observation = candidate?.observations?.firstOrNull { it.bounds != null }
@@ -1436,6 +1686,8 @@ private fun SummaryVehicleCard(
                         photo,
                         observation?.bounds,
                         photoStore,
+                        retainedPlateCrop,
+                        sharedTransition,
                         stringResource(R.string.plate_evidence),
                         Modifier.fillMaxWidth().height(72.dp),
                     )
@@ -1449,10 +1701,7 @@ private fun SummaryVehicleCard(
                         Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                     }
             }
-            SummaryStatusIcon(
-                complete = report.vehicleConfirmed,
-                canEdit = true,
-            )
+            SummaryEditIndicator(visible = onClick != null)
         }
     }
 }
@@ -1494,36 +1743,19 @@ private fun SummaryRow(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            SummaryStatusIcon(
-                complete = complete,
-                warning = warning,
-                canEdit = onClick != null,
-            )
+            SummaryEditIndicator(visible = onClick != null)
         }
     }
 }
 
 @Composable
-private fun SummaryStatusIcon(
-    complete: Boolean,
-    canEdit: Boolean,
-    warning: Boolean = false,
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (complete && !warning) {
-            Icon(
-                PpIcons.CheckCircle,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
-        if (canEdit) {
-            Icon(
-                PpIcons.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+private fun SummaryEditIndicator(visible: Boolean) {
+    if (visible) {
+        Icon(
+            PpIcons.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -1676,6 +1908,20 @@ private fun wizardTitle(step: ReportWizardStep): String = stringResource(
         ReportWizardStep.SUMMARY -> R.string.wizard_summary_title
     },
 )
+
+internal fun wizardTransitionOffset(width: Int, direction: Int): Int =
+    width * WIZARD_TRANSITION_DISTANCE_PERCENT * direction / 100
+
+private fun Report.primaryPlateEvidence(candidate: PlateCandidate?): PrimaryPlateEvidence? {
+    val observation = candidate?.observations?.firstOrNull { it.bounds != null } ?: return null
+    val bounds = requireNotNull(observation.bounds)
+    val photo = photos.firstOrNull { it.id == observation.photoId } ?: return null
+    return PrimaryPlateEvidence(
+        key = PlateEvidenceKey(id, photo.id, bounds),
+        photo = photo,
+        observation = observation,
+    )
+}
 
 @Composable
 private fun providerLabel(provider: CloudProvider): String = stringResource(

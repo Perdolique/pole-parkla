@@ -26,12 +26,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.perdolique.poleparkla.R
 import com.perdolique.poleparkla.model.ReportPhoto
 import com.perdolique.poleparkla.service.PhotoStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.awaitCancellation
+
+internal sealed interface ManagedBitmapLoadState {
+    data object Loading : ManagedBitmapLoadState
+
+    data class Ready(val bitmap: Bitmap) : ManagedBitmapLoadState
+
+    data object Failed : ManagedBitmapLoadState
+}
 
 @Composable
 fun LanguageSelector(selected: String, onSelected: (String) -> Unit) {
@@ -89,13 +99,14 @@ fun PhotoThumbnail(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
         bitmap?.let {
             Image(
                 bitmap = it.asImageBitmap(),
-                contentDescription = contentDescription,
+                contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -127,4 +138,38 @@ internal fun rememberManagedBitmap(
         }
     }
     return bitmapState
+}
+
+/** Owns a decoded bitmap while exposing loading and failure as distinct states. */
+@Composable
+internal fun rememberManagedBitmapLoadState(
+    bitmapKey: Any?,
+    load: suspend () -> Bitmap?,
+): State<ManagedBitmapLoadState> {
+    val loadState = remember(bitmapKey) {
+        mutableStateOf<ManagedBitmapLoadState>(ManagedBitmapLoadState.Loading)
+    }
+    LaunchedEffect(bitmapKey) {
+        val decoded = try {
+            load()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            null
+        }
+        if (decoded == null) {
+            loadState.value = ManagedBitmapLoadState.Failed
+            return@LaunchedEffect
+        }
+        loadState.value = ManagedBitmapLoadState.Ready(decoded)
+        try {
+            awaitCancellation()
+        } finally {
+            if ((loadState.value as? ManagedBitmapLoadState.Ready)?.bitmap === decoded) {
+                loadState.value = ManagedBitmapLoadState.Loading
+            }
+            decoded.recycle()
+        }
+    }
+    return loadState
 }
