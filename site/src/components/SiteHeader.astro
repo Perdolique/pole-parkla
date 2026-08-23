@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets'
 import brandMark from '../assets/brand-mark.png'
 import { siteConfig } from '../config'
 import { getLocalizedPath, type Locale, type RouteName } from '../i18n/config'
@@ -17,7 +18,16 @@ const text = ui[locale]
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href={getLocalizedPath(locale, 'home')} aria-label="Pole parkla">
-      <img src={brandMark.src} alt={text.logoAlt} width="42" height="42" />
+      <Image
+        src={brandMark}
+        alt={text.logoAlt}
+        width={42}
+        height={42}
+        densities={[1, 2, 3]}
+        format="webp"
+        quality={100}
+        loading="eager"
+      />
       <span>Pole parkla</span>
     </a>
 

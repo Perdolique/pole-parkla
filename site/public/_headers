@@ -1,5 +1,11 @@
 /*
   Content-Signal: search=yes, ai-input=yes, ai-train=no, use=reference
 
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/screenshots/*
+  Cache-Control: public, max-age=86400, must-revalidate
+
 https://:version.:subdomain.workers.dev/*
   X-Robots-Tag: noindex, nofollow

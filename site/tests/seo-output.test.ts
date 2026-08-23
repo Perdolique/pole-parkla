@@ -35,6 +35,7 @@ const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const distRoot = path.join(siteRoot, 'dist')
 const siteUrl = 'https://poleparkla.ee'
 const personId = `${siteUrl}/#person`
+const screenshotSizes = '(max-width: 387px) calc(78vw - 2px), 300px'
 const localeConfig = {
   et: {
     htmlLanguage: 'et',
@@ -246,6 +247,8 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
         assert.equal(getMetaContent(html, 'name', 'twitter:image'), localeData.socialImage)
         assert.ok(getMetaContent(html, 'name', 'twitter:image:alt'))
         assert.equal(findTag(html, 'meta', { name: 'keywords' }), undefined)
+        assert.equal(findTag(html, 'link', { rel: 'stylesheet' }), undefined)
+        assert.match(html, /<style(?:\s|>)/)
 
         const structuredData = getStructuredData(html)
         const graph = structuredData['@graph']
@@ -281,9 +284,39 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           assert.match(html, /<h1[^>]*>Pole parkla<\/h1>/)
           assert.equal((html.match(/<h1\b/g) ?? []).length, 1)
           assert.match(html, /<dl\b/)
-          assert.match(html, /fetchpriority="high"/)
-          assert.match(html, /camera-420\.webp 420w/)
-          assert.match(html, /camera-600\.webp 600w/)
+          const images = getTags(html, 'img')
+          const brandImage = images.find(
+            (attributes) =>
+              attributes.get('width') === '42' && attributes.get('height') === '42'
+          )
+
+          assert.ok(brandImage, `Missing responsive brand image for ${locale}`)
+          assert.match(brandImage.get('src') ?? '', /^\/_astro\/brand-mark\..+\.webp$/)
+          assert.match(brandImage.get('srcset') ?? '', / 1x,.* 2x,.* 3x/)
+          assert.equal(brandImage.get('loading'), 'eager')
+
+          const cameraImage = findTag(html, 'img', {
+            src: `/screenshots/${locale}/camera.webp`
+          })
+          const reviewImage = findTag(html, 'img', {
+            src: `/screenshots/${locale}/review.webp`
+          })
+          const reportImage = findTag(html, 'img', {
+            src: `/screenshots/${locale}/report.webp`
+          })
+
+          assert.ok(cameraImage, `Missing camera screenshot for ${locale}`)
+          assert.ok(reviewImage, `Missing review screenshot for ${locale}`)
+          assert.ok(reportImage, `Missing report screenshot for ${locale}`)
+          assert.equal(cameraImage.get('sizes'), screenshotSizes)
+          assert.equal(cameraImage.get('loading'), 'eager')
+          assert.equal(cameraImage.get('fetchpriority'), 'high')
+          assert.match(cameraImage.get('srcset') ?? '', /camera-420\.webp 420w/)
+          assert.match(cameraImage.get('srcset') ?? '', /camera-600\.webp 600w/)
+          assert.equal(reviewImage.get('sizes'), screenshotSizes)
+          assert.equal(reviewImage.get('loading'), 'lazy')
+          assert.equal(reportImage.get('sizes'), screenshotSizes)
+          assert.equal(reportImage.get('loading'), 'lazy')
         }
 
         if (page === 'privacy') {
@@ -337,7 +370,7 @@ test('404 outputs are noindex and never canonicalize to the home page', async ()
   }
 })
 
-test('crawler policy allows discovery and blocks model-training crawlers', async () => {
+test('crawler and cache policies protect discovery and static assets', async () => {
   const robots = await readFile(path.join(distRoot, 'robots.txt'), 'utf8')
   const headers = await readFile(path.join(distRoot, '_headers'), 'utf8')
   const llms = await readFile(path.join(distRoot, 'llms.txt'), 'utf8')
@@ -364,6 +397,15 @@ test('crawler policy allows discovery and blocks model-training crawlers', async
   }
 
   assert.match(headers, /Content-Signal: search=yes, ai-input=yes, ai-train=no, use=reference/)
+  assert.match(
+    headers,
+    /\/_astro\/\*\n\s+Cache-Control: public, max-age=31536000, immutable/
+  )
+  assert.match(
+    headers,
+    /\/screenshots\/\*\n\s+Cache-Control: public, max-age=86400, must-revalidate/
+  )
+  assert.doesNotMatch(headers.split('\n\n')[0] ?? '', /Cache-Control/)
   assert.match(headers, /workers\.dev\/\*\n\s+X-Robots-Tag: noindex, nofollow/)
   assert.match(llms, /Pole parkla does not send reports/)
   assert.match(llms, /Search indexing and real-time AI input are allowed/)

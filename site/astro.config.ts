@@ -20,6 +20,10 @@ export default defineConfig({
   site: 'https://poleparkla.ee',
   output: 'static',
 
+  build: {
+    inlineStylesheets: 'always'
+  },
+
   i18n: {
     locales: ['et', 'en', 'ru'],
     defaultLocale: 'et',
