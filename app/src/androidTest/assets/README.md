@@ -1,9 +1,9 @@
 # Instrumentation image fixture
 
-`synthetic_plate_test_image.png` was generated for this project with OpenAI image generation on
-2026-08-21. It depicts a generic silver hatchback with the fictional plate `123 ABC`; it is not a
-photograph of a real vehicle and is not derived from the bundled model repositories.
+`street_plate_test_image.png` is based on a street photograph supplied by the project owner. The
+main Estonian plate originally read `003 OOO`; an OpenAI image edit on 2026-08-23 changed only its
+letters to `PUK`, producing the test value `003 PUK`.
 
-Final prompt summary: create a realistic, unbranded rear three-quarter vehicle photograph with a
-large, sharp, front-facing Estonian-style plate reading exactly `123 ABC`, neutral surroundings,
-daylight and no people or other readable text.
+Final prompt summary: preserve the source photograph, digits `003`, Estonian plate strip, plate
+geometry, lighting, street, vehicle, and composition; replace only the final three letters with
+`PUK`.

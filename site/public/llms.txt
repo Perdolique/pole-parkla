@@ -1,0 +1,32 @@
+# Pole parkla
+
+> Pole parkla is a private, camera-first Android app for preparing evidence-based reports about vehicles parked on cycle paths or footways in Estonia.
+
+The app keeps drafts and photos on the Android device. Bundled OCR and number-plate recognition run locally. Address search, map tiles, and optional cloud recognition require a network connection. Optional cloud recognition starts only after the user selects a provider and accepts its disclosure.
+
+Pole parkla does not send reports. It opens an editable Estonian draft with temporary photo attachments in the mail app chosen by the user, who decides whether to edit, send, or discard it.
+
+## Main pages
+
+- [Eesti home](https://poleparkla.ee/) — Primary Estonian product information.
+- [English home](https://poleparkla.ee/en/) — English product information.
+- [Русский](https://poleparkla.ee/ru/) — Russian product information.
+- [Eesti privacy policy](https://poleparkla.ee/privacy/) — Detailed data handling and service disclosures.
+- [English privacy policy](https://poleparkla.ee/en/privacy/) — Detailed data handling and service disclosures in English.
+- [Russian privacy policy](https://poleparkla.ee/ru/privacy/) — Detailed data handling and service disclosures in Russian.
+
+## Release history
+
+- [Eesti updates](https://poleparkla.ee/updates/)
+- [English updates](https://poleparkla.ee/en/updates/)
+- [Russian updates](https://poleparkla.ee/ru/updates/)
+- [Eesti RSS](https://poleparkla.ee/updates.xml)
+- [English RSS](https://poleparkla.ee/en/updates.xml)
+- [Russian RSS](https://poleparkla.ee/ru/updates.xml)
+
+## Discovery and policy
+
+- [Sitemap](https://poleparkla.ee/sitemap-index.xml)
+- [Crawler policy](https://poleparkla.ee/robots.txt)
+
+Search indexing and real-time AI input are allowed. Model training is not permitted. Content may be indexed, excerpted, and linked back to its canonical Pole parkla page.

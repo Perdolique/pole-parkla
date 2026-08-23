@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ChevronRight
@@ -73,6 +74,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -121,6 +123,7 @@ object PpIcons {
     val Refresh = Icons.Outlined.Refresh
     val Lock = Icons.Outlined.Lock
     val Send = Icons.AutoMirrored.Outlined.Send
+    val Calendar = Icons.Outlined.CalendarMonth
     val Time = Icons.Outlined.Schedule
 }
 
@@ -211,6 +214,7 @@ fun PpIconButton(
         contentColor = contentColor,
         modifier = modifier
             .size(48.dp)
+            .alpha(if (enabled) 1f else 0.38f)
             .semantics { role = Role.Button },
     ) {
         Box(contentAlignment = Alignment.Center) {

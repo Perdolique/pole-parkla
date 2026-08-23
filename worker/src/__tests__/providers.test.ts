@@ -49,7 +49,7 @@ describe(recognizeWithOpenAI, () => {
     const fetcher = vi.fn().mockResolvedValue(
       openAiResponse(
         JSON.stringify({
-          plateCandidates: ["123 ABC"],
+          plateCandidates: ["003 PUK"],
           vehicleMake: null,
           vehicleModel: null,
           suggestedViolationType: null,
@@ -117,7 +117,7 @@ describe(recognizeWithWorkersAI, () => {
         {
           message: {
             content: JSON.stringify({
-              plateCandidates: ["123 ABC"],
+              plateCandidates: ["003 PUK"],
               vehicleMake: "Toyota",
               vehicleModel: "Corolla",
               suggestedViolationType: null,
@@ -140,7 +140,7 @@ describe(recognizeWithWorkersAI, () => {
 
     expect(result).toEqual({
       payload: {
-        plateCandidates: ["123 ABC"],
+        plateCandidates: ["003 PUK"],
         vehicleMake: "Toyota",
         vehicleModel: "Corolla",
         suggestedViolationType: null,

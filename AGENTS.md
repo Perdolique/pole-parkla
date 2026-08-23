@@ -32,7 +32,12 @@ Pole parkla is a private, camera-first Android app for preparing reports about v
 - Keep interactive targets at least 48 dp and adapt report layouts from 600 dp width.
 - Text and multi-field editors commit changes only through an explicit save action. Violation choices commit in one tap and close immediately; dismissing a sheet without choosing an action must not mutate the report.
 - Image-generated mockups are visual references only and must not be bundled into the APK.
+- When a design change affects UI shown in `site/public/screenshots/`, recapture the affected screenshots from the real app in every applicable locale; do not regenerate unchanged screenshots.
 
 ## Development workflow
 
+- Keep every repository-owned Node config, script, and test in erasable TypeScript. Execute `.ts` files directly with Node; do not add `.js`, `.mjs`, `.cjs`, `tsx`, `ts-node`, loaders, or TypeScript runtime flags.
+- Use the Node version pinned in the root `.node-version`; keep nested pins and package engine requirements aligned, and verify runtime upgrades against the official Node.js release index.
+- Prefix every Gradle command with `env JAVA_HOME='/Applications/Android Studio.app/Contents/jbr/Contents/Home' ANDROID_HOME='/Users/ky6uk/Library/Android/sdk'`; do not use the default Java 26.
+- Never send an email from a test device or interact with a mail app's send action; email-flow testing must stop after verifying the populated draft.
 - After completing and verifying Android app changes, always install the freshly built debug APK on a connected Android device when one is available.

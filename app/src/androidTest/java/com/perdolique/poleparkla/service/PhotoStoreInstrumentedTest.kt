@@ -8,6 +8,7 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.perdolique.poleparkla.model.PhotoSource
+import com.perdolique.poleparkla.model.NormalizedPhotoRect
 import com.perdolique.poleparkla.model.ReportPhoto
 import java.io.File
 import java.io.FileInputStream
@@ -19,6 +20,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -163,6 +165,44 @@ class PhotoStoreInstrumentedTest {
         assertNull(metadata.location)
     }
 
+    @Test
+    fun plateCropUsesTheOrientedOriginalAndBoundedPadding() = runBlocking {
+        val source = createSplitPng(width = 400, height = 200)
+
+        val crop = photoStore.decodePlateCrop(
+            reportPhoto(source),
+            NormalizedPhotoRect(left = 0.25f, top = 0.25f, right = 0.75f, bottom = 0.75f),
+        )
+
+        try {
+            assertEquals(248, crop.width)
+            assertEquals(170, crop.height)
+            assertEquals(Color.RED, crop.getPixel(10, crop.height / 2))
+            assertEquals(Color.BLUE, crop.getPixel(crop.width - 10, crop.height / 2))
+        } finally {
+            crop.recycle()
+        }
+    }
+
+    @Test
+    fun fullFrameSmallPlateCropRemainsUsable() = runBlocking {
+        val source = createPng(width = 128, height = 64)
+
+        val crop = photoStore.decodePlateCrop(
+            reportPhoto(source),
+            NormalizedPhotoRect(left = 0f, top = 0f, right = 1f, bottom = 1f),
+        )
+
+        try {
+            assertFalse(crop.isRecycled)
+            assertEquals(64, crop.width)
+            assertEquals(128, crop.height)
+            assertEquals(Color.GREEN, crop.getPixel(crop.width / 2, crop.height / 2))
+        } finally {
+            crop.recycle()
+        }
+    }
+
     private fun reportPhoto(source: File) = ReportPhoto(
         id = "photo",
         reportId = REPORT_ID,
@@ -207,6 +247,24 @@ class PhotoStoreInstrumentedTest {
             bitmap.recycle()
         }
         addExif(file, orientation = ExifInterface.ORIENTATION_ROTATE_90)
+        return file
+    }
+
+    private fun createSplitPng(width: Int, height: Int): File {
+        val file = File(reportsDirectory, "$REPORT_ID/split.png")
+        file.parentFile?.mkdirs()
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val pixels = IntArray(width * height) { index ->
+            if (index % width < width / 2) Color.RED else Color.BLUE
+        }
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+        try {
+            FileOutputStream(file).use { output ->
+                check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+            }
+        } finally {
+            bitmap.recycle()
+        }
         return file
     }
 

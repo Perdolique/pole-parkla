@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
     entities = [
         ReportEntity::class,
         PhotoEntity::class,
+        PlateObservationEntity::class,
         CustomViolationTemplateEntity::class,
     ],
     version = 1,

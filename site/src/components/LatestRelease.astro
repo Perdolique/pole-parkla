@@ -1,0 +1,99 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import type { Locale } from '../i18n/config'
+import { ui } from '../i18n/ui'
+import { formatDate } from '../lib/content'
+import { getLocalizedPath } from '../i18n/config'
+
+interface Props {
+  entry: CollectionEntry<'updates'>
+  locale: Locale
+}
+
+const { entry, locale } = Astro.props
+const text = ui[locale]
+---
+
+<section class="latest-release" aria-labelledby="latest-release-title">
+  <div class="release-meta">
+    <p class="eyebrow">{text.latestReleaseEyebrow}</p>
+    <p class="version">{entry.data.version}</p>
+    <p class="date">
+      <span>{text.releaseDateLabel}</span>
+      <time datetime={entry.data.releasedAt.toISOString()}>{formatDate(entry.data.releasedAt, locale)}</time>
+    </p>
+  </div>
+
+  <div class="release-details">
+    <h2 id="latest-release-title">{entry.data.title}</h2>
+    <ul>
+      {entry.data.highlights.map((highlight) => <li>{highlight}</li>)}
+    </ul>
+    <a class="arrow-link" href={getLocalizedPath(locale, 'updates')}>{text.allUpdatesLink}<span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<style>
+  .latest-release {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
+    gap: clamp(var(--space-32), 6vw, var(--space-80));
+    width: var(--page-width);
+    margin: var(--space-16) auto 0;
+    padding: clamp(var(--space-24), 4vw, var(--space-40));
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  p,
+  h2,
+  ul {
+    margin-block-start: 0;
+  }
+
+  .eyebrow {
+    margin-block-end: var(--space-12);
+    color: var(--color-forest);
+    font-size: var(--font-size-label);
+    font-weight: 750;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .version {
+    margin-block-end: var(--space-8);
+    font-size: var(--font-size-title);
+    font-weight: 700;
+  }
+
+  .date {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+  }
+
+  h2 {
+    margin-block-end: var(--space-16);
+    color: var(--color-forest);
+    font-size: var(--font-size-title);
+  }
+
+  ul {
+    margin-block-end: var(--space-20);
+    padding-inline-start: 1.2em;
+  }
+
+  li + li {
+    margin-block-start: var(--space-8);
+  }
+
+  @media (max-width: 680px) {
+    .latest-release {
+      grid-template-columns: 1fr;
+      gap: var(--space-24);
+    }
+  }
+</style>

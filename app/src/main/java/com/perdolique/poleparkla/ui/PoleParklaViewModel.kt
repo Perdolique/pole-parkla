@@ -22,7 +22,6 @@ import com.perdolique.poleparkla.model.AddressResolution
 import com.perdolique.poleparkla.model.AppSettings
 import com.perdolique.poleparkla.model.CloudProvider
 import com.perdolique.poleparkla.model.CustomViolationTemplate
-import com.perdolique.poleparkla.model.LetterDraft
 import com.perdolique.poleparkla.model.LocationSnapshot
 import com.perdolique.poleparkla.model.Report
 import com.perdolique.poleparkla.model.ReportPhoto
@@ -95,6 +94,7 @@ private data class PendingAddressResolution(
 
 sealed interface MailPreparation {
     data object Idle : MailPreparation
+    data object Preparing : MailPreparation
     data class Ready(
         val report: Report,
         val files: List<File>,
@@ -262,7 +262,6 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
                         container.reportRepository.addPhotos(reportId, imported.map { it.photo })
                         persisted = true
                     }
-                    container.reportRepository.clearAutomaticRecognition(reportId)
                     recognizeLocally(reportId)
                 } catch (error: CancellationException) {
                     if (!persisted) imported.forEach { File(it.photo.filePath).delete() }
@@ -282,11 +281,19 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
         launchDataMutation {
             _busy.value = true
             try {
-                container.photoStore.clearTemporaryCopies(reportId)
-                container.reportRepository.removePhoto(photoId)
+                try {
+                    container.photoStore.clearTemporaryCopies(reportId)
+                    container.reportRepository.removePhoto(photoId)
+                    container.textRecognitionService.invalidate(photoId)
+                    container.plateRecognitionService.invalidate(photoId)
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (_: Exception) {
+                    _notices.emit(UiNotice(NoticeKind.DATA_DELETE_FAILED))
+                    return@launchDataMutation
+                }
                 val report = container.reportRepository.getReport(reportId)
                 if (report != null) {
-                    container.reportRepository.clearAutomaticRecognition(reportId)
                     if (report.photos.isEmpty()) {
                         refreshLetter(reportId)
                     } else {
@@ -352,11 +359,12 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
     fun updateVehicleDetails(reportId: String, plate: String, make: String, model: String) =
         updateReport(reportId) {
             it.copy(
-                plate = plate.uppercase(),
-                vehicleMake = make,
-                vehicleModel = model,
+                plate = plate.trim().uppercase(),
+                vehicleMake = make.trim(),
+                vehicleModel = model.trim(),
                 plateManuallyEdited = true,
                 vehicleManuallyEdited = true,
+                vehicleConfirmed = true,
             )
         }
 
@@ -398,6 +406,7 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
                 },
                 occurredAtEpochMillis = parsed.occurredAtEpochMillis,
                 locationNeedsReview = false,
+                locationConfirmed = true,
             )
         }
         return null
@@ -446,20 +455,6 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
         location: LocationSnapshot,
         forceRefresh: Boolean,
     ): AddressResolution? = resolveAddressOrNull(location, forceRefresh)
-
-    fun updateLetter(reportId: String, subject: String, body: String) = updateReport(
-        reportId,
-        regenerate = false,
-    ) { it.copy(subject = subject, body = body, letterManuallyEdited = true) }
-
-    fun regenerateLetter(reportId: String) = updateReport(reportId, regenerate = true) {
-        it.copy(letterManuallyEdited = false)
-    }
-
-    fun previewRegeneratedLetter(report: Report): LetterDraft? {
-        val description = violationDescription(report, templates.value) ?: return null
-        return container.emailTemplateRenderer.render(report, settings.value.profile, description)
-    }
 
     fun recognizeWithCloud(reportId: String, provider: CloudProvider) {
         launchDataMutation {
@@ -572,7 +567,6 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
                     .forEach { report ->
                         updateReportNow(
                             reportId = report.id,
-                            regenerate = false,
                             templateSnapshot = templateSnapshot,
                         ) { it }
                     }
@@ -586,12 +580,12 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
             reports.value.orEmpty()
                 .filter { it.customTemplateId == id }
                 .forEach { report ->
-                    updateReportNow(report.id, regenerate = false) {
+                    updateReportNow(report.id) {
                         it.copy(
                             violationType = null,
                             customTemplateId = null,
-                            subject = if (it.letterManuallyEdited) it.subject else "",
-                            body = if (it.letterManuallyEdited) it.body else "",
+                            subject = "",
+                            body = "",
                         )
                     }
                 }
@@ -601,8 +595,13 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
     fun deleteReport(id: String) {
         launchDataMutation {
             try {
+                val photoIds = container.reportRepository.getReport(id)?.photos.orEmpty().map(ReportPhoto::id)
                 container.photoStore.clearTemporaryCopies(id)
                 container.reportRepository.deleteReport(id)
+                photoIds.forEach { photoId ->
+                    container.textRecognitionService.invalidate(photoId)
+                    container.plateRecognitionService.invalidate(photoId)
+                }
             } catch (error: CancellationException) {
                 throw error
             } catch (_: Exception) {
@@ -628,6 +627,8 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
                 previousAddressLookupSession.cancelAndJoin()
                 photoMutex.withLock {
                     container.reportRepository.deleteAll()
+                    container.textRecognitionService.clear()
+                    container.plateRecognitionService.clear()
                     container.settingsRepository.clearAll()
                     container.secureTokenStore.clear()
                     cloudTokenRevision.value++
@@ -658,22 +659,39 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun prepareMail(reportId: String) {
+        if (!acceptingDataMutations || _busy.value) return
+        _busy.value = true
+        _mailPreparation.value = MailPreparation.Preparing
         launchDataMutation {
-            val report = container.reportRepository.getReport(reportId)
-            val description = report?.let { violationDescription(it, templates.value) }
-            if (report == null ||
-                !report.isReady(settings.value.profile, description) ||
-                report.recipient.isBlank()
-            ) {
-                _notices.emit(UiNotice(NoticeKind.INVALID_REPORT))
-                return@launchDataMutation
-            }
-            _busy.value = true
             try {
+                refreshLetter(reportId)
+                val report = container.reportRepository.getReport(reportId)
+                val description = report?.let { violationDescription(it, templates.value) }
+                if (report == null ||
+                    !report.isReady(settings.value.profile, description) ||
+                    report.recipient.isBlank()
+                ) {
+                    _mailPreparation.value = MailPreparation.Idle
+                    _notices.emit(UiNotice(NoticeKind.INVALID_REPORT))
+                    return@launchDataMutation
+                }
+                val preparedPhotoIds = report.photos.map(ReportPhoto::id)
                 val files = container.photoStore.prepareEmailCopies(report.photos)
+                val current = container.reportRepository.getReport(reportId)
+                val currentDescription = current?.let { violationDescription(it, templates.value) }
+                if (current == null ||
+                    !current.isReady(settings.value.profile, currentDescription) ||
+                    current.recipient.isBlank() ||
+                    current.photos.map(ReportPhoto::id) != preparedPhotoIds
+                ) {
+                    container.photoStore.clearTemporaryCopies(reportId)
+                    _mailPreparation.value = MailPreparation.Idle
+                    _notices.emit(UiNotice(NoticeKind.INVALID_REPORT))
+                    return@launchDataMutation
+                }
                 val apps = container.emailLauncher.compatibleApps()
                 _mailPreparation.value = MailPreparation.Ready(
-                    report = report,
+                    report = current,
                     files = files,
                     apps = apps,
                     savedComponent = container.emailLauncher.findSavedComponent(settings.value.mailComponent, apps),
@@ -770,7 +788,6 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
         addressResolution?.let { resolution ->
             updateResolvedAddress(reportId, resolution.location, resolution.needsReview)
         }
-        container.reportRepository.clearAutomaticRecognition(reportId)
         recognizeLocally(reportId)
     }
 
@@ -793,7 +810,6 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
                 current
             } else {
                 current.copy(
-                    address = resolution?.suggested?.address.orEmpty(),
                     locationNeedsReview = metadataNeedsReview ||
                         resolution == null ||
                         resolution.needsReview,
@@ -864,15 +880,13 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
 
     private fun updateReport(
         reportId: String,
-        regenerate: Boolean = false,
         transform: (Report) -> Report,
     ) {
-        launchDataMutation { updateReportNow(reportId, regenerate, transform = transform) }
+        launchDataMutation { updateReportNow(reportId, transform = transform) }
     }
 
     private suspend fun updateReportNow(
         reportId: String,
-        regenerate: Boolean,
         templateSnapshot: List<CustomViolationTemplate> = templates.value,
         transform: (Report) -> Report,
     ) {
@@ -880,12 +894,19 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
         container.reportRepository.mutateReport(reportId) { current ->
             var updated = transform(current)
             val description = violationDescription(updated, templateSnapshot)
-            if (description != null && (regenerate || !updated.letterManuallyEdited)) {
+            if (description != null) {
                 val letter = container.emailTemplateRenderer.render(updated, profile, description)
                 updated = updated.copy(
                     subject = letter.subject,
                     body = letter.body,
-                    letterManuallyEdited = false,
+                )
+            } else {
+                updated = updated.copy(subject = "", body = "")
+            }
+            if (current.status == ReportStatus.HANDED_OFF_TO_MAIL && updated != current) {
+                updated = updated.copy(
+                    status = ReportStatus.DRAFT,
+                    mailOpenedAtEpochMillis = null,
                 )
             }
             ReportTransitions.refreshReadiness(updated, profile, description)
@@ -893,11 +914,12 @@ class PoleParklaViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     private suspend fun refreshLetter(reportId: String) {
-        updateReportNow(reportId, regenerate = false) { it }
+        updateReportNow(reportId) { it }
     }
 
     private suspend fun markMailOpenedNow(reportId: String) {
-        updateReportNow(reportId, regenerate = false) { report ->
+        refreshLetter(reportId)
+        container.reportRepository.mutateReport(reportId) { report ->
             if (report.status == ReportStatus.READY ||
                 report.status == ReportStatus.HANDED_OFF_TO_MAIL
             ) {

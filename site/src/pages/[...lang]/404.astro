@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from 'astro'
+import NotFoundPage from '../../components/NotFoundPage.astro'
+import type { LocaleRouteProps } from '../../i18n/config'
+
+export const getStaticPaths: GetStaticPaths = () =>
+  (['en', 'ru'] as const).map((locale) => ({
+    params: { lang: locale },
+    props: { locale }
+  }))
+
+const { locale } = Astro.props as LocaleRouteProps
+---
+
+<NotFoundPage locale={locale} />

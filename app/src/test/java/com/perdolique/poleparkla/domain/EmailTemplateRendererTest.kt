@@ -14,7 +14,7 @@ import org.junit.Test
 
 class EmailTemplateRendererTest {
     private val renderer = EmailTemplateRenderer(ZoneId.of("Europe/Tallinn"))
-    private val profile = ReporterProfile("Mari Maasikas", "+372 5555 5555")
+    private val profile = ReporterProfile("Pier Dolique", "+37256789012")
 
     @Test
     fun `renders one photo and omits missing vehicle data cleanly`() {
@@ -24,11 +24,11 @@ class EmailTemplateRendererTest {
             violationDescription = ViolationTemplates.CYCLE_PATH_DESCRIPTION,
         )
 
-        assertTrue(letter.body.contains("Sõiduk: registreerimisnumber 123 ABC"))
+        assertTrue(letter.body.contains("Sõiduk: registreerimisnumber 003 PUK"))
         assertFalse(letter.body.contains("Sõiduk: ,"))
         assertTrue(letter.body.contains("Foto on kirjale lisatud."))
-        assertTrue(letter.body.contains("Mari Maasikas"))
-        assertTrue(letter.body.contains("Telefon: +372 5555 5555"))
+        assertTrue(letter.body.contains("Pier Dolique"))
+        assertTrue(letter.body.contains("Telefon: +37256789012"))
         assertFalse(letter.body.contains("E-post:"))
     }
 
@@ -40,7 +40,7 @@ class EmailTemplateRendererTest {
             violationDescription = ViolationTemplates.PEDESTRIAN_PATH_DESCRIPTION,
         )
 
-        assertTrue(letter.body.contains("Toyota Corolla, registreerimisnumber 123 ABC"))
+        assertTrue(letter.body.contains("Toyota Corolla, registreerimisnumber 003 PUK"))
         assertTrue(letter.body.contains("59.437000, 24.753600"))
         assertFalse(letter.body.contains("±"))
         assertTrue(letter.body.contains("Fotod on kirjale lisatud."))
@@ -68,25 +68,26 @@ class EmailTemplateRendererTest {
         id = "report",
         createdAtEpochMillis = 0,
         updatedAtEpochMillis = 0,
-        occurredAtEpochMillis = Instant.parse("2026-08-20T10:15:00Z").toEpochMilli(),
+        occurredAtEpochMillis = Instant.parse("2026-08-13T13:58:00Z").toEpochMilli(),
         status = ReportStatus.DRAFT,
-        plate = "123 ABC",
+        plate = "003 PUK",
         vehicleMake = vehicleMake,
         vehicleModel = vehicleModel,
         violationType = ViolationType.CYCLE_PATH,
         customTemplateId = null,
         recipient = "mupo@example.com",
-        address = "Vabaduse väljak 1, Tallinn",
+        address = "Lastekodu tn 42, Tallinn",
         latitude = 59.437,
         longitude = 24.7536,
         accuracyMeters = 8.8f,
         locationNeedsReview = false,
         subject = "",
         body = "",
-        letterManuallyEdited = false,
         plateManuallyEdited = false,
         vehicleManuallyEdited = false,
-        plateSuggestions = emptyList(),
+        vehicleConfirmed = true,
+        locationConfirmed = true,
+        plateObservations = emptyList(),
         suggestedViolationType = null,
         mailOpenedAtEpochMillis = null,
         photos = List(photoCount) { index ->

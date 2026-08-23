@@ -45,25 +45,14 @@ class PlateModelProcessingTest {
     @Test
     fun `plate output decodes characters and removes trailing padding`() {
         val output = FloatArray(PLATE_OCR_MAX_SLOTS * PLATE_OCR_ALPHABET.length)
-        "003OOO____".forEachIndexed { slot, char ->
+        "003PUK____".forEachIndexed { slot, char ->
             output[(slot * PLATE_OCR_ALPHABET.length) + PLATE_OCR_ALPHABET.indexOf(char)] = 1f
         }
 
         val plate = requireNotNull(decodePlate(output))
 
-        assertEquals("003OOO", plate.value)
+        assertEquals("003PUK", plate.value)
         assertEquals(1f, plate.meanCharacterConfidence)
-    }
-
-    @Test
-    fun `candidate seen across photos outranks a larger one-off plate`() {
-        val observations = listOf(
-            observation(photoId = "one", value = "003 OOO", relativeArea = 0.01f),
-            observation(photoId = "two", value = "003 OOO", relativeArea = 0.02f),
-            observation(photoId = "one", value = "999 XYZ", relativeArea = 0.05f),
-        )
-
-        assertEquals(listOf("003 OOO", "999 XYZ"), rankPlateCandidates(observations))
     }
 
     @Test
@@ -78,15 +67,4 @@ class PlateModelProcessingTest {
         assertTrue(detections.isEmpty())
     }
 
-    private fun observation(
-        photoId: String,
-        value: String,
-        relativeArea: Float,
-    ) = PlateObservation(
-        photoId = photoId,
-        value = value,
-        detectionConfidence = 0.8f,
-        characterConfidence = 0.9f,
-        relativeArea = relativeArea,
-    )
 }

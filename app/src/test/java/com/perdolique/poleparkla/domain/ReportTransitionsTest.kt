@@ -8,11 +8,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class ReportTransitionsTest {
-    private val profile = ReporterProfile("Mari", "+372 5555")
+    private val profile = ReporterProfile("Pier Dolique", "+37256789012")
 
     @Test
     fun `moves from draft to ready and then handed off`() {
-        val draft = sampleReport(plate = "123 ABC", violationType = ViolationType.CYCLE_PATH)
+        val draft = sampleReport(plate = "003 PUK", violationType = ViolationType.CYCLE_PATH)
         val ready = ReportTransitions.refreshReadiness(
             draft,
             profile,
@@ -41,7 +41,7 @@ class ReportTransitionsTest {
     @Test
     fun `missing recipient remains a draft`() {
         val report = sampleReport(
-            plate = "123 ABC",
+            plate = "003 PUK",
             violationType = ViolationType.CYCLE_PATH,
             recipient = "",
         )
@@ -57,15 +57,37 @@ class ReportTransitionsTest {
     }
 
     @Test
-    fun `location requiring review remains a draft`() {
+    fun `readiness requires explicit vehicle and location confirmations`() {
+        val otherwiseComplete = sampleReport(
+            plate = "003 PUK",
+            violationType = ViolationType.CYCLE_PATH,
+        )
+
+        listOf(
+            otherwiseComplete.copy(vehicleConfirmed = false),
+            otherwiseComplete.copy(locationConfirmed = false),
+        ).forEach { report ->
+            assertEquals(
+                ReportStatus.DRAFT,
+                ReportTransitions.refreshReadiness(
+                    report,
+                    profile,
+                    ViolationTemplates.CYCLE_PATH_DESCRIPTION,
+                ).status,
+            )
+        }
+    }
+
+    @Test
+    fun `technical location warning does not replace explicit confirmation`() {
         val report = sampleReport(
-            plate = "123 ABC",
+            plate = "003 PUK",
             violationType = ViolationType.CYCLE_PATH,
             locationNeedsReview = true,
         )
 
         assertEquals(
-            ReportStatus.DRAFT,
+            ReportStatus.READY,
             ReportTransitions.refreshReadiness(
                 report,
                 profile,
@@ -77,7 +99,7 @@ class ReportTransitionsTest {
     @Test
     fun `empty letter remains a draft`() {
         val report = sampleReport(
-            plate = "123 ABC",
+            plate = "003 PUK",
             violationType = ViolationType.CYCLE_PATH,
             subject = "",
             body = "",

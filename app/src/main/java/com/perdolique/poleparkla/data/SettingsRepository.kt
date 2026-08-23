@@ -14,10 +14,8 @@ import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 private val Context.settingsDataStore by preferencesDataStore(name = "settings")
-private const val LEGACY_DEFAULT_RECIPIENT = "munitsipaalpolitsei@tallinnlv.ee"
 
 class SettingsRepository(private val context: Context) {
     private object Keys {
@@ -26,7 +24,6 @@ class SettingsRepository(private val context: Context) {
         val reporterName = stringPreferencesKey("reporter_name")
         val reporterPhone = stringPreferencesKey("reporter_phone")
         val defaultRecipient = stringPreferencesKey("default_recipient")
-        val defaultRecipientMigrated = booleanPreferencesKey("default_recipient_migrated_to_duty_officer")
         val workerUrl = stringPreferencesKey("worker_url")
         val cloudProvider = stringPreferencesKey("cloud_provider")
         val workersAiConsent = booleanPreferencesKey("workers_ai_consent")
@@ -36,7 +33,6 @@ class SettingsRepository(private val context: Context) {
     }
 
     val settings: Flow<AppSettings> = context.settingsDataStore.data
-        .onStart { migrateLegacyDefaultRecipient() }
         .catch { error ->
             if (error is IOException) emit(emptyPreferences()) else throw error
         }
@@ -70,18 +66,7 @@ class SettingsRepository(private val context: Context) {
             preferences[Keys.reporterName] = profile.name.trim()
             preferences[Keys.reporterPhone] = profile.phone.trim()
             preferences[Keys.defaultRecipient] = defaultRecipient.trim()
-            preferences[Keys.defaultRecipientMigrated] = true
             preferences[Keys.onboardingComplete] = true
-        }
-    }
-
-    private suspend fun migrateLegacyDefaultRecipient() {
-        context.settingsDataStore.edit { preferences ->
-            if (preferences[Keys.defaultRecipientMigrated] == true) return@edit
-            if (preferences[Keys.defaultRecipient] == LEGACY_DEFAULT_RECIPIENT) {
-                preferences[Keys.defaultRecipient] = DEFAULT_RECIPIENT
-            }
-            preferences[Keys.defaultRecipientMigrated] = true
         }
     }
 
@@ -98,7 +83,6 @@ class SettingsRepository(private val context: Context) {
             preferences[Keys.reporterName] = profile.name.trim()
             preferences[Keys.reporterPhone] = profile.phone.trim()
             preferences[Keys.defaultRecipient] = defaultRecipient.trim()
-            preferences[Keys.defaultRecipientMigrated] = true
             preferences[Keys.workerUrl] = workerUrl.trim()
             preferences[Keys.cloudProvider] = cloudProvider.name
             if (clearCloudConsents) {
@@ -110,10 +94,6 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setLanguage(languageTag: String) {
         context.settingsDataStore.edit { it[Keys.languageTag] = languageTag }
-    }
-
-    suspend fun setDefaultRecipient(recipient: String) {
-        context.settingsDataStore.edit { it[Keys.defaultRecipient] = recipient.trim() }
     }
 
     suspend fun setCloudConsent(provider: CloudProvider, consented: Boolean) {

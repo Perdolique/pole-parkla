@@ -1,0 +1,220 @@
+---
+import type { GetStaticPaths } from 'astro'
+import LatestRelease from '../../components/LatestRelease.astro'
+import ScreenshotGallery from '../../components/ScreenshotGallery.astro'
+import { siteConfig } from '../../config'
+import { getLocalizedPath, getStaticLocalePaths, type LocaleRouteProps } from '../../i18n/config'
+import { ui } from '../../i18n/ui'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getPublishedUpdates } from '../../lib/content'
+import { createSeoMetadata } from '../../lib/seo'
+
+export const getStaticPaths = (() => getStaticLocalePaths()) satisfies GetStaticPaths
+
+const { locale } = Astro.props as LocaleRouteProps
+const text = ui[locale]
+const [latestRelease] = await getPublishedUpdates(locale)
+const seo = createSeoMetadata({
+  description: text.homeMeta.description,
+  imageAlt: text.socialImageAlt,
+  locale,
+  pageKind: 'home',
+  route: 'home',
+  title: text.homeMeta.title
+})
+---
+
+<BaseLayout seo={seo}>
+  <section class="hero">
+    <h1>Pole parkla</h1>
+    <p>{text.heroDescription}</p>
+
+    {siteConfig.googlePlay && (
+      <a class="google-play-link" href={siteConfig.googlePlay.url} rel="noreferrer">
+        <img
+          src={siteConfig.googlePlay.badgePaths[locale]}
+          width="180"
+          height="54"
+          alt={text.googlePlayAlt}
+        />
+      </a>
+    )}
+  </section>
+
+  <ScreenshotGallery locale={locale} />
+  {latestRelease && <LatestRelease entry={latestRelease} locale={locale} />}
+
+  <section class="home-section" aria-labelledby="how-it-works-title">
+    <h2 id="how-it-works-title">{text.howItWorksTitle}</h2>
+    <ol class="process-steps">
+      {text.howItWorksSteps.map((step) => <li>{step}</li>)}
+    </ol>
+  </section>
+
+  <section class="home-section" aria-labelledby="recognition-title">
+    <h2 id="recognition-title">{text.recognitionTitle}</h2>
+    <div class="recognition-grid">
+      {text.recognitionItems.map((item) => (
+        <article>
+          <h3>{item.title}</h3>
+          <p>{item.body}</p>
+        </article>
+      ))}
+    </div>
+    <a class="arrow-link" href={getLocalizedPath(locale, 'privacy')}>
+      {text.privacyDetailsLink}<span aria-hidden="true">→</span>
+    </a>
+  </section>
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <h2 id="faq-title">{text.faqTitle}</h2>
+    <dl>
+      {text.faqItems.map((item) => (
+        <div>
+          <dt>{item.question}</dt>
+          <dd>{item.answer}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    width: var(--page-width);
+    margin: clamp(var(--space-40), 7vw, var(--space-80)) auto var(--space-40);
+  }
+
+  h1 {
+    margin: 0 0 var(--space-12);
+    color: var(--color-forest);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  .hero > p {
+    max-width: 590px;
+    margin: 0;
+    color: var(--color-ink);
+    font-size: clamp(1.0625rem, 2vw, 1.25rem);
+    line-height: 1.5;
+  }
+
+  .google-play-link {
+    display: block;
+    width: fit-content;
+    margin-block-start: var(--space-24);
+  }
+
+  .google-play-link img {
+    display: block;
+    width: auto;
+    height: 54px;
+  }
+
+  .home-section,
+  .faq-section {
+    width: var(--page-width);
+    margin: var(--space-80) auto 0;
+  }
+
+  .home-section > h2,
+  .faq-section > h2 {
+    max-width: 760px;
+    margin: 0 0 var(--space-32);
+    color: var(--color-forest);
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+  }
+
+  .process-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(var(--space-24), 4vw, var(--space-48));
+    margin: 0;
+    padding: 0;
+    counter-reset: report-step;
+    list-style: none;
+  }
+
+  .process-steps li {
+    padding-block-start: var(--space-16);
+    border-top: 2px solid var(--color-forest);
+    counter-increment: report-step;
+  }
+
+  .process-steps li::before {
+    display: block;
+    margin-block-end: var(--space-12);
+    color: var(--color-forest);
+    font-size: var(--font-size-label);
+    font-weight: 750;
+    content: counter(report-step, decimal-leading-zero);
+  }
+
+  .recognition-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(var(--space-24), 4vw, var(--space-48));
+    margin-block-end: var(--space-16);
+  }
+
+  .recognition-grid article {
+    padding-block-start: var(--space-16);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .recognition-grid h3 {
+    margin: 0 0 var(--space-12);
+    color: var(--color-forest);
+    font-size: var(--font-size-title);
+  }
+
+  .recognition-grid p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .faq-section {
+    width: var(--reading-width);
+  }
+
+  .faq-section dl {
+    margin: 0;
+  }
+
+  .faq-section dl > div {
+    padding-block: var(--space-24);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .faq-section dl > div:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .faq-section dt {
+    color: var(--color-forest);
+    font-size: var(--font-size-title);
+    font-weight: 700;
+  }
+
+  .faq-section dd {
+    margin: var(--space-8) 0 0;
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 720px) {
+    .home-section,
+    .faq-section {
+      margin-block-start: var(--space-64);
+    }
+
+    .process-steps,
+    .recognition-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-24);
+    }
+  }
+</style>

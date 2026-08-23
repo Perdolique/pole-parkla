@@ -1,0 +1,82 @@
+---
+import '../styles/global.css'
+import SiteFooter from '../components/SiteFooter.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import { ui } from '../i18n/ui'
+import { buildStructuredData, isIndexableSeo, type SeoMetadata } from '../lib/seo'
+
+interface Props {
+  seo: SeoMetadata
+}
+
+const { seo } = Astro.props
+const text = ui[seo.locale]
+const indexable = isIndexableSeo(seo)
+const structuredData = indexable ? buildStructuredData(seo) : null
+---
+
+<!doctype html>
+<html lang={seo.locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={seo.description} />
+    <meta name="robots" content={seo.robots} />
+    <meta name="theme-color" content="#174b38" />
+
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="describedby" type="text/plain" href="/llms.txt" />
+
+    {indexable && (
+      <>
+        <link rel="canonical" href={seo.canonicalUrl} />
+        {seo.alternateUrls.map((alternate) => (
+          <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />
+        ))}
+        <link rel="alternate" hreflang="x-default" href={seo.defaultUrl} />
+        <link rel="alternate" type="application/rss+xml" title={text.rssTitle} href={seo.rssUrl} />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Pole parkla" />
+        <meta property="og:title" content={seo.title} />
+        <meta property="og:description" content={seo.description} />
+        <meta property="og:url" content={seo.canonicalUrl} />
+        <meta property="og:locale" content={seo.openGraphLocale} />
+        {seo.alternateUrls
+          .filter((alternate) => alternate.locale !== seo.locale)
+          .map((alternate) => (
+            <meta property="og:locale:alternate" content={alternate.hreflang.replace('-', '_')} />
+          ))}
+        <meta property="og:image" content={seo.image.url} />
+        <meta property="og:image:secure_url" content={seo.image.url} />
+        <meta property="og:image:type" content={seo.image.mimeType} />
+        <meta property="og:image:width" content={seo.image.width.toString()} />
+        <meta property="og:image:height" content={seo.image.height.toString()} />
+        <meta property="og:image:alt" content={seo.image.alt} />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seo.title} />
+        <meta name="twitter:description" content={seo.description} />
+        <meta name="twitter:image" content={seo.image.url} />
+        <meta name="twitter:image:alt" content={seo.image.alt} />
+
+        <script type="application/ld+json" set:html={structuredData} is:inline />
+      </>
+    )}
+
+    <title>{seo.title}</title>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main-content">{text.skipToContent}</a>
+    <SiteHeader locale={seo.locale} route={seo.route} />
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <SiteFooter locale={seo.locale} />
+  </body>
+</html>

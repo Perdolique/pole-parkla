@@ -15,6 +15,7 @@ data class ParsedReportLocation(
 )
 
 enum class ReportLocationInputError {
+    LOCATION,
     TIME,
     COORDINATES,
 }
@@ -59,6 +60,9 @@ object ReportLocationInput {
         } else {
             parseLongitude(normalizedLongitude)
                 ?: return ReportLocationInputResult.Invalid(ReportLocationInputError.COORDINATES)
+        }
+        if (address.isBlank() && parsedLatitude == null && parsedLongitude == null) {
+            return ReportLocationInputResult.Invalid(ReportLocationInputError.LOCATION)
         }
         return ReportLocationInputResult.Valid(
             ParsedReportLocation(

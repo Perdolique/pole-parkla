@@ -1,0 +1,35 @@
+{
+  "name": "pole-parkla-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.24.0",
+  "engines": {
+    "node": ">=26.7.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "test:typecheck": "astro check && tsc --noEmit",
+    "images:generate": "node scripts/generate-site-images.ts",
+    "images:check": "node scripts/generate-site-images.ts --check",
+    "prebuild": "pnpm run images:check",
+    "build": "astro build",
+    "test:seo": "pnpm run build && node --test tests/seo-output.test.ts",
+    "preview": "pnpm run build && wrangler dev",
+    "deploy": "pnpm run build && wrangler deploy",
+    "deploy:preview": "pnpm run build && wrangler versions upload"
+  },
+  "dependencies": {
+    "@astrojs/rss": "4.0.19",
+    "@fontsource-variable/inter": "5.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@astrojs/sitemap": "3.7.3",
+    "@types/node": "26.2.0",
+    "astro": "7.2.4",
+    "sharp": "0.35.3",
+    "typescript": "6.0.3",
+    "wrangler": "4.125.0"
+  }
+}

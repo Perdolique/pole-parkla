@@ -13,6 +13,8 @@ import android.graphics.Rect
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import com.perdolique.poleparkla.domain.PlateCandidateParser
+import com.perdolique.poleparkla.model.NormalizedPhotoRect
+import com.perdolique.poleparkla.model.RecognitionPlateObservation
 import com.perdolique.poleparkla.model.RecognitionResult
 import com.perdolique.poleparkla.model.RecognitionSource
 import com.perdolique.poleparkla.model.ReportPhoto
@@ -30,7 +32,7 @@ class PlateRecognitionService(
     private val environment = OrtEnvironment.getEnvironment()
     private val detectorSession by lazy { loadSession(DETECTOR_MODEL_ASSET) }
     private val ocrSession by lazy { loadSession(OCR_MODEL_ASSET) }
-    private val observationsByPhoto = mutableMapOf<PhotoRecognitionCacheKey, List<PlateObservation>>()
+    private val observationsByPhoto = mutableMapOf<PhotoRecognitionCacheKey, List<LocalPlateObservation>>()
 
     suspend fun recognize(photos: List<ReportPhoto>): RecognitionResult =
         withContext(Dispatchers.Default) {
@@ -38,7 +40,7 @@ class PlateRecognitionService(
             synchronized(observationsByPhoto) {
                 observationsByPhoto.keys.retainAll(photosWithKeys.mapTo(mutableSetOf()) { it.second })
             }
-            val observations = buildList {
+            val observations = buildList<LocalPlateObservation> {
                 photosWithKeys.forEach { (photo, key) ->
                     val cached = synchronized(observationsByPhoto) { observationsByPhoto[key] }
                     val recognized = cached ?: recognizePhoto(photo).also { value ->
@@ -49,7 +51,21 @@ class PlateRecognitionService(
             }
             RecognitionResult(
                 source = RecognitionSource.LOCAL_PLATE_MODEL,
-                plateCandidates = rankPlateCandidates(observations),
+                plateObservations = observations.map { observation ->
+                    RecognitionPlateObservation(
+                        photoId = observation.photoId,
+                        value = observation.value,
+                        bounds = NormalizedPhotoRect(
+                            left = observation.left.toFloat() / observation.imageWidth,
+                            top = observation.top.toFloat() / observation.imageHeight,
+                            right = observation.right.toFloat() / observation.imageWidth,
+                            bottom = observation.bottom.toFloat() / observation.imageHeight,
+                        ),
+                        detectionConfidence = observation.detectionConfidence,
+                        characterConfidence = observation.characterConfidence,
+                        relativeArea = observation.relativeArea,
+                    )
+                },
             )
         }
 
@@ -57,6 +73,10 @@ class PlateRecognitionService(
         synchronized(observationsByPhoto) {
             observationsByPhoto.keys.removeAll { it.id == photoId }
         }
+    }
+
+    fun clear() {
+        synchronized(observationsByPhoto) { observationsByPhoto.clear() }
     }
 
     internal fun recognizePlateCrop(bitmap: Bitmap): DecodedPlate? {
@@ -74,7 +94,7 @@ class PlateRecognitionService(
         }
     }
 
-    private fun recognizeBitmap(photoId: String, bitmap: Bitmap): List<PlateObservation> =
+    private fun recognizeBitmap(photoId: String, bitmap: Bitmap): List<LocalPlateObservation> =
         detectPlates(bitmap).mapNotNull { detection ->
             val crop = Bitmap.createBitmap(
                 bitmap,
@@ -86,9 +106,15 @@ class PlateRecognitionService(
             try {
                 val decoded = recognizePlateCrop(crop) ?: return@mapNotNull null
                 val normalized = PlateCandidateParser.normalize(decoded.value) ?: return@mapNotNull null
-                PlateObservation(
+                LocalPlateObservation(
                     photoId = photoId,
                     value = normalized,
+                    left = detection.left,
+                    top = detection.top,
+                    right = detection.right,
+                    bottom = detection.bottom,
+                    imageWidth = bitmap.width,
+                    imageHeight = bitmap.height,
                     detectionConfidence = detection.confidence,
                     characterConfidence = decoded.meanCharacterConfidence,
                     relativeArea = detection.relativeArea,
@@ -98,7 +124,7 @@ class PlateRecognitionService(
             }
         }
 
-    private suspend fun recognizePhoto(photo: ReportPhoto): List<PlateObservation> {
+    private suspend fun recognizePhoto(photo: ReportPhoto): List<LocalPlateObservation> {
         val bitmap = photoStore.decodeForModel(photo, MODEL_MAX_LONG_SIDE)
         return try {
             recognizeBitmap(photo.id, bitmap)

@@ -1,0 +1,117 @@
+---
+import type { Locale } from '../i18n/config'
+import { ui } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const text = ui[locale]
+---
+
+<section class="gallery-section" aria-labelledby="screenshots-heading">
+  <h2 id="screenshots-heading" class="visually-hidden">{text.screenshotsLabel}</h2>
+
+  <div class="gallery-track">
+    {text.screenshots.map((screenshot, index) => (
+      <figure>
+        <figcaption>{screenshot.label}</figcaption>
+        <div class="screenshot-frame">
+          <img
+            src={`/screenshots/${locale}/${screenshot.id}.webp`}
+            srcset={[
+              `/screenshots/${locale}/${screenshot.id}-420.webp 420w`,
+              `/screenshots/${locale}/${screenshot.id}-600.webp 600w`,
+              `/screenshots/${locale}/${screenshot.id}.webp 1008w`
+            ].join(', ')}
+            sizes="(max-width: 410px) 78vw, (max-width: 720px) 320px, 302px"
+            alt={screenshot.alt}
+            width="1008"
+            height="2244"
+            loading={index === 0 ? 'eager' : 'lazy'}
+            fetchpriority={index === 0 ? 'high' : undefined}
+            decoding="async"
+          />
+        </div>
+      </figure>
+    ))}
+  </div>
+</section>
+
+<style>
+  .gallery-section {
+    width: var(--page-width);
+    margin-inline: auto;
+    padding: var(--space-24);
+    overflow: hidden;
+    color: var(--color-canvas);
+    background: var(--color-forest);
+    border-radius: var(--radius-feature);
+  }
+
+  .gallery-track {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(var(--space-24), 4vw, var(--space-56));
+    align-items: start;
+  }
+
+  figure {
+    min-width: 0;
+    margin: 0;
+  }
+
+  figcaption {
+    margin-block-end: var(--space-12);
+    color: var(--color-signal);
+    font-size: var(--font-size-label);
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .screenshot-frame {
+    max-width: 302px;
+    margin-inline: auto;
+    overflow: hidden;
+    background: var(--color-ink);
+    border: 1px solid rgb(243 245 239 / 28%);
+    border-radius: var(--radius-screenshot);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 720px) {
+    .gallery-section {
+      padding: var(--space-20) 0 var(--space-16);
+      border-radius: var(--radius-feature-mobile);
+    }
+
+    .gallery-track {
+      display: flex;
+      gap: var(--space-12);
+      padding-inline: var(--space-16);
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      scroll-padding-inline: var(--space-16);
+      scroll-snap-type: inline mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-signal) rgb(243 245 239 / 18%);
+    }
+
+    figure {
+      flex: 0 0 min(78vw, 320px);
+      scroll-snap-align: start;
+    }
+
+    .screenshot-frame {
+      border-radius: var(--radius-screenshot-mobile);
+    }
+  }
+</style>

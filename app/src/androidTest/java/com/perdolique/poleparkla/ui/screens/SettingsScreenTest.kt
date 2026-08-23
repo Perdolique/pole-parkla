@@ -40,7 +40,7 @@ class SettingsScreenTest {
                     settings = AppSettings(
                         loaded = true,
                         onboardingComplete = true,
-                        profile = ReporterProfile("Mari", "+372 5555"),
+                        profile = ReporterProfile("Pier Dolique", "+37256789012"),
                     ),
                     cloudConfigured = false,
                     templates = listOf(existing),
@@ -115,7 +115,7 @@ class SettingsScreenTest {
                         loaded = true,
                         onboardingComplete = true,
                         languageTag = "ru",
-                        profile = ReporterProfile("Mari", "+372 5555"),
+                        profile = ReporterProfile("Pier Dolique", "+37256789012"),
                         defaultRecipient = "recipient@example.invalid",
                     ),
                     cloudConfigured = false,
@@ -143,11 +143,11 @@ class SettingsScreenTest {
 
         composeRule.onNodeWithTag("settings_category_profile").performScrollTo().performClick()
         composeRule.onNodeWithTag("settings_profile_email").assertDoesNotExist()
-        composeRule.onNodeWithTag("settings_profile_name").performTextReplacement("Mari Updated")
+        composeRule.onNodeWithTag("settings_profile_name").performTextReplacement("Pier Dolique Updated")
         composeRule.onNodeWithTag("settings_profile_save").performClick()
         composeRule.waitForIdle()
         assertEquals(1, saved.size)
-        assertEquals("Mari Updated", saved.single().profile.name)
+        assertEquals("Pier Dolique Updated", saved.single().profile.name)
 
         composeRule.onNodeWithTag("settings_category_recipient").performScrollTo().performClick()
         composeRule.onNodeWithTag("settings_recipient")

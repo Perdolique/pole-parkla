@@ -7,9 +7,9 @@ import org.junit.Test
 class PlateCandidateParserTest {
     @Test
     fun `ranks a common Estonian plate first`() {
-        val candidates = PlateCandidateParser.parse("Toyota AB-1234, nearby plate 123 abc")
+        val candidates = PlateCandidateParser.parse("Toyota AB-1234, nearby plate 003 puk")
 
-        assertEquals("123 ABC", candidates.first())
+        assertEquals("003 PUK", candidates.first())
         assertTrue("AB1234" in candidates)
     }
 

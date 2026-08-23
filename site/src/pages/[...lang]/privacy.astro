@@ -1,0 +1,74 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { render } from 'astro:content'
+import { getStaticLocalePaths, type LocaleRouteProps } from '../../i18n/config'
+import { ui } from '../../i18n/ui'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { formatDate, getPrivacyEntry } from '../../lib/content'
+import { createSeoMetadata } from '../../lib/seo'
+
+export const getStaticPaths = (() => getStaticLocalePaths()) satisfies GetStaticPaths
+
+const { locale } = Astro.props as LocaleRouteProps
+const text = ui[locale]
+const privacyEntry = await getPrivacyEntry(locale)
+const { Content } = await render(privacyEntry)
+const seo = createSeoMetadata({
+  dateModified: privacyEntry.data.lastUpdated.toISOString(),
+  description: text.privacyMeta.description,
+  imageAlt: text.socialImageAlt,
+  locale,
+  pageKind: 'privacy',
+  route: 'privacy',
+  title: text.privacyMeta.title
+})
+---
+
+<BaseLayout seo={seo}>
+  <header class="page-heading">
+    <h1>{privacyEntry.data.title}</h1>
+    <p>
+      <time datetime={privacyEntry.data.lastUpdated.toISOString()}>
+        {formatDate(privacyEntry.data.lastUpdated, locale)}
+      </time>
+    </p>
+  </header>
+
+  <article class="policy-content">
+    <Content />
+  </article>
+</BaseLayout>
+
+<style>
+  .policy-content {
+    width: var(--reading-width);
+    margin-inline: auto;
+  }
+
+  .policy-content :global(h2) {
+    margin: var(--space-48) 0 var(--space-16);
+    color: var(--color-forest);
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .policy-content :global(h3) {
+    margin: var(--space-32) 0 var(--space-12);
+    color: var(--color-forest);
+  }
+
+  .policy-content :global(p),
+  .policy-content :global(ul) {
+    margin-block: 0 var(--space-20);
+  }
+
+  .policy-content :global(li + li) {
+    margin-block-start: var(--space-8);
+  }
+
+  .policy-content :global(a) {
+    overflow-wrap: anywhere;
+    text-underline-offset: 0.25em;
+  }
+</style>

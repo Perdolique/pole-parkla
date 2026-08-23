@@ -10,6 +10,7 @@ import android.webkit.MimeTypeMap
 import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
 import com.perdolique.poleparkla.model.LocationSnapshot
+import com.perdolique.poleparkla.model.NormalizedPhotoRect
 import com.perdolique.poleparkla.model.PhotoSource
 import com.perdolique.poleparkla.model.ReportPhoto
 import java.io.File
@@ -27,6 +28,8 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 data class StoredGalleryPhoto(
@@ -44,6 +47,8 @@ class PhotoStore(
     private val context: Context,
     private val reportsDirectory: File,
 ) {
+    private val plateCropDecodeMutex = Mutex()
+
     fun createCameraTarget(reportId: String): File {
         val directory = reportDirectory(reportId)
         return File(directory, "${UUID.randomUUID()}.jpg")
@@ -169,6 +174,60 @@ class PhotoStore(
 
     suspend fun decodeForModel(photo: ReportPhoto, maxLongSide: Int): Bitmap =
         withContext(Dispatchers.IO) { decodeOrientedBitmap(File(photo.filePath), maxLongSide) }
+
+    suspend fun decodePlateCrop(
+        photo: ReportPhoto,
+        bounds: NormalizedPhotoRect,
+        maxLongSide: Int = PLATE_CROP_MAX_LONG_SIDE,
+    ): Bitmap = plateCropDecodeMutex.withLock {
+        withContext(Dispatchers.IO) {
+            require(
+                bounds.left in 0f..1f &&
+                    bounds.top in 0f..1f &&
+                    bounds.right in 0f..1f &&
+                    bounds.bottom in 0f..1f &&
+                    bounds.right > bounds.left &&
+                    bounds.bottom > bounds.top
+            ) { "Invalid normalized plate bounds" }
+            val bitmap = decodeOrientedBitmap(File(photo.filePath), MODEL_EVIDENCE_MAX_LONG_SIDE)
+            try {
+                val plateWidth = (bounds.right - bounds.left) * bitmap.width
+                val plateHeight = (bounds.bottom - bounds.top) * bitmap.height
+                val left = (bounds.left * bitmap.width - plateWidth * PLATE_CROP_HORIZONTAL_PADDING)
+                    .roundToInt()
+                    .coerceIn(0, bitmap.width - 1)
+                val top = (bounds.top * bitmap.height - plateHeight * PLATE_CROP_VERTICAL_PADDING)
+                    .roundToInt()
+                    .coerceIn(0, bitmap.height - 1)
+                val right = (bounds.right * bitmap.width + plateWidth * PLATE_CROP_HORIZONTAL_PADDING)
+                    .roundToInt()
+                    .coerceIn(left + 1, bitmap.width)
+                val bottom = (bounds.bottom * bitmap.height + plateHeight * PLATE_CROP_VERTICAL_PADDING)
+                    .roundToInt()
+                    .coerceIn(top + 1, bitmap.height)
+                val candidate = Bitmap.createBitmap(bitmap, left, top, right - left, bottom - top)
+                val crop = if (candidate === bitmap) {
+                    requireNotNull(bitmap.copy(bitmap.config ?: Bitmap.Config.ARGB_8888, false))
+                } else {
+                    candidate
+                }
+                val longSide = maxOf(crop.width, crop.height)
+                if (longSide <= maxLongSide) {
+                    crop
+                } else {
+                    val scale = maxLongSide.toFloat() / longSide
+                    crop.scale(
+                        width = maxOf(1, (crop.width * scale).roundToInt()),
+                        height = maxOf(1, (crop.height * scale).roundToInt()),
+                    ).also { scaled ->
+                        if (scaled !== crop) crop.recycle()
+                    }
+                }
+            } finally {
+                bitmap.recycle()
+            }
+        }
+    }
 
     suspend fun clearTemporaryCopies() = withContext(Dispatchers.IO) {
         deleteDirectory(File(context.cacheDir, "cloud"))
@@ -385,6 +444,10 @@ class PhotoStore(
         const val MAIL_MAX_LONG_SIDE = 2560
         const val MAX_IMPORTED_BYTES = 50L * 1024L * 1024L
         private const val CLOUD_MAX_LONG_SIDE = 2048
+        private const val MODEL_EVIDENCE_MAX_LONG_SIDE = 2048
+        private const val PLATE_CROP_MAX_LONG_SIDE = 720
+        private const val PLATE_CROP_HORIZONTAL_PADDING = 0.12f
+        private const val PLATE_CROP_VERTICAL_PADDING = 0.35f
         private const val CLOUD_MIN_LONG_SIDE = 640
         private const val CLOUD_START_QUALITY = 90
         private const val CLOUD_MIN_QUALITY = 34
