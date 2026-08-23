@@ -1,0 +1,88 @@
+---
+import { siteConfig } from '../config'
+import { getLocalizedPath, type Locale } from '../i18n/config'
+import { ui } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const text = ui[locale]
+---
+
+<footer class="site-footer">
+  <nav class="footer-inner" aria-label={text.footerLabel}>
+    <a href={getLocalizedPath(locale, 'privacy')}>{text.privacyLink}</a>
+    <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a>
+    {siteConfig.sourceUrl
+      ? <a href={siteConfig.sourceUrl} rel="noreferrer">{siteConfig.developerName}</a>
+      : <span>{siteConfig.developerName}</span>}
+  </nav>
+</footer>
+
+<style>
+  .site-footer {
+    margin-block-start: var(--space-48);
+    color: var(--color-canvas);
+    background: var(--color-forest);
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-24);
+    align-items: center;
+    width: var(--page-width);
+    min-height: 104px;
+    margin-inline: auto;
+  }
+
+  a,
+  span {
+    color: inherit;
+    font-size: var(--font-size-small);
+  }
+
+  a {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    text-underline-offset: 0.25em;
+  }
+
+  a:nth-child(2) {
+    justify-self: center;
+  }
+
+  :is(a, span):last-child {
+    justify-self: end;
+  }
+
+  @media (max-width: 640px) {
+    .footer-inner {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding-block: var(--space-12);
+    }
+
+    a,
+    a:nth-child(2),
+    :is(a, span):last-child {
+      justify-self: stretch;
+    }
+
+    a,
+    span {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      border-bottom: 1px solid rgb(243 245 239 / 18%);
+    }
+
+    :is(a, span):last-child {
+      border-bottom: 0;
+    }
+  }
+</style>

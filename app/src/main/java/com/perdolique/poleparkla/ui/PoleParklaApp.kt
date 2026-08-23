@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,7 +41,7 @@ import com.perdolique.poleparkla.service.PhotoStore
 import com.perdolique.poleparkla.ui.screens.CameraScreen
 import com.perdolique.poleparkla.ui.screens.HistoryScreen
 import com.perdolique.poleparkla.ui.screens.OnboardingScreen
-import com.perdolique.poleparkla.ui.screens.ReviewScreen
+import com.perdolique.poleparkla.ui.screens.ReportWizardScreen
 import com.perdolique.poleparkla.ui.screens.SettingsScreen
 import kotlinx.coroutines.flow.Flow
 
@@ -51,8 +50,10 @@ private object Routes {
     const val Camera = "camera"
     const val History = "history"
     const val Settings = "settings"
+    const val SettingsFromReportPattern = "settings/report/{reportId}"
     const val ReviewPattern = "review/{reportId}"
     fun review(reportId: String) = "review/$reportId"
+    fun settingsFromReport(reportId: String) = "settings/report/$reportId"
 }
 
 @Composable
@@ -60,9 +61,7 @@ internal fun rememberInitialRoute(
     onboardingComplete: Boolean,
     reports: List<Report>,
 ): String = remember {
-    val restoredDraft = reports.firstOrNull {
-        it.status == ReportStatus.DRAFT && it.photos.isNotEmpty()
-    }
+    val restoredDraft = reports.firstOrNull { it.photos.isNotEmpty() }
     when {
         !onboardingComplete -> Routes.Onboarding
         restoredDraft != null -> Routes.review(restoredDraft.id)
@@ -75,11 +74,6 @@ internal fun navigateBackFromReview(
     onEmptyBackStack: () -> Unit,
 ) {
     if (!popBackStack()) onEmptyBackStack()
-}
-
-@Composable
-internal fun ReviewBackHandler(onBack: () -> Unit) {
-    BackHandler(onBack = onBack)
 }
 
 @Composable
@@ -174,6 +168,50 @@ fun PoleParklaApp(
                 )
             }
             composable(
+                route = Routes.SettingsFromReportPattern,
+                arguments = listOf(navArgument("reportId") { type = NavType.StringType }),
+            ) {
+                val templates by viewModel.templates.collectAsStateWithLifecycle()
+                SettingsScreen(
+                    settings = settings,
+                    cloudConfigured = cloudConfigured,
+                    templates = templates,
+                    appVersion = appVersion,
+                    onBack = { navController.popBackStack() },
+                    onRateApp = context::openPlayStorePage,
+                    onLanguageSelected = { languageTag ->
+                        viewModel.setLanguage(languageTag)
+                        AppCompatDelegate.setApplicationLocales(
+                            if (languageTag.isBlank()) LocaleListCompat.getEmptyLocaleList()
+                            else LocaleListCompat.forLanguageTags(languageTag),
+                        )
+                    },
+                    onSave = { languageTag, profile, recipient, workerUrl, provider, newToken, onSaved ->
+                        viewModel.saveSettings(
+                            languageTag,
+                            profile,
+                            recipient,
+                            workerUrl,
+                            provider,
+                            newToken,
+                        ) {
+                            onSaved()
+                            navController.popBackStack()
+                        }
+                    },
+                    onClearToken = viewModel::clearToken,
+                    onUpsertTemplate = viewModel::upsertTemplate,
+                    onDeleteTemplate = viewModel::deleteTemplate,
+                    onDeleteAll = {
+                        viewModel.deleteAllLocalData {
+                            navController.navigate(Routes.Onboarding) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                            }
+                        }
+                    },
+                )
+            }
+            composable(
                 route = Routes.ReviewPattern,
                 arguments = listOf(navArgument("reportId") { type = NavType.StringType }),
             ) { entry ->
@@ -190,8 +228,7 @@ fun PoleParklaApp(
                         },
                     )
                 }
-                ReviewBackHandler(onReviewBack)
-                ReviewScreen(
+                ReportWizardScreen(
                     reportId = reportId,
                     viewModel = viewModel,
                     photoStore = photoStore,
@@ -200,6 +237,7 @@ fun PoleParklaApp(
                         viewModel.continueCameraSession(reportId)
                         navController.navigate(Routes.Camera)
                     },
+                    onEditSettings = { navController.navigate(Routes.settingsFromReport(reportId)) },
                 )
             }
         }

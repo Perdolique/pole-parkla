@@ -31,6 +31,9 @@ interface PoleParklaDao {
     suspend fun upsertPhotos(photos: List<PhotoEntity>)
 
     @Upsert
+    suspend fun upsertPlateObservations(observations: List<PlateObservationEntity>)
+
+    @Upsert
     suspend fun upsertTemplate(template: CustomViolationTemplateEntity)
 
     @Query("SELECT * FROM custom_violation_templates ORDER BY displayName COLLATE NOCASE")
@@ -39,8 +42,17 @@ interface PoleParklaDao {
     @Query("SELECT * FROM photos WHERE id = :id")
     suspend fun getPhoto(id: String): PhotoEntity?
 
+    @Query("SELECT * FROM plate_observations WHERE reportId = :reportId")
+    suspend fun getPlateObservations(reportId: String): List<PlateObservationEntity>
+
     @Delete
     suspend fun deletePhoto(photo: PhotoEntity)
+
+    @Query("DELETE FROM plate_observations WHERE reportId = :reportId AND source = :source")
+    suspend fun deletePlateObservations(reportId: String, source: String)
+
+    @Query("DELETE FROM plate_observations WHERE reportId = :reportId")
+    suspend fun deletePlateObservations(reportId: String)
 
     @Query("DELETE FROM custom_violation_templates WHERE id = :id")
     suspend fun deleteTemplate(id: String)
@@ -58,5 +70,38 @@ interface PoleParklaDao {
     suspend fun insertDraft(report: ReportEntity, photos: List<PhotoEntity>) {
         upsertReport(report)
         upsertPhotos(photos)
+    }
+
+    @Transaction
+    suspend fun replaceRecognition(
+        report: ReportEntity,
+        source: String,
+        observations: List<PlateObservationEntity>,
+    ) {
+        deletePlateObservations(report.id, source)
+        upsertPlateObservations(observations)
+        upsertReport(report)
+    }
+
+    @Transaction
+    suspend fun addPhotosAndResetReport(
+        report: ReportEntity,
+        photos: List<PhotoEntity>,
+    ) {
+        upsertPhotos(photos)
+        deletePlateObservations(report.id)
+        upsertReport(report)
+    }
+
+    @Transaction
+    suspend fun removePhotoAndResetReport(
+        report: ReportEntity,
+        photo: PhotoEntity,
+        promotedPrimary: PhotoEntity?,
+    ) {
+        deletePhoto(photo)
+        promotedPrimary?.let { upsertPhoto(it) }
+        deletePlateObservations(report.id)
+        upsertReport(report)
     }
 }

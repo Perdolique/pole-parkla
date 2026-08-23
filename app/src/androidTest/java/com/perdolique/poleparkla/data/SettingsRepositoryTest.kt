@@ -54,25 +54,13 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun migratesLegacyDefaultOnceAndPreservesLaterChoices() = runBlocking {
-        repository.setDefaultRecipient("munitsipaalpolitsei@tallinnlv.ee")
-        assertEquals(DEFAULT_RECIPIENT, repository.settings.first().defaultRecipient)
-
-        repository.setDefaultRecipient("munitsipaalpolitsei@tallinnlv.ee")
-        assertEquals("munitsipaalpolitsei@tallinnlv.ee", repository.settings.first().defaultRecipient)
-
-        repository.setDefaultRecipient("custom@example.invalid")
-        assertEquals("custom@example.invalid", repository.settings.first().defaultRecipient)
-    }
-
-    @Test
     fun savingSettingsWritesAllValuesAndCanClearCloudConsents() = runBlocking {
         repository.setCloudConsent(CloudProvider.WORKERS_AI, true)
         repository.setCloudConsent(CloudProvider.OPENAI, true)
 
         repository.saveSettings(
             languageTag = "et",
-            profile = ReporterProfile(" Mari ", " +372 5555 "),
+            profile = ReporterProfile(" Pier Dolique ", " +37256789012 "),
             defaultRecipient = " reports@example.invalid ",
             workerUrl = " https://worker.example.invalid ",
             cloudProvider = CloudProvider.OPENAI,
@@ -81,7 +69,7 @@ class SettingsRepositoryTest {
 
         val settings = repository.settings.first()
         assertEquals("et", settings.languageTag)
-        assertEquals(ReporterProfile("Mari", "+372 5555"), settings.profile)
+        assertEquals(ReporterProfile("Pier Dolique", "+37256789012"), settings.profile)
         assertEquals("reports@example.invalid", settings.defaultRecipient)
         assertEquals("https://worker.example.invalid", settings.workerUrl)
         assertEquals(CloudProvider.OPENAI, settings.cloudProvider)

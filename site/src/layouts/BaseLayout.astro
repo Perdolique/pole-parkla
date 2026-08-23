@@ -1,0 +1,62 @@
+---
+import '../styles/global.css'
+import SiteFooter from '../components/SiteFooter.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import { siteConfig } from '../config'
+import { getLocalizedPath, locales, type Locale, type RouteName } from '../i18n/config'
+import { ui } from '../i18n/ui'
+
+interface Props {
+  pageTitle: string
+  metaDescription: string
+  locale: Locale
+  route: RouteName
+  noIndex?: boolean
+}
+
+const { pageTitle, metaDescription, locale, route, noIndex = false } = Astro.props
+const text = ui[locale]
+const canonicalUrl = new URL(getLocalizedPath(locale, route), siteConfig.siteUrl)
+const alternateUrls = locales.map((alternateLocale) => ({
+  locale: alternateLocale,
+  url: new URL(getLocalizedPath(alternateLocale, route), siteConfig.siteUrl)
+}))
+const defaultUrl = new URL(getLocalizedPath('et', route), siteConfig.siteUrl)
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={metaDescription} />
+    {noIndex && <meta name="robots" content="noindex" />}
+
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="canonical" href={canonicalUrl} />
+    {alternateUrls.map(({ locale: alternateLocale, url }) => (
+      <link rel="alternate" hreflang={alternateLocale} href={url} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={defaultUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pole parkla" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+
+    <title>{pageTitle}</title>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main-content">{text.skipToContent}</a>
+    <SiteHeader locale={locale} route={route} />
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <SiteFooter locale={locale} />
+  </body>
+</html>

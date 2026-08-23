@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -33,6 +34,7 @@ import com.perdolique.poleparkla.service.PhotoStore
 import com.perdolique.poleparkla.ui.PoleParklaTheme
 import java.io.File
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
@@ -51,6 +53,7 @@ class CameraScreenTest {
             PoleParklaTheme {
                 CameraUnavailable(
                     cameraPresent = cameraPresent.value,
+                    galleryEnabled = true,
                     onGrantCamera = {},
                     onGallery = {},
                 )
@@ -67,21 +70,43 @@ class CameraScreenTest {
     }
 
     @Test
+    fun unavailableCameraDisablesGalleryWhenNoPhotoSlotRemains() {
+        composeRule.setContent {
+            PoleParklaTheme {
+                CameraUnavailable(
+                    cameraPresent = false,
+                    galleryEnabled = false,
+                    onGrantCamera = {},
+                    onGallery = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("camera_gallery_empty").assertIsNotEnabled()
+    }
+
+    @Test
     fun galleryOnlyCaptureAndThreePhotoLimitHaveDistinctControls() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val photoStore = PhotoStore(context, File(context.cacheDir, "camera-screen-test"))
         val cameraAvailable = mutableStateOf(false)
         val photos = mutableStateOf(emptyList<ReportPhoto>())
+        var removedPhotoId: String? = null
         composeRule.setContent {
             PoleParklaTheme {
                 Box(Modifier.fillMaxSize()) {
-                    CameraTray(
+                    CameraTrayWithDeletion(
+                        reportId = "report",
                         photos = photos.value,
                         photoStore = photoStore,
                         cameraAvailable = cameraAvailable.value,
                         busy = false,
                         onGallery = {},
                         onCapture = {},
+                        onRemoveConfirmed = { removed ->
+                            removedPhotoId = removed.id
+                            photos.value = photos.value.filterNot { it.id == removed.id }
+                        },
                         onReview = {},
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
@@ -101,6 +126,17 @@ class CameraScreenTest {
         composeRule.onNodeWithTag("camera_gallery").assertIsNotEnabled()
         composeRule.onNodeWithTag("camera_capture").assertIsNotEnabled()
         composeRule.onNodeWithTag("camera_review").assertExists().assertIsEnabled()
+        composeRule.onNodeWithTag("camera_photo_limit_hint")
+            .assertTextEquals(context.getString(R.string.photo_limit_replace_hint))
+        composeRule.onNodeWithTag("camera_photo_delete_photo-1").assertExists().assertIsEnabled().performClick()
+        composeRule.runOnIdle { assertNull(removedPhotoId) }
+        composeRule.onNodeWithTag("camera_gallery").assertIsNotEnabled()
+        composeRule.onNodeWithTag("camera_capture").assertIsNotEnabled()
+        composeRule.onNodeWithTag("camera_delete_confirm").performClick()
+        composeRule.runOnIdle { assertEquals("photo-1", removedPhotoId) }
+        composeRule.onNodeWithTag("camera_gallery").assertIsEnabled()
+        composeRule.onNodeWithTag("camera_capture").assertIsEnabled()
+        composeRule.onNodeWithTag("camera_photo_limit_hint").assertDoesNotExist()
         assertCaptureIsCentered()
     }
 

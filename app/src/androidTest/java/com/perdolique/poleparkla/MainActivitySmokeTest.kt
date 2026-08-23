@@ -47,10 +47,10 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("onboarding_submit").performClick()
         composeRule.onNodeWithTag("onboarding_name")
             .performScrollTo()
-            .performTextReplacement("Mari Maasikas")
+            .performTextReplacement("Pier Dolique")
         composeRule.onNodeWithTag("onboarding_phone")
             .performScrollTo()
-            .performTextReplacement("+372 5555 5555")
+            .performTextReplacement("+37256789012")
         composeRule.onNodeWithTag("onboarding_submit").performClick()
         composeRule.waitUntil(timeoutMillis = 10_000L) {
             composeRule.onAllNodesWithTag("camera_settings").fetchSemanticsNodes().isNotEmpty()

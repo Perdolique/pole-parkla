@@ -47,6 +47,27 @@ class PoleParklaAppNavigationTest {
     }
 
     @Test
+    fun readyAndHandedOffReportsRestoreDirectlyToTheirSummary() {
+        var readyRoute = ""
+        var handedOffRoute = ""
+        composeRule.setContent {
+            readyRoute = rememberInitialRoute(
+                onboardingComplete = true,
+                reports = listOf(draftReport().copy(status = ReportStatus.READY)),
+            )
+            handedOffRoute = rememberInitialRoute(
+                onboardingComplete = true,
+                reports = listOf(draftReport().copy(status = ReportStatus.HANDED_OFF_TO_MAIL)),
+            )
+        }
+
+        composeRule.runOnIdle {
+            assertEquals("review/draft", readyRoute)
+            assertEquals("review/draft", handedOffRoute)
+        }
+    }
+
+    @Test
     fun reviewBackUsesCameraFallbackWhenRestoredDraftIsTheStartRoute() {
         var fallbackCalls = 0
 
@@ -70,44 +91,30 @@ class PoleParklaAppNavigationTest {
         assertEquals(0, fallbackCalls)
     }
 
-    @Test
-    fun systemBackInvokesTheReviewBackCallback() {
-        var backCalls = 0
-        composeRule.setContent {
-            ReviewBackHandler(onBack = { backCalls++ })
-            Text("Review", Modifier.testTag("review_content"))
-        }
-
-        composeRule.runOnIdle {
-            composeRule.activity.onBackPressedDispatcher.onBackPressed()
-        }
-
-        assertEquals(1, backCalls)
-    }
-
     private fun draftReport() = Report(
         id = "draft",
         createdAtEpochMillis = 1,
         updatedAtEpochMillis = 1,
         occurredAtEpochMillis = 1,
         status = ReportStatus.DRAFT,
-        plate = "123 ABC",
+        plate = "003 PUK",
         vehicleMake = "",
         vehicleModel = "",
         violationType = null,
         customTemplateId = null,
         recipient = "mupo@example.com",
-        address = "Tartu mnt 24",
+        address = "Lastekodu tn 42, Tallinn",
         latitude = null,
         longitude = null,
         accuracyMeters = null,
         locationNeedsReview = false,
         subject = "",
         body = "",
-        letterManuallyEdited = false,
         plateManuallyEdited = false,
         vehicleManuallyEdited = false,
-        plateSuggestions = emptyList(),
+        vehicleConfirmed = false,
+        locationConfirmed = false,
+        plateObservations = emptyList(),
         suggestedViolationType = null,
         mailOpenedAtEpochMillis = null,
         photos = listOf(

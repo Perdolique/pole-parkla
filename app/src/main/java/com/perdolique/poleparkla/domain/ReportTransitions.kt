@@ -10,11 +10,11 @@ object ReportTransitions {
         profile: ReporterProfile,
         violationDescription: String?,
     ): Report {
-        if (report.status == ReportStatus.HANDED_OFF_TO_MAIL) return report
-        val status = if (report.isReady(profile, violationDescription)) {
-            ReportStatus.READY
-        } else {
-            ReportStatus.DRAFT
+        val ready = report.isReady(profile, violationDescription)
+        val status = when {
+            !ready -> ReportStatus.DRAFT
+            report.status == ReportStatus.HANDED_OFF_TO_MAIL -> ReportStatus.HANDED_OFF_TO_MAIL
+            else -> ReportStatus.READY
         }
         return report.copy(status = status)
     }

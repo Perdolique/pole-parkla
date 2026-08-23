@@ -1,17 +1,22 @@
 package com.perdolique.poleparkla.data
 
+import androidx.room.withTransaction
 import com.perdolique.poleparkla.data.local.CustomViolationTemplateEntity
 import com.perdolique.poleparkla.data.local.PhotoEntity
+import com.perdolique.poleparkla.data.local.PlateObservationEntity
+import com.perdolique.poleparkla.data.local.PoleParklaDatabase
 import com.perdolique.poleparkla.data.local.ReportEntity
 import com.perdolique.poleparkla.data.local.ReportWithPhotos
-import com.perdolique.poleparkla.data.local.PoleParklaDao
 import com.perdolique.poleparkla.domain.RecognitionMerger
+import com.perdolique.poleparkla.domain.PlateCandidateParser
 import com.perdolique.poleparkla.domain.localRecognitionFingerprint
 import com.perdolique.poleparkla.model.AppSettings
 import com.perdolique.poleparkla.model.CustomViolationTemplate
 import com.perdolique.poleparkla.model.LocationSnapshot
+import com.perdolique.poleparkla.model.NormalizedPhotoRect
 import com.perdolique.poleparkla.model.PhotoSource
-import com.perdolique.poleparkla.model.PlateSuggestion
+import com.perdolique.poleparkla.model.PlateObservation
+import com.perdolique.poleparkla.model.RecognitionPlateObservation
 import com.perdolique.poleparkla.model.RecognitionResult
 import com.perdolique.poleparkla.model.RecognitionSource
 import com.perdolique.poleparkla.model.Report
@@ -19,6 +24,7 @@ import com.perdolique.poleparkla.model.ReportPhoto
 import com.perdolique.poleparkla.model.ReportStatus
 import com.perdolique.poleparkla.model.ViolationType
 import java.io.File
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,9 +33,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class ReportRepository(
-    private val dao: PoleParklaDao,
+    private val database: PoleParklaDatabase,
     private val reportsDirectory: File,
 ) {
+    private val dao = database.dao()
     private val mutationMutex = Mutex()
 
     fun observeReports(): Flow<List<Report>> = dao.observeReports().map { reports ->
@@ -93,10 +100,10 @@ class ReportRepository(
             locationNeedsReview = locationNeedsReview,
             subject = "",
             body = "",
-            letterManuallyEdited = false,
             plateManuallyEdited = false,
             vehicleManuallyEdited = false,
-            plateSuggestions = "",
+            vehicleConfirmed = false,
+            locationConfirmed = false,
             suggestedViolationType = null,
             mailOpenedAtEpochMillis = null,
             localRecognitionFingerprint = "",
@@ -106,34 +113,41 @@ class ReportRepository(
 
     suspend fun addPhotos(reportId: String, photos: List<ReportPhoto>) = mutationMutex.withLock {
         if (photos.isEmpty()) return@withLock
-        val report = dao.getReport(reportId) ?: return@withLock
-        require(report.photos.size + photos.size <= 3) { "A report can contain at most three photos" }
+        val current = dao.getReport(reportId)?.toDomain() ?: return@withLock
+        require(current.photos.size + photos.size <= 3) { "A report can contain at most three photos" }
         require(photos.all { it.reportId == reportId }) { "Every photo must belong to the report" }
-        val primaryPhotoId = if (report.photos.any(PhotoEntity::isPrimary)) {
+        val primaryPhotoId = if (current.photos.any(ReportPhoto::isPrimary)) {
             null
         } else {
             photos.firstOrNull(ReportPhoto::isPrimary)?.id ?: photos.first().id
         }
-        dao.upsertPhotos(
-            photos.map { photo ->
-                photo.copy(isPrimary = photo.id == primaryPhotoId).toEntity()
-            },
+        val normalizedPhotos = photos.map { photo ->
+            photo.copy(isPrimary = photo.id == primaryPhotoId).toEntity()
+        }
+        dao.addPhotosAndResetReport(
+            report = current.resetAfterPhotoChange().toEntity(),
+            photos = normalizedPhotos,
         )
-        touchAfterPhotoChange(reportId)
     }
 
     suspend fun removePhoto(photoId: String) = mutationMutex.withLock {
         val photo = dao.getPhoto(photoId) ?: return@withLock
-        withContext(Dispatchers.IO) {
+        val current = dao.getReport(photo.reportId)?.toDomain() ?: return@withLock
+        val remaining = current.photos.filterNot { it.id == photoId }
+        val promotedPrimary = if (photo.isPrimary) {
+            remaining.firstOrNull()?.copy(isPrimary = true)?.toEntity()
+        } else {
+            null
+        }
+        database.withTransaction {
+            dao.removePhotoAndResetReport(
+                report = current.resetAfterPhotoChange().toEntity(),
+                photo = photo,
+                promotedPrimary = promotedPrimary,
+            )
             val file = File(photo.filePath)
             check(!file.exists() || file.delete()) { "Unable to delete report photo" }
         }
-        dao.deletePhoto(photo)
-        val remaining = dao.getReport(photo.reportId)?.photos.orEmpty()
-        if (photo.isPrimary && remaining.isNotEmpty()) {
-            dao.upsertPhoto(remaining.first().copy(isPrimary = true))
-        }
-        touchAfterPhotoChange(photo.reportId)
     }
 
     suspend fun mutateReport(id: String, transform: (Report) -> Report) = mutationMutex.withLock {
@@ -144,13 +158,41 @@ class ReportRepository(
         dao.upsertReport(updated.toEntity())
     }
 
-    suspend fun applyRecognition(id: String, result: RecognitionResult) =
-        mutateReport(id) { report -> RecognitionMerger.merge(report, result) }
-
-    suspend fun clearAutomaticRecognition(id: String) =
-        mutateReport(id) { report ->
-            RecognitionMerger.clearAutomatic(report).copy(localRecognitionFingerprint = "")
+    suspend fun applyRecognition(id: String, result: RecognitionResult) = mutationMutex.withLock {
+        val current = dao.getReport(id)?.toDomain() ?: return@withLock
+        val rawObservations = if (result.plateObservations.isNotEmpty()) {
+            result.plateObservations
+        } else {
+            current.primaryPhoto?.id?.let { photoId ->
+                result.plateCandidates.map { value -> RecognitionPlateObservation(photoId, value) }
+            }.orEmpty()
         }
+        val replacements = rawObservations.mapNotNull { observation ->
+            val value = PlateCandidateParser.normalize(observation.value) ?: return@mapNotNull null
+            PlateObservation(
+                id = UUID.randomUUID().toString(),
+                reportId = id,
+                photoId = observation.photoId,
+                source = result.source,
+                value = value,
+                bounds = observation.bounds,
+                detectionConfidence = observation.detectionConfidence,
+                characterConfidence = observation.characterConfidence,
+                relativeArea = observation.relativeArea,
+            )
+        }
+        val mergedObservations = current.plateObservations
+            .filterNot { it.source == result.source } + replacements
+        val merged = RecognitionMerger.merge(
+            report = current.copy(plateObservations = mergedObservations),
+            result = result,
+        ).copy(updatedAtEpochMillis = System.currentTimeMillis())
+        dao.replaceRecognition(
+            report = merged.toEntity(),
+            source = result.source.name,
+            observations = replacements.map(PlateObservation::toEntity),
+        )
+    }
 
     suspend fun markLocalRecognitionComplete(id: String, expectedFingerprint: String) =
         mutateReport(id) { report ->
@@ -190,21 +232,23 @@ class ReportRepository(
         dao.deleteAllReports()
         dao.deleteAllTemplates()
     }
-
-    private suspend fun touchAfterPhotoChange(reportId: String) {
-        val current = dao.getReport(reportId)?.report ?: return
-        dao.upsertReport(
-            current.copy(
-                updatedAtEpochMillis = System.currentTimeMillis(),
-                localRecognitionFingerprint = "",
-            ),
-        )
-    }
 }
 
-private fun ReportWithPhotos.toDomain(): Report = report.toDomain(photos)
+private fun Report.resetAfterPhotoChange(): Report = RecognitionMerger.clearAutomatic(this).copy(
+    updatedAtEpochMillis = System.currentTimeMillis(),
+    status = ReportStatus.DRAFT,
+    vehicleConfirmed = false,
+    mailOpenedAtEpochMillis = null,
+    plateObservations = emptyList(),
+    localRecognitionFingerprint = "",
+)
 
-private fun ReportEntity.toDomain(photos: List<PhotoEntity>): Report = Report(
+private fun ReportWithPhotos.toDomain(): Report = report.toDomain(photos, plateObservations)
+
+private fun ReportEntity.toDomain(
+    photos: List<PhotoEntity>,
+    observations: List<PlateObservationEntity>,
+): Report = Report(
     id = id,
     createdAtEpochMillis = createdAtEpochMillis,
     updatedAtEpochMillis = updatedAtEpochMillis,
@@ -223,10 +267,11 @@ private fun ReportEntity.toDomain(photos: List<PhotoEntity>): Report = Report(
     locationNeedsReview = locationNeedsReview,
     subject = subject,
     body = body,
-    letterManuallyEdited = letterManuallyEdited,
     plateManuallyEdited = plateManuallyEdited,
     vehicleManuallyEdited = vehicleManuallyEdited,
-    plateSuggestions = decodeSuggestions(plateSuggestions),
+    vehicleConfirmed = vehicleConfirmed,
+    locationConfirmed = locationConfirmed,
+    plateObservations = observations.map(PlateObservationEntity::toDomain),
     suggestedViolationType = suggestedViolationType?.let { enumValueOrNull<ViolationType>(it) },
     mailOpenedAtEpochMillis = mailOpenedAtEpochMillis,
     photos = photos.map(PhotoEntity::toDomain).sortedBy(ReportPhoto::capturedAtEpochMillis),
@@ -252,10 +297,10 @@ private fun Report.toEntity(): ReportEntity = ReportEntity(
     locationNeedsReview = locationNeedsReview,
     subject = subject,
     body = body,
-    letterManuallyEdited = letterManuallyEdited,
     plateManuallyEdited = plateManuallyEdited,
     vehicleManuallyEdited = vehicleManuallyEdited,
-    plateSuggestions = encodeSuggestions(plateSuggestions),
+    vehicleConfirmed = vehicleConfirmed,
+    locationConfirmed = locationConfirmed,
     suggestedViolationType = suggestedViolationType?.name,
     mailOpenedAtEpochMillis = mailOpenedAtEpochMillis,
     localRecognitionFingerprint = localRecognitionFingerprint,
@@ -270,6 +315,24 @@ private fun PhotoEntity.toDomain(): ReportPhoto = ReportPhoto(
     isPrimary = isPrimary,
 )
 
+private fun PlateObservationEntity.toDomain(): PlateObservation = PlateObservation(
+    id = id,
+    reportId = reportId,
+    photoId = photoId,
+    source = enumValueOrDefault(source, RecognitionSource.ML_KIT_OCR),
+    value = value,
+    bounds = if (
+        boundsLeft != null && boundsTop != null && boundsRight != null && boundsBottom != null
+    ) {
+        NormalizedPhotoRect(boundsLeft, boundsTop, boundsRight, boundsBottom)
+    } else {
+        null
+    },
+    detectionConfidence = detectionConfidence,
+    characterConfidence = characterConfidence,
+    relativeArea = relativeArea,
+)
+
 private fun ReportPhoto.toEntity(): PhotoEntity = PhotoEntity(
     id = id,
     reportId = reportId,
@@ -279,24 +342,26 @@ private fun ReportPhoto.toEntity(): PhotoEntity = PhotoEntity(
     isPrimary = isPrimary,
 )
 
+private fun PlateObservation.toEntity(): PlateObservationEntity = PlateObservationEntity(
+    id = id,
+    reportId = reportId,
+    photoId = photoId,
+    source = source.name,
+    value = value,
+    boundsLeft = bounds?.left,
+    boundsTop = bounds?.top,
+    boundsRight = bounds?.right,
+    boundsBottom = bounds?.bottom,
+    detectionConfidence = detectionConfidence,
+    characterConfidence = characterConfidence,
+    relativeArea = relativeArea,
+)
+
 private fun CustomViolationTemplateEntity.toDomain(): CustomViolationTemplate =
     CustomViolationTemplate(id, displayName, estonianDescription, createdAtEpochMillis, updatedAtEpochMillis)
 
 private fun CustomViolationTemplate.toEntity(): CustomViolationTemplateEntity =
     CustomViolationTemplateEntity(id, displayName, estonianDescription, createdAtEpochMillis, updatedAtEpochMillis)
-
-private fun encodeSuggestions(suggestions: List<PlateSuggestion>): String = suggestions.joinToString("\n") {
-    "${it.source.name}\t${it.value.replace("\t", " ").replace("\n", " ")}"
-}
-
-private fun decodeSuggestions(encoded: String): List<PlateSuggestion> = encoded.lineSequence()
-    .mapNotNull { line ->
-        val parts = line.split('\t', limit = 2)
-        val source = parts.firstOrNull()?.let { enumValueOrNull<RecognitionSource>(it) }
-        val value = parts.getOrNull(1)?.takeIf(String::isNotBlank)
-        if (source != null && value != null) PlateSuggestion(source, value) else null
-    }
-    .toList()
 
 private inline fun <reified T : Enum<T>> enumValueOrNull(value: String): T? =
     runCatching { enumValueOf<T>(value) }.getOrNull()

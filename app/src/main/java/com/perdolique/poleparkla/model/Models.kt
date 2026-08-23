@@ -92,14 +92,45 @@ data class ReportPhoto(
     val isPrimary: Boolean,
 )
 
-data class PlateSuggestion(
+data class NormalizedPhotoRect(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+)
+
+data class RecognitionPlateObservation(
+    val photoId: String,
+    val value: String,
+    val bounds: NormalizedPhotoRect? = null,
+    val detectionConfidence: Float? = null,
+    val characterConfidence: Float? = null,
+    val relativeArea: Float? = null,
+)
+
+data class PlateObservation(
+    val id: String,
+    val reportId: String,
+    val photoId: String,
     val source: RecognitionSource,
     val value: String,
+    val bounds: NormalizedPhotoRect? = null,
+    val detectionConfidence: Float? = null,
+    val characterConfidence: Float? = null,
+    val relativeArea: Float? = null,
+)
+
+data class PlateCandidate(
+    val value: String,
+    val sources: Set<RecognitionSource>,
+    val supportingPhotoCount: Int,
+    val observations: List<PlateObservation>,
 )
 
 data class RecognitionResult(
     val source: RecognitionSource,
-    val plateCandidates: List<String>,
+    val plateCandidates: List<String> = emptyList(),
+    val plateObservations: List<RecognitionPlateObservation> = emptyList(),
     val vehicleMake: String? = null,
     val vehicleModel: String? = null,
     val suggestedViolationType: ViolationType? = null,
@@ -124,10 +155,11 @@ data class Report(
     val locationNeedsReview: Boolean,
     val subject: String,
     val body: String,
-    val letterManuallyEdited: Boolean,
     val plateManuallyEdited: Boolean,
     val vehicleManuallyEdited: Boolean,
-    val plateSuggestions: List<PlateSuggestion>,
+    val vehicleConfirmed: Boolean,
+    val locationConfirmed: Boolean,
+    val plateObservations: List<PlateObservation>,
     val suggestedViolationType: ViolationType?,
     val mailOpenedAtEpochMillis: Long?,
     val photos: List<ReportPhoto>,
@@ -136,17 +168,28 @@ data class Report(
     val primaryPhoto: ReportPhoto?
         get() = photos.firstOrNull(ReportPhoto::isPrimary) ?: photos.firstOrNull()
 
+    fun hasValidLocation(): Boolean =
+        occurredAtEpochMillis > 0L &&
+            (
+                address.isNotBlank() ||
+                    (
+                        latitude?.isFinite() == true && latitude in -90.0..90.0 &&
+                            longitude?.isFinite() == true && longitude in -180.0..180.0
+                        )
+                )
+
     fun isReady(profile: ReporterProfile, violationDescription: String?): Boolean =
         photos.isNotEmpty() &&
             plate.isNotBlank() &&
+            vehicleConfirmed &&
             !violationDescription.isNullOrBlank() &&
             recipient.isNotBlank() &&
             subject.isNotBlank() &&
             body.isNotBlank() &&
             profile.name.isNotBlank() &&
             profile.phone.isNotBlank() &&
-            !locationNeedsReview &&
-            (address.isNotBlank() || (latitude != null && longitude != null))
+            locationConfirmed &&
+            hasValidLocation()
 }
 
 data class CustomViolationTemplate(

@@ -35,9 +35,15 @@ internal data class DecodedPlate(
     val meanCharacterConfidence: Float,
 )
 
-internal data class PlateObservation(
+internal data class LocalPlateObservation(
     val photoId: String,
     val value: String,
+    val left: Int,
+    val top: Int,
+    val right: Int,
+    val bottom: Int,
+    val imageWidth: Int,
+    val imageHeight: Int,
     val detectionConfidence: Float,
     val characterConfidence: Float,
     val relativeArea: Float,
@@ -134,37 +140,5 @@ internal fun decodePlate(output: FloatArray): DecodedPlate? {
         meanCharacterConfidence = confidences.take(value.length).average().toFloat(),
     )
 }
-
-internal fun rankPlateCandidates(
-    observations: List<PlateObservation>,
-    limit: Int = 5,
-): List<String> = observations
-    .groupBy(PlateObservation::value)
-    .map { (value, matches) ->
-        RankedPlate(
-            value = value,
-            photoCount = matches.map(PlateObservation::photoId).distinct().size,
-            largestRelativeArea = matches.maxOf(PlateObservation::relativeArea),
-            bestDetectionConfidence = matches.maxOf(PlateObservation::detectionConfidence),
-            bestCharacterConfidence = matches.maxOf(PlateObservation::characterConfidence),
-        )
-    }
-    .sortedWith(
-        compareByDescending<RankedPlate>(RankedPlate::photoCount)
-            .thenByDescending(RankedPlate::largestRelativeArea)
-            .thenByDescending(RankedPlate::bestDetectionConfidence)
-            .thenByDescending(RankedPlate::bestCharacterConfidence)
-            .thenBy(RankedPlate::value),
-    )
-    .take(limit)
-    .map(RankedPlate::value)
-
-private data class RankedPlate(
-    val value: String,
-    val photoCount: Int,
-    val largestRelativeArea: Float,
-    val bestDetectionConfidence: Float,
-    val bestCharacterConfidence: Float,
-)
 
 private const val DETECTION_ROW_SIZE = 7

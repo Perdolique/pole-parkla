@@ -12,18 +12,18 @@ class ReportLocationInputTest {
     @Test
     fun `parses strict time and comma coordinates`() {
         val result = ReportLocationInput.validate(
-            address = " Vabaduse väljak 1 ",
+            address = " Lastekodu tn 42, Tallinn ",
             latitude = "59,437",
             longitude = "24,7536",
-            occurredAt = "20.08.2026 12:15",
+            occurredAt = "13.08.2026 16:58",
             zoneId = tallinn,
         )
 
         val parsed = (result as ReportLocationInputResult.Valid).location
-        assertEquals("Vabaduse väljak 1", parsed.address)
+        assertEquals("Lastekodu tn 42, Tallinn", parsed.address)
         assertEquals(59.437, parsed.latitude)
         assertEquals(24.7536, parsed.longitude)
-        assertEquals("20.08.2026 12:15", ReportLocationInput.format(parsed.occurredAtEpochMillis, tallinn))
+        assertEquals("13.08.2026 16:58", ReportLocationInput.format(parsed.occurredAtEpochMillis, tallinn))
     }
 
     @Test
@@ -37,10 +37,10 @@ class ReportLocationInputTest {
     @Test
     fun `accepts an address without coordinates`() {
         val result = ReportLocationInput.validate(
-            address = "Vabaduse väljak 1",
+            address = "Lastekodu tn 42, Tallinn",
             latitude = "",
             longitude = "",
-            occurredAt = "20.08.2026 12:15",
+            occurredAt = "13.08.2026 16:58",
             zoneId = tallinn,
         )
 
@@ -52,7 +52,7 @@ class ReportLocationInputTest {
     @Test
     fun `reports an empty time separately from blank coordinates`() {
         val result = ReportLocationInput.validate(
-            address = "Vabaduse väljak 1",
+            address = "Lastekodu tn 42, Tallinn",
             latitude = "",
             longitude = "",
             occurredAt = "",
@@ -68,10 +68,10 @@ class ReportLocationInputTest {
     @Test
     fun `reports an invalid coordinate pair separately from time`() {
         val result = ReportLocationInput.validate(
-            address = "Vabaduse väljak 1",
+            address = "Lastekodu tn 42, Tallinn",
             latitude = "59.4",
             longitude = "",
-            occurredAt = "20.08.2026 12:15",
+            occurredAt = "13.08.2026 16:58",
             zoneId = tallinn,
         )
 
@@ -82,8 +82,24 @@ class ReportLocationInputTest {
     }
 
     @Test
+    fun `requires either an address or a coordinate pair`() {
+        val result = ReportLocationInput.validate(
+            address = "",
+            latitude = "",
+            longitude = "",
+            occurredAt = "13.08.2026 16:58",
+            zoneId = tallinn,
+        )
+
+        assertEquals(
+            ReportLocationInputResult.Invalid(ReportLocationInputError.LOCATION),
+            result,
+        )
+    }
+
+    @Test
     fun `rejects invalid time ranges non-finite values and half a coordinate pair`() {
-        val valid = arrayOf("Vabaduse väljak 1", "59.4", "24.7", "20.08.2026 12:15")
+        val valid = arrayOf("Lastekodu tn 42, Tallinn", "59.4", "24.7", "13.08.2026 16:58")
 
         listOf(
             ReportLocationInput.validate(valid[0], valid[1], valid[2], "31.02.2026 12:15", tallinn),

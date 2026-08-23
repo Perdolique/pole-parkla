@@ -71,11 +71,11 @@ class OnboardingScreenTest {
         composeRule.onNodeWithTag("onboarding_submit").performClick()
         composeRule.onNodeWithTag("onboarding_name")
             .performScrollTo()
-            .performTextReplacement("Mari Maasikas")
+            .performTextReplacement("Pier Dolique")
         composeRule.onNodeWithTag("onboarding_email").assertDoesNotExist()
         composeRule.onNodeWithTag("onboarding_phone")
             .performScrollTo()
-            .performTextReplacement("+372 5555 5555")
+            .performTextReplacement("+37256789012")
         composeRule.onNodeWithTag("onboarding_submit").performClick()
         composeRule.waitForIdle()
 
@@ -83,8 +83,8 @@ class OnboardingScreenTest {
             Submission(
                 language = "",
                 profile = ReporterProfile(
-                    name = "Mari Maasikas",
-                    phone = "+372 5555 5555",
+                    name = "Pier Dolique",
+                    phone = "+37256789012",
                 ),
                 recipient = DEFAULT_RECIPIENT,
             ),
@@ -97,7 +97,7 @@ class OnboardingScreenTest {
         val settings = mutableStateOf(
             AppSettings(
                 loaded = true,
-                profile = ReporterProfile("Mari", "+372 5555"),
+                profile = ReporterProfile("Pier Dolique", "+37256789012"),
             ),
         )
         composeRule.setContent {
@@ -111,7 +111,10 @@ class OnboardingScreenTest {
 
         composeRule.onNodeWithTag("onboarding_submit").performClick()
         composeRule.onNodeWithTag("onboarding_name").assert(
-            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("Mari")),
+            SemanticsMatcher.expectValue(
+                SemanticsProperties.EditableText,
+                AnnotatedString("Pier Dolique"),
+            ),
         )
 
         composeRule.runOnIdle { settings.value = AppSettings(loaded = true) }

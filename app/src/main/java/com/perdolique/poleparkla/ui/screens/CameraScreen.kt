@@ -52,6 +52,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -96,6 +97,11 @@ private enum class PermissionRequest {
     CAMERA,
     LOCATION,
 }
+
+private const val MAX_REPORT_PHOTOS = 3
+
+internal fun remainingPhotoCapacity(photoCount: Int): Int =
+    (MAX_REPORT_PHOTOS - photoCount).coerceIn(0, MAX_REPORT_PHOTOS)
 
 @Composable
 fun CameraScreen(
@@ -157,8 +163,19 @@ fun CameraScreen(
         }
         permissionLauncher.launch(request.permissions())
     }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(3)) { uris ->
+    val singlePhotoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { viewModel.addGalleryPhotos(listOf(it)) }
+    }
+    val twoPhotoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(2)) { uris ->
         viewModel.addGalleryPhotos(uris)
+    }
+    val threePhotoPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(MAX_REPORT_PHOTOS),
+    ) { uris ->
+        viewModel.addGalleryPhotos(uris)
+    }
+    val galleryRequest = remember {
+        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
     }
     val imageCapture = remember {
         ImageCapture.Builder()
@@ -166,6 +183,16 @@ fun CameraScreen(
             .build()
     }
     val freshLocation = latestLocation?.takeIf { LocationFreshness.isFresh(it) }
+    val photoCount = report?.photos.orEmpty().size
+    val photoCapacity = remainingPhotoCapacity(photoCount)
+    val launchGallery = {
+        when (photoCapacity) {
+            1 -> singlePhotoPicker.launch(galleryRequest)
+            2 -> twoPhotoPicker.launch(galleryRequest)
+            3 -> threePhotoPicker.launch(galleryRequest)
+            else -> Unit
+        }
+    }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         permissionRefresh++
@@ -215,6 +242,7 @@ fun CameraScreen(
         } else {
             CameraUnavailable(
                 cameraPresent = cameraPresent,
+                galleryEnabled = photoCapacity > 0 && !busy,
                 onGrantCamera = {
                     if (cameraPermissionRequested && !context.shouldShowRationale(PermissionRequest.CAMERA)) {
                         permanentlyDeniedPermission = PermissionRequest.CAMERA
@@ -222,9 +250,7 @@ fun CameraScreen(
                         launchPermissionRequest(PermissionRequest.CAMERA)
                     }
                 },
-                onGallery = {
-                    picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
+                onGallery = launchGallery,
             )
         }
 
@@ -245,14 +271,13 @@ fun CameraScreen(
             modifier = Modifier.align(Alignment.TopCenter),
         )
 
-        CameraTray(
+        CameraTrayWithDeletion(
+            reportId = reportId,
             photos = report?.photos.orEmpty(),
             photoStore = photoStore,
             cameraAvailable = cameraAvailable,
             busy = busy,
-            onGallery = {
-                picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            },
+            onGallery = launchGallery,
             onCapture = {
                 val target = viewModel.createCameraTarget()
                 capturePhoto(
@@ -263,6 +288,7 @@ fun CameraScreen(
                     onError = { viewModel.onCameraCaptureFailed(target) },
                 )
             },
+            onRemoveConfirmed = { photo -> viewModel.removePhoto(reportId, photo.id) },
             onReview = { onReview(reportId) },
             modifier = Modifier.align(Alignment.BottomCenter),
         )
@@ -331,6 +357,7 @@ fun CameraScreen(
             },
         )
     }
+
 }
 
 @Composable
@@ -404,6 +431,7 @@ private fun CameraTopControls(
 @Composable
 internal fun CameraUnavailable(
     cameraPresent: Boolean,
+    galleryEnabled: Boolean,
     onGrantCamera: () -> Unit,
     onGallery: () -> Unit,
 ) {
@@ -446,6 +474,7 @@ internal fun CameraUnavailable(
         PpButton(
             text = stringResource(R.string.add_from_gallery),
             onClick = onGallery,
+            enabled = galleryEnabled,
             icon = PpIcons.Gallery,
             style = PpButtonStyle.Secondary,
             modifier = Modifier.fillMaxWidth().testTag("camera_gallery_empty"),
@@ -461,10 +490,12 @@ internal fun CameraTray(
     busy: Boolean,
     onGallery: () -> Unit,
     onCapture: () -> Unit,
+    onRemove: (ReportPhoto) -> Unit,
     onReview: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val photoCount = photos.size
+    val canAddPhoto = remainingPhotoCapacity(photoCount) > 0 && !busy
     val captureDescription = stringResource(R.string.take_photo)
     Column(
         modifier = modifier
@@ -487,15 +518,27 @@ internal fun CameraTray(
                     photo = photos.getOrNull(index),
                     photoStore = photoStore,
                     index = index,
+                    busy = busy,
+                    onRemove = onRemove,
                     modifier = Modifier.weight(1f),
                 )
             }
         }
         Text(
-            stringResource(R.string.photo_counter, photoCount),
+            if (photoCount >= MAX_REPORT_PHOTOS) {
+                stringResource(R.string.photo_limit_replace_hint)
+            } else {
+                stringResource(R.string.photo_counter, photoCount)
+            },
             color = Color.White,
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp)
+                .then(
+                    if (photoCount >= MAX_REPORT_PHOTOS) Modifier.testTag("camera_photo_limit_hint")
+                    else Modifier.testTag("camera_photo_counter"),
+                ),
         )
         Box(
             modifier = Modifier
@@ -508,7 +551,7 @@ internal fun CameraTray(
                 icon = PpIcons.Gallery,
                 contentDescription = stringResource(R.string.add_from_gallery),
                 onClick = onGallery,
-                enabled = photoCount < 3 && !busy,
+                enabled = canAddPhoto,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White,
                 modifier = Modifier.align(Alignment.CenterStart).testTag("camera_gallery"),
@@ -516,13 +559,14 @@ internal fun CameraTray(
             if (cameraAvailable) {
                 Surface(
                     onClick = onCapture,
-                    enabled = photoCount < 3 && !busy,
+                    enabled = canAddPhoto,
                     shape = CircleShape,
                     color = Color.White,
                     border = BorderStroke(4.dp, Color.White.copy(alpha = 0.55f)),
                     modifier = Modifier
                         .align(Alignment.Center)
                         .size(76.dp)
+                        .alpha(if (canAddPhoto) 1f else 0.38f)
                         .semantics { contentDescription = captureDescription }
                         .testTag("camera_capture"),
                 ) {
@@ -551,20 +595,78 @@ internal fun CameraTray(
 }
 
 @Composable
+internal fun CameraTrayWithDeletion(
+    reportId: String,
+    photos: List<ReportPhoto>,
+    photoStore: PhotoStore,
+    cameraAvailable: Boolean,
+    busy: Boolean,
+    onGallery: () -> Unit,
+    onCapture: () -> Unit,
+    onRemoveConfirmed: (ReportPhoto) -> Unit,
+    onReview: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var photoToDelete by remember(reportId) { mutableStateOf<ReportPhoto?>(null) }
+    CameraTray(
+        photos = photos,
+        photoStore = photoStore,
+        cameraAvailable = cameraAvailable,
+        busy = busy,
+        onGallery = onGallery,
+        onCapture = onCapture,
+        onRemove = { photoToDelete = it },
+        onReview = onReview,
+        modifier = modifier,
+    )
+    photoToDelete?.let { photo ->
+        PpDialog(
+            title = stringResource(R.string.remove_photo),
+            onDismissRequest = { photoToDelete = null },
+            confirmText = stringResource(R.string.delete),
+            onConfirm = {
+                onRemoveConfirmed(photo)
+                photoToDelete = null
+            },
+            dismissText = stringResource(R.string.cancel),
+            destructive = true,
+            confirmTestTag = "camera_delete_confirm",
+        )
+    }
+}
+
+@Composable
 private fun PhotoSlot(
     photo: ReportPhoto?,
     photoStore: PhotoStore,
     index: Int,
+    busy: Boolean,
+    onRemove: (ReportPhoto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(16.dp)
     if (photo != null) {
-        PhotoThumbnail(
-            photo = photo,
-            photoStore = photoStore,
-            contentDescription = stringResource(R.string.photo_description, index + 1),
-            modifier = modifier.height(72.dp).border(2.dp, MaterialTheme.colorScheme.primaryContainer, shape),
-        )
+        Box(modifier = modifier.height(72.dp)) {
+            PhotoThumbnail(
+                photo = photo,
+                photoStore = photoStore,
+                contentDescription = stringResource(R.string.photo_description, index + 1),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(2.dp, MaterialTheme.colorScheme.primaryContainer, shape),
+            )
+            PpIconButton(
+                icon = PpIcons.Delete,
+                contentDescription = stringResource(R.string.remove_photo_number, index + 1),
+                onClick = { onRemove(photo) },
+                enabled = !busy,
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .testTag("camera_photo_delete_${photo.id}"),
+            )
+        }
     } else {
         Box(
             modifier = modifier

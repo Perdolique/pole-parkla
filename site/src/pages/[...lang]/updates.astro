@@ -1,0 +1,131 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { render } from 'astro:content'
+import { getStaticLocalePaths, type LocaleRouteProps } from '../../i18n/config'
+import { ui } from '../../i18n/ui'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { formatDate, getPublishedUpdates } from '../../lib/content'
+
+export const getStaticPaths = (() => getStaticLocalePaths()) satisfies GetStaticPaths
+
+const { locale } = Astro.props as LocaleRouteProps
+const text = ui[locale]
+const updates = await getPublishedUpdates(locale)
+const renderedUpdates = await Promise.all(updates.map(async (entry) => {
+  const { Content } = await render(entry)
+
+  return {
+    entry,
+    Content
+  }
+}))
+---
+
+<BaseLayout
+  pageTitle={text.updatesMeta.title}
+  metaDescription={text.updatesMeta.description}
+  locale={locale}
+  route="updates"
+>
+  <header class="page-heading">
+    <h1>{text.updatesLink}</h1>
+    <p>{text.updatesMeta.description}</p>
+  </header>
+
+  <div class="updates-list">
+    {renderedUpdates.length === 0
+      ? <p class="empty-state">{text.noUpdates}</p>
+      : renderedUpdates.map(({ entry, Content }) => (
+        <article class="update-entry">
+          <header>
+            <div>
+              <p class="version">{entry.data.version}</p>
+              <h2>{entry.data.title}</h2>
+            </div>
+            <time datetime={entry.data.releasedAt.toISOString()}>{formatDate(entry.data.releasedAt, locale)}</time>
+          </header>
+
+          <ul>
+            {entry.data.highlights.map((highlight) => <li>{highlight}</li>)}
+          </ul>
+
+          <div class="update-body">
+            <Content />
+          </div>
+        </article>
+      ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .updates-list {
+    display: grid;
+    gap: var(--space-16);
+    width: var(--reading-width);
+    margin-inline: auto;
+  }
+
+  .empty-state {
+    margin: 0;
+    padding: var(--space-24);
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .update-entry {
+    padding: clamp(var(--space-24), 5vw, var(--space-40));
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .update-entry > header {
+    display: flex;
+    gap: var(--space-24);
+    align-items: start;
+    justify-content: space-between;
+    margin-block-end: var(--space-24);
+  }
+
+  .version {
+    margin: 0 0 var(--space-8);
+    color: var(--color-forest);
+    font-size: var(--font-size-label);
+    font-weight: 750;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--color-forest);
+    font-size: var(--font-size-title);
+  }
+
+  time {
+    flex: 0 0 auto;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+  }
+
+  ul {
+    padding-inline-start: 1.2em;
+  }
+
+  li + li {
+    margin-block-start: var(--space-8);
+  }
+
+  .update-body :global(:first-child) {
+    margin-block-start: var(--space-24);
+  }
+
+  @media (max-width: 520px) {
+    .update-entry > header {
+      display: grid;
+      gap: var(--space-8);
+    }
+  }
+</style>

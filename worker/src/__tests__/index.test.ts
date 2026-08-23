@@ -5,7 +5,7 @@ import { ProviderFailure, type ProviderServices } from "../providers"
 
 const APP_TOKEN = "test-app-token"
 const validPayload = {
-  plateCandidates: ["123 ABC"],
+  plateCandidates: ["003 PUK"],
   vehicleMake: "Toyota",
   vehicleModel: "Corolla",
   suggestedViolationType: "CYCLE_PATH",
@@ -158,7 +158,7 @@ describe(handleRecognitionRequest, () => {
     const response = await handleRecognitionRequest(
       recognitionRequest(),
       APP_TOKEN,
-      providerServices({ plateCandidates: "123 ABC" }),
+      providerServices({ plateCandidates: "003 PUK" }),
     )
 
     expect(response.status).toBe(502)

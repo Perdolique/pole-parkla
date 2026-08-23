@@ -9,6 +9,8 @@ import com.perdolique.poleparkla.model.ReportPhoto
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -24,7 +26,7 @@ class PlateRecognitionServiceInstrumentedTest {
         try {
             val photoFile = File(testDirectory, "synthetic-car.png")
             InstrumentationRegistry.getInstrumentation().context.assets
-                .open("synthetic_plate_test_image.png").use { input ->
+                .open("street_plate_test_image.png").use { input ->
                 photoFile.outputStream().use(input::copyTo)
             }
             val photoStore = PhotoStore(context, File(testDirectory, "reports"))
@@ -43,7 +45,21 @@ class PlateRecognitionServiceInstrumentedTest {
                 ),
             )
 
-            assertEquals(listOf("123 ABC"), result.plateCandidates)
+            val observation = result.plateObservations.single()
+            assertEquals("003 PUK", observation.value)
+            assertEquals("photo", observation.photoId)
+            assertNotNull(observation.bounds)
+            requireNotNull(observation.bounds).let { bounds ->
+                assertTrue(bounds.left in 0f..1f)
+                assertTrue(bounds.top in 0f..1f)
+                assertTrue(bounds.right in 0f..1f)
+                assertTrue(bounds.bottom in 0f..1f)
+                assertTrue(bounds.right > bounds.left)
+                assertTrue(bounds.bottom > bounds.top)
+            }
+            assertNotNull(observation.detectionConfidence)
+            assertNotNull(observation.characterConfidence)
+            assertNotNull(observation.relativeArea)
         } finally {
             testDirectory.deleteRecursively()
         }

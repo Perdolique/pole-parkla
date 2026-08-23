@@ -1,0 +1,66 @@
+---
+import { getLocalizedPath, locales, type Locale, type RouteName } from '../i18n/config'
+import { ui } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+  route: RouteName
+  compact?: boolean
+}
+
+const { locale, route, compact = false } = Astro.props
+const labels = {
+  et: 'ET',
+  en: 'EN',
+  ru: 'RU'
+} as const satisfies Record<Locale, string>
+---
+
+<nav
+  class:list={['language-switcher', { compact }]}
+  aria-label={ui[locale].languageSwitcherLabel}
+>
+  {locales.map((targetLocale) => (
+    <a
+      href={getLocalizedPath(targetLocale, route)}
+      lang={targetLocale}
+      hreflang={targetLocale}
+      aria-current={targetLocale === locale ? 'page' : undefined}
+    >
+      {labels[targetLocale]}
+    </a>
+  ))}
+</nav>
+
+<style>
+  .language-switcher {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    min-height: 48px;
+    color: var(--color-canvas);
+    font-size: var(--font-size-small);
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  a[aria-current='page'] {
+    color: var(--color-signal);
+  }
+
+  a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+
+  .compact {
+    justify-content: flex-start;
+  }
+</style>

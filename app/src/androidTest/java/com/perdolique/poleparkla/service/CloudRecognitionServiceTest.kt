@@ -27,7 +27,7 @@ class CloudRecognitionServiceTest {
         val connection = FakeConnection(
             responseBody = """
                 {
-                  "plateCandidates": ["123 ABC"],
+                  "plateCandidates": ["003 PUK"],
                   "vehicleMake": "Toyota",
                   "vehicleModel": "Corolla",
                   "suggestedViolationType": null
@@ -45,7 +45,7 @@ class CloudRecognitionServiceTest {
                 image = image,
             )
 
-            assertEquals(listOf("123 ABC"), result.plateCandidates)
+            assertEquals(listOf("003 PUK"), result.plateCandidates)
             assertEquals("Bearer app-token", connection.getRequestProperty("Authorization"))
             assertTrue(connection.writtenBody().contains("name=\"provider\""))
             assertTrue(connection.writtenBody().contains("workers_ai"))

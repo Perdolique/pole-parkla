@@ -28,8 +28,8 @@ class AddressMapPickerStateTest {
     fun `resolved point returns suggestion and every candidate`() {
         val point = AddressMapPoint(latitude = 59.437, longitude = 24.7536)
         val candidates = listOf(
-            candidate("Tartu mnt, Tallinn", AddressCandidateType.STREET),
-            candidate("Tartu mnt 24, Tallinn", AddressCandidateType.BUILDING),
+            candidate("Lastekodu tn, Tallinn", AddressCandidateType.STREET),
+            candidate("Lastekodu tn 42, Tallinn", AddressCandidateType.BUILDING),
         )
         val selection = addressMapSelection(
             point = point,
@@ -43,7 +43,7 @@ class AddressMapPickerStateTest {
         )
 
         requireNotNull(selection)
-        assertEquals("Tartu mnt 24, Tallinn", selection.address)
+        assertEquals("Lastekodu tn 42, Tallinn", selection.address)
         assertEquals(candidates, selection.candidates)
         assertFalse(selection.addressLookupFailed)
         assertTrue(selection.movedPoint)

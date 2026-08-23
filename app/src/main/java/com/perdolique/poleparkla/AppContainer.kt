@@ -31,7 +31,7 @@ class AppContainer(context: Context) {
 
     val settingsRepository = SettingsRepository(appContext)
     val secureTokenStore = SecureTokenStore(appContext)
-    val reportRepository = ReportRepository(database.dao(), reportsDirectory)
+    val reportRepository = ReportRepository(database, reportsDirectory)
     val emailTemplateRenderer = EmailTemplateRenderer()
     val photoStore = PhotoStore(appContext, reportsDirectory)
     val locationService = LocationService(appContext)

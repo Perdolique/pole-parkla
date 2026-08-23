@@ -1,0 +1,56 @@
+---
+import { getLocalizedPath, type Locale } from '../i18n/config'
+import { ui } from '../i18n/ui'
+import BaseLayout from '../layouts/BaseLayout.astro'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const text = ui[locale]
+---
+
+<BaseLayout
+  pageTitle={`${text.notFoundTitle} — Pole parkla`}
+  metaDescription={text.notFoundDescription}
+  locale={locale}
+  route="home"
+  noIndex
+>
+  <section class="not-found">
+    <p class="code">404</p>
+    <h1>{text.notFoundTitle}</h1>
+    <p>{text.notFoundDescription}</p>
+    <a class="arrow-link" href={getLocalizedPath(locale, 'home')}>
+      {text.homeLink}<span aria-hidden="true">→</span>
+    </a>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    width: var(--reading-width);
+    margin: var(--space-80) auto;
+  }
+
+  .code {
+    margin: 0 0 var(--space-8);
+    color: var(--color-forest);
+    font-size: var(--font-size-label);
+    font-weight: 750;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    margin: 0 0 var(--space-16);
+    color: var(--color-forest);
+    font-size: clamp(2rem, 7vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  p {
+    max-width: 580px;
+  }
+</style>

@@ -1,0 +1,194 @@
+---
+import brandMark from '../assets/brand-mark.png'
+import { siteConfig } from '../config'
+import { getLocalizedPath, type Locale, type RouteName } from '../i18n/config'
+import { ui } from '../i18n/ui'
+import LanguageSwitcher from './LanguageSwitcher.astro'
+
+interface Props {
+  locale: Locale
+  route: RouteName
+}
+
+const { locale, route } = Astro.props
+const text = ui[locale]
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href={getLocalizedPath(locale, 'home')} aria-label="Pole parkla">
+      <img src={brandMark.src} alt={text.logoAlt} width="42" height="42" />
+      <span>Pole parkla</span>
+    </a>
+
+    <nav class="desktop-nav" aria-label={text.navigationLabel}>
+      <a aria-current={route === 'privacy' ? 'page' : undefined} href={getLocalizedPath(locale, 'privacy')}>
+        {text.privacyLink}
+      </a>
+      <a aria-current={route === 'updates' ? 'page' : undefined} href={getLocalizedPath(locale, 'updates')}>
+        {text.updatesLink}
+      </a>
+      {siteConfig.sourceUrl && <a href={siteConfig.sourceUrl} rel="noreferrer">{text.sourceLink}</a>}
+      <LanguageSwitcher locale={locale} route={route} />
+    </nav>
+
+    <details class="mobile-menu">
+      <summary>
+        <span class="visually-hidden">{text.menuLabel}</span>
+        <span class="menu-icon" aria-hidden="true"></span>
+      </summary>
+
+      <div class="mobile-panel">
+        <nav aria-label={text.navigationLabel}>
+          <a aria-current={route === 'privacy' ? 'page' : undefined} href={getLocalizedPath(locale, 'privacy')}>
+            {text.privacyLink}
+          </a>
+          <a aria-current={route === 'updates' ? 'page' : undefined} href={getLocalizedPath(locale, 'updates')}>
+            {text.updatesLink}
+          </a>
+          {siteConfig.sourceUrl && <a href={siteConfig.sourceUrl} rel="noreferrer">{text.sourceLink}</a>}
+        </nav>
+        <LanguageSwitcher locale={locale} route={route} compact />
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: relative;
+    z-index: 10;
+    color: var(--color-canvas);
+    background: var(--color-forest);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: var(--page-width);
+    min-height: 76px;
+    margin-inline: auto;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-12);
+    min-height: 48px;
+    color: inherit;
+    font-size: var(--font-size-brand);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-decoration: none;
+  }
+
+  .brand :global(img) {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+  }
+
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
+  }
+
+  .desktop-nav > a,
+  .mobile-panel a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    color: inherit;
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .desktop-nav > a:hover,
+  .mobile-panel a:hover,
+  a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--color-signal);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.35em;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  summary {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu-icon,
+  .menu-icon::before,
+  .menu-icon::after {
+    width: 24px;
+    height: 2px;
+    background: currentColor;
+  }
+
+  .menu-icon {
+    position: relative;
+  }
+
+  .menu-icon::before,
+  .menu-icon::after {
+    position: absolute;
+    inset-inline-start: 0;
+    content: '';
+  }
+
+  .menu-icon::before {
+    inset-block-start: -7px;
+  }
+
+  .menu-icon::after {
+    inset-block-start: 7px;
+  }
+
+  .mobile-panel {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline: 0;
+    padding: var(--space-12) var(--page-gutter) var(--space-20);
+    color: var(--color-canvas);
+    background: var(--color-forest);
+    border-top: 1px solid rgb(243 245 239 / 18%);
+  }
+
+  .mobile-panel nav {
+    display: grid;
+  }
+
+  @media (max-width: 720px) {
+    .header-inner {
+      min-height: 68px;
+    }
+
+    .brand :global(img) {
+      width: 38px;
+      height: 38px;
+    }
+
+    .desktop-nav {
+      display: none;
+    }
+
+    .mobile-menu {
+      display: block;
+    }
+  }
+</style>
