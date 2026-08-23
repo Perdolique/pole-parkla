@@ -72,3 +72,7 @@ export function formatDate(date: Date, locale: Locale): string {
     year: 'numeric'
   }).format(date)
 }
+
+export function getUpdateAnchor(version: string): string {
+  return `version-${version}`
+}

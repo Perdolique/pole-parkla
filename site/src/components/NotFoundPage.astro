@@ -2,6 +2,7 @@
 import { getLocalizedPath, type Locale } from '../i18n/config'
 import { ui } from '../i18n/ui'
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { createSeoMetadata } from '../lib/seo'
 
 interface Props {
   locale: Locale
@@ -9,15 +10,18 @@ interface Props {
 
 const { locale } = Astro.props
 const text = ui[locale]
+const seo = createSeoMetadata({
+  description: text.notFoundDescription,
+  imageAlt: text.socialImageAlt,
+  locale,
+  pageKind: 'not-found',
+  robots: 'noindex,follow',
+  route: 'home',
+  title: `${text.notFoundTitle} — Pole parkla`
+})
 ---
 
-<BaseLayout
-  pageTitle={`${text.notFoundTitle} — Pole parkla`}
-  metaDescription={text.notFoundDescription}
-  locale={locale}
-  route="home"
-  noIndex
->
+<BaseLayout seo={seo}>
   <section class="not-found">
     <p class="code">404</p>
     <h1>{text.notFoundTitle}</h1>

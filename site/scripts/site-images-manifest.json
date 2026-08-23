@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 1,
+  "generatorHash": "fcdf61d5680eee8a74c522cfa717e369e4d45dddc7462ce9030bb8b7aac16241",
+  "sources": [
+    {
+      "path": "src/assets/brand-mark.png",
+      "sha256": "2264635e9059f97a69d667699ff9993eb9850afb8ba63a568982fafa963ec83c",
+      "size": 6332,
+      "format": "png",
+      "width": 128,
+      "height": 128,
+      "hasExif": true
+    },
+    {
+      "path": "public/screenshots/et/camera.webp",
+      "sha256": "a730cf63c707f60ecfdd594da5bfe4f13b87f864e8f2c34c6ae11009fffae40b",
+      "size": 215672,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/et/review.webp",
+      "sha256": "dd9115352ed3f91b54e791976224aacde5d1c95d69e11db2708fa866d0a0a165",
+      "size": 60868,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/et/report.webp",
+      "sha256": "b1aeb7da4fa8e11c9ca46b331c7477da1f6e8fcf61e76c2e94610d005442d9e4",
+      "size": 84276,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/camera.webp",
+      "sha256": "4cd813055c6cb87d8a6dd543d1fba2e93e73f663dfc7e2eb3bdc57f1ca7220a5",
+      "size": 216128,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/review.webp",
+      "sha256": "d9c9fe34dd0e0deec875e58e0e901e74ff019deb67c9f2a6c5094c283dce52e6",
+      "size": 60598,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/report.webp",
+      "sha256": "7708e2449da4e1e694f80de942bc78bbd055ab615bc115e7f8e67d0b0471e629",
+      "size": 83874,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/camera.webp",
+      "sha256": "a133f6a93ffc0f9b087c55401beb4b31e4e1187e2611f4baf8d165715d8e8598",
+      "size": 218612,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/review.webp",
+      "sha256": "e8ce1eb9e5d9cad6d932d398f0bd363e02d88809ec5b309eabd6558c124263e5",
+      "size": 69556,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/report.webp",
+      "sha256": "04d7188df54e025c05c5e94a641d5418297da523b590c5c30d72d353c5c68dad",
+      "size": 88154,
+      "format": "webp",
+      "width": 1008,
+      "height": 2244,
+      "hasExif": false
+    }
+  ],
+  "outputs": [
+    {
+      "path": "public/screenshots/et/camera-420.webp",
+      "sha256": "a269836b4aa17ee97e54f1d8dcefc6f526698b14ca16f93f5fd24f0c7780375d",
+      "size": 51014,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/et/camera-600.webp",
+      "sha256": "8af86d8fa74fc08c0d265d1150b3ac757a735d82db7353fc24f91bac38e66558",
+      "size": 84126,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/et/review-420.webp",
+      "sha256": "076b1a00a447fd89afa85af8056b83eb7916b375dcd5445a576cdac44ba741c7",
+      "size": 19860,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/et/review-600.webp",
+      "sha256": "e9d4f49142b99285f3ab494ddcf8d0275fa253672682a5f559d7d9f643966cd0",
+      "size": 29270,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/et/report-420.webp",
+      "sha256": "8941a1d8fdc4882e3b8ba9699ef77d98d3498ed195ce3c3caa6fb52889807cef",
+      "size": 26270,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/et/report-600.webp",
+      "sha256": "f351171e631b88839eb9e9254432b9663e8999f9dc7c385e29a3d2ad4db7b25c",
+      "size": 41038,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/camera-420.webp",
+      "sha256": "f78653bd2a05a82b5efd70740c9bcb760bad80a77d2986d95572d8b0c2333d66",
+      "size": 51262,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/camera-600.webp",
+      "sha256": "ad4a94765dffc59cdcf30f454d7ed841a3bc3871d7d872470a5d2c7bcf38da21",
+      "size": 84092,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/review-420.webp",
+      "sha256": "2a13f30de136d715cf754ffdd5b35de2ec5b5cde5c8939f43b5256057448fe7c",
+      "size": 19788,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/review-600.webp",
+      "sha256": "99a91bbff6235382281d1572b9108351756d3ad198a7bcf4a7b0b789ca05a00d",
+      "size": 29372,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/report-420.webp",
+      "sha256": "61b101f30d80affff8ea1b94394c970cdfce302f7501d393075ba037da82dc5a",
+      "size": 26596,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/en/report-600.webp",
+      "sha256": "1021a5fe24ab9b284b051d730a6e48d068ca798b961b585d6faa6638ff02bbd3",
+      "size": 41302,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/camera-420.webp",
+      "sha256": "d884e81d1c6674692e2fa5c95599c96de4c8ae8e0df951308fc97a570ad04421",
+      "size": 52258,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/camera-600.webp",
+      "sha256": "99bd3ce947d5b94a41968f8a4896b77e0d74efdcedc5e8c7d81105a0e4ab27d9",
+      "size": 85320,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/review-420.webp",
+      "sha256": "afc29ed6e430fc499e00420155ada07883d9c46b22dab5842a2634bfa92c0ba0",
+      "size": 22980,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/review-600.webp",
+      "sha256": "d106a0545adacf69f565e103c9fe8aa0481e8e9ca85d2baec8a1efeb7c5bff05",
+      "size": 34178,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/report-420.webp",
+      "sha256": "c1b18d6c896df463c03dc582a38cac737c4a84e0fbf02e28cb92555c37784401",
+      "size": 28638,
+      "format": "webp",
+      "width": 420,
+      "height": 935,
+      "hasExif": false
+    },
+    {
+      "path": "public/screenshots/ru/report-600.webp",
+      "sha256": "8123b09e5064b38dd64762b3f7b27cc286b9c72292c903982d42810fa633cc29",
+      "size": 43820,
+      "format": "webp",
+      "width": 600,
+      "height": 1336,
+      "hasExif": false
+    },
+    {
+      "path": "public/social/pole-parkla-et.jpg",
+      "sha256": "26e3b6b41272ee86e63e921c13ea0deb5fac419d6a6737f702baf562e48d7d3d",
+      "size": 61488,
+      "format": "jpeg",
+      "width": 1200,
+      "height": 630,
+      "hasExif": false
+    },
+    {
+      "path": "public/social/pole-parkla-en.jpg",
+      "sha256": "61eb6c4e1c271501461e3319943e8b5a270b7ca7e2d97719a025a8eb1dd3561c",
+      "size": 61780,
+      "format": "jpeg",
+      "width": 1200,
+      "height": 630,
+      "hasExif": false
+    },
+    {
+      "path": "public/social/pole-parkla-ru.jpg",
+      "sha256": "0793c2f0a9b068b5ba0b5e356dabdc794ce5d25dd58309d020111bba4ba87eef",
+      "size": 71336,
+      "format": "jpeg",
+      "width": 1200,
+      "height": 630,
+      "hasExif": false
+    },
+    {
+      "path": "public/apple-touch-icon.png",
+      "sha256": "afa403275b8b4f47aa83fd13feb3c62dbe8aff897178e6b93a7305f8519a0a5b",
+      "size": 5539,
+      "format": "png",
+      "width": 180,
+      "height": 180,
+      "hasExif": false
+    }
+  ]
+}

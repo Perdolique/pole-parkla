@@ -11,6 +11,9 @@ keystore.properties
 captures/
 .DS_Store
 
+# Node local artifacts
+/.pnpm-store/
+
 # Cloudflare Worker
 worker/node_modules/
 worker/.wrangler/

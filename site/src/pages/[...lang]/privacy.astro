@@ -5,6 +5,7 @@ import { getStaticLocalePaths, type LocaleRouteProps } from '../../i18n/config'
 import { ui } from '../../i18n/ui'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate, getPrivacyEntry } from '../../lib/content'
+import { createSeoMetadata } from '../../lib/seo'
 
 export const getStaticPaths = (() => getStaticLocalePaths()) satisfies GetStaticPaths
 
@@ -12,14 +13,18 @@ const { locale } = Astro.props as LocaleRouteProps
 const text = ui[locale]
 const privacyEntry = await getPrivacyEntry(locale)
 const { Content } = await render(privacyEntry)
+const seo = createSeoMetadata({
+  dateModified: privacyEntry.data.lastUpdated.toISOString(),
+  description: text.privacyMeta.description,
+  imageAlt: text.socialImageAlt,
+  locale,
+  pageKind: 'privacy',
+  route: 'privacy',
+  title: text.privacyMeta.title
+})
 ---
 
-<BaseLayout
-  pageTitle={text.privacyMeta.title}
-  metaDescription={text.privacyMeta.description}
-  locale={locale}
-  route="privacy"
->
+<BaseLayout seo={seo}>
   <header class="page-heading">
     <h1>{privacyEntry.data.title}</h1>
     <p>

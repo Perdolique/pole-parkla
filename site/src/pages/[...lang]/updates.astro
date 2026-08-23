@@ -4,13 +4,22 @@ import { render } from 'astro:content'
 import { getStaticLocalePaths, type LocaleRouteProps } from '../../i18n/config'
 import { ui } from '../../i18n/ui'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { formatDate, getPublishedUpdates } from '../../lib/content'
+import { formatDate, getPublishedUpdates, getUpdateAnchor } from '../../lib/content'
+import { createSeoMetadata } from '../../lib/seo'
 
 export const getStaticPaths = (() => getStaticLocalePaths()) satisfies GetStaticPaths
 
 const { locale } = Astro.props as LocaleRouteProps
 const text = ui[locale]
 const updates = await getPublishedUpdates(locale)
+const seo = createSeoMetadata({
+  description: text.updatesMeta.description,
+  imageAlt: text.socialImageAlt,
+  locale,
+  pageKind: 'updates',
+  route: 'updates',
+  title: text.updatesMeta.title
+})
 const renderedUpdates = await Promise.all(updates.map(async (entry) => {
   const { Content } = await render(entry)
 
@@ -21,12 +30,7 @@ const renderedUpdates = await Promise.all(updates.map(async (entry) => {
 }))
 ---
 
-<BaseLayout
-  pageTitle={text.updatesMeta.title}
-  metaDescription={text.updatesMeta.description}
-  locale={locale}
-  route="updates"
->
+<BaseLayout seo={seo}>
   <header class="page-heading">
     <h1>{text.updatesLink}</h1>
     <p>{text.updatesMeta.description}</p>
@@ -36,7 +40,7 @@ const renderedUpdates = await Promise.all(updates.map(async (entry) => {
     {renderedUpdates.length === 0
       ? <p class="empty-state">{text.noUpdates}</p>
       : renderedUpdates.map(({ entry, Content }) => (
-        <article class="update-entry">
+        <article class="update-entry" id={getUpdateAnchor(entry.data.version)}>
           <header>
             <div>
               <p class="version">{entry.data.version}</p>

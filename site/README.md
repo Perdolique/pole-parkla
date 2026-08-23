@@ -8,7 +8,9 @@ Static Astro website for <https://poleparkla.ee>. It contains the public app lan
 pnpm install
 pnpm dev
 pnpm test:typecheck
+pnpm run images:check
 pnpm build
+pnpm run test:seo
 pnpm preview
 ```
 
@@ -74,6 +76,30 @@ The site expects three real Android app screenshots per locale under `public/scr
 Use only approved demonstration values and remove unapproved personal data. Do not commit image-generated UI mockups.
 
 The committed screenshots use UI captured from a connected Android device. Camera and report imagery comes from the Android instrumentation fixture at `../app/src/androidTest/assets/street_plate_test_image.png`, whose main plate reads `003 PUK`. No generated interface elements are included.
+
+The three locale source screenshots generate responsive `420w` and `600w` WebP variants, localized `1200x630` social cards, and the Apple touch icon. After changing a source screenshot, brand asset, card text, or generation script, run:
+
+```sh
+pnpm run images:generate
+pnpm run images:check
+```
+
+Do not edit generated image outputs or `scripts/site-images-manifest.json` by hand. The production build checks that generated files still match their sources and generator.
+
+## SEO and machine discovery
+
+The site publishes these stable discovery endpoints:
+
+- `/robots.txt` for classic and AI crawler policy;
+- `/llms.txt` as a compact agent-oriented site index;
+- `/sitemap-index.xml` for the nine localized canonical HTML pages;
+- `/updates.xml`, `/en/updates.xml`, and `/ru/updates.xml` for localized public release feeds.
+
+Search indexing and real-time AI input are allowed. Model-training crawlers are blocked in the repository policy. Versioned `workers.dev` preview URLs receive `X-Robots-Tag: noindex, nofollow` through `public/_headers`; the production domain must not receive that header.
+
+`pnpm run test:seo` builds the site and verifies canonical URLs, hreflang, Open Graph, X/Twitter metadata, JSON-LD, sitemap, 404 behavior in generated HTML, crawler files, RSS draft filtering, and responsive image references.
+
+After connecting the production Cloudflare zone, keep Managed `robots.txt` disabled, allow AI Search and AI Assistant crawlers in AI Crawl Control, block documented model-training crawlers, and enable Crawler Hints. Enable Markdown for Agents only if the existing plan includes it; do not upgrade solely for that feature.
 
 ## Privacy content
 

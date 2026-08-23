@@ -1,0 +1,5 @@
+/*
+  Content-Signal: search=yes, ai-input=yes, ai-train=no, use=reference
+
+https://:version.:subdomain.workers.dev/*
+  X-Robots-Tag: noindex, nofollow

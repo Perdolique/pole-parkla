@@ -1,10 +1,9 @@
-// @ts-check
 import { copyFile } from 'node:fs/promises'
+import type { AstroIntegration } from 'astro'
 import { defineConfig } from 'astro/config'
 import sitemap from '@astrojs/sitemap'
 
-/** @type {import('astro').AstroIntegration} */
-const localized404Pages = {
+const localized404Pages: AstroIntegration = {
   name: 'localized-404-pages',
   hooks: {
     'astro:build:done': async ({ dir }) => {
@@ -30,7 +29,24 @@ export default defineConfig({
     }
   },
 
-  integrations: [sitemap(), localized404Pages],
+  integrations: [
+    sitemap({
+      filter: (page) => {
+        const pathname = new URL(page).pathname
+
+        return !pathname.includes('/404/') && !pathname.endsWith('.xml')
+      },
+      i18n: {
+        defaultLocale: 'et',
+        locales: {
+          et: 'et-EE',
+          en: 'en-EE',
+          ru: 'ru-EE'
+        }
+      }
+    }),
+    localized404Pages
+  ],
 
   devToolbar: {
     enabled: false

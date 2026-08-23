@@ -20,10 +20,17 @@ const text = ui[locale]
         <div class="screenshot-frame">
           <img
             src={`/screenshots/${locale}/${screenshot.id}.webp`}
+            srcset={[
+              `/screenshots/${locale}/${screenshot.id}-420.webp 420w`,
+              `/screenshots/${locale}/${screenshot.id}-600.webp 600w`,
+              `/screenshots/${locale}/${screenshot.id}.webp 1008w`
+            ].join(', ')}
+            sizes="(max-width: 410px) 78vw, (max-width: 720px) 320px, 302px"
             alt={screenshot.alt}
             width="1008"
             height="2244"
             loading={index === 0 ? 'eager' : 'lazy'}
+            fetchpriority={index === 0 ? 'high' : undefined}
             decoding="async"
           />
         </div>

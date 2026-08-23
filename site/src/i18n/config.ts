@@ -4,6 +4,18 @@ export type Locale = typeof locales[number]
 
 export const defaultLocale: Locale = 'et'
 
+export const localeLanguageTags = {
+  et: 'et-EE',
+  en: 'en-EE',
+  ru: 'ru-EE'
+} as const satisfies Record<Locale, string>
+
+export const openGraphLocales = {
+  et: 'et_EE',
+  en: 'en_EE',
+  ru: 'ru_EE'
+} as const satisfies Record<Locale, string>
+
 export type RouteName = 'home' | 'privacy' | 'updates'
 
 export interface LocaleRouteProps {
@@ -26,6 +38,12 @@ export function getLocalizedPath(locale: Locale, route: RouteName): string {
   const segment = routeSegments[route]
 
   return `/${localePrefix}${segment}`
+}
+
+export function getLocalizedRssPath(locale: Locale): string {
+  const localePrefix = locale === defaultLocale ? '' : `${locale}/`
+
+  return `/${localePrefix}updates.xml`
 }
 
 export function getStaticLocalePaths(): Array<{

@@ -1,5 +1,5 @@
 ---
-import { getLocalizedPath, locales, type Locale, type RouteName } from '../i18n/config'
+import { getLocalizedPath, localeLanguageTags, locales, type Locale, type RouteName } from '../i18n/config'
 import { ui } from '../i18n/ui'
 
 interface Props {
@@ -24,7 +24,7 @@ const labels = {
     <a
       href={getLocalizedPath(targetLocale, route)}
       lang={targetLocale}
-      hreflang={targetLocale}
+      hreflang={localeLanguageTags[targetLocale]}
       aria-current={targetLocale === locale ? 'page' : undefined}
     >
       {labels[targetLocale]}
