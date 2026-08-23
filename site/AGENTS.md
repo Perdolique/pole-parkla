@@ -1,5 +1,6 @@
 # Pole parkla site
 
+- Apply every user-facing site change consistently across all supported locales (`et`, `en`, and `ru`), including localized copy, routes, metadata, and locale-specific assets.
 - Capture website screenshots from the real app on a connected Android device; do not generate, redraw, or manually recreate app UI.
 - Use `../app/src/androidTest/assets/street_plate_test_image.png` as the shared camera/gallery fixture. Its approved plate is `003 PUK`; do not introduce a separate fake vehicle image.
 - A temporary debug-only camera-preview substitution is allowed for screenshot capture, but remove it and reinstall the clean debug APK before finishing.
