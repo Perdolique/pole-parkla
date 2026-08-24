@@ -1,4 +1,4 @@
-# Pole parkla privacy notes
+# Pole parkla! privacy notes
 
 Pole parkla is designed for personal sideload use. It has no account system, analytics, advertising, crash-reporting SDK or background synchronization.
 

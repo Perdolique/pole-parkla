@@ -60,19 +60,19 @@ interface UiText {
 export const ui = {
   et: {
     homeMeta: {
-      title: 'Pole parkla — teade valesti pargitud sõidukist',
+      title: 'Pole parkla! — teade valesti pargitud sõidukist',
       description: 'Androidi rakendus jalgratta- või kõnniteele pargitud sõidukist tõenditega teate ettevalmistamiseks Eestis.'
     },
     privacyMeta: {
-      title: 'Privaatsuspoliitika — Pole parkla',
+      title: 'Privaatsuspoliitika — Pole parkla!',
       description: 'Kuidas Pole parkla töötleb fotosid, asukohta, teateid ja valikulise pilvetuvastuse andmeid.'
     },
     updatesMeta: {
-      title: 'Muudatused — Pole parkla',
+      title: 'Muudatused — Pole parkla!',
       description: 'Pole parkla avalike versioonide muudatused.'
     },
     skipToContent: 'Liigu põhisisu juurde',
-    logoAlt: 'Pole parkla märk',
+    logoAlt: 'Pole parkla! märk',
     navigationLabel: 'Põhinavigatsioon',
     menuLabel: 'Ava menüü',
     languageSwitcherLabel: 'Vali keel',
@@ -132,8 +132,8 @@ export const ui = {
       { id: 'review', label: 'Kontroll', alt: 'Pole parkla teate kontrollvaade' },
       { id: 'report', label: 'Teade', alt: 'Pole parkla valmis teate vaade' }
     ],
-    socialImageAlt: 'Pole parkla märk ja eestikeelne sõiduki kontrollvaade',
-    rssTitle: 'Pole parkla muudatused',
+    socialImageAlt: 'Pole parkla! märk ja eestikeelne sõiduki kontrollvaade',
+    rssTitle: 'Pole parkla! muudatused',
     rssDescription: 'Pole parkla avalike versioonide muudatused eesti keeles.',
     latestReleaseEyebrow: 'Viimane versioon',
     releaseDateLabel: 'Avaldatud',
@@ -146,19 +146,19 @@ export const ui = {
   },
   en: {
     homeMeta: {
-      title: 'Pole parkla — report vehicles blocking paths',
+      title: 'Pole parkla! — report vehicles blocking paths',
       description: 'An Android app for preparing evidence-based reports about vehicles parked on cycle paths or footways in Estonia.'
     },
     privacyMeta: {
-      title: 'Privacy Policy — Pole parkla',
+      title: 'Privacy Policy — Pole parkla!',
       description: 'How Pole parkla handles photos, location, reports, and optional cloud recognition data.'
     },
     updatesMeta: {
-      title: 'Updates — Pole parkla',
+      title: 'Updates — Pole parkla!',
       description: 'Changes in public Pole parkla releases.'
     },
     skipToContent: 'Skip to main content',
-    logoAlt: 'Pole parkla mark',
+    logoAlt: 'Pole parkla! mark',
     navigationLabel: 'Main navigation',
     menuLabel: 'Open menu',
     languageSwitcherLabel: 'Choose language',
@@ -218,8 +218,8 @@ export const ui = {
       { id: 'review', label: 'Review', alt: 'Pole parkla report review view' },
       { id: 'report', label: 'Report', alt: 'Pole parkla prepared report view' }
     ],
-    socialImageAlt: 'Pole parkla mark and an English vehicle review screen',
-    rssTitle: 'Pole parkla updates',
+    socialImageAlt: 'Pole parkla! mark and an English vehicle review screen',
+    rssTitle: 'Pole parkla! updates',
     rssDescription: 'Changes in public Pole parkla releases in English.',
     latestReleaseEyebrow: 'Latest version',
     releaseDateLabel: 'Released',
@@ -232,19 +232,19 @@ export const ui = {
   },
   ru: {
     homeMeta: {
-      title: 'Pole parkla — обращение о машине на дорожке',
+      title: 'Pole parkla! — обращение о машине на дорожке',
       description: 'Android-приложение для подготовки обращения с фотографиями о машине на велодорожке или тротуаре в Эстонии.'
     },
     privacyMeta: {
-      title: 'Политика конфиденциальности — Pole parkla',
+      title: 'Политика конфиденциальности — Pole parkla!',
       description: 'Как Pole parkla обрабатывает фотографии, геолокацию, обращения и данные облачного распознавания.'
     },
     updatesMeta: {
-      title: 'Изменения — Pole parkla',
+      title: 'Изменения — Pole parkla!',
       description: 'Изменения в публичных версиях Pole parkla.'
     },
     skipToContent: 'Перейти к основному содержанию',
-    logoAlt: 'Знак Pole parkla',
+    logoAlt: 'Знак Pole parkla!',
     navigationLabel: 'Основная навигация',
     menuLabel: 'Открыть меню',
     languageSwitcherLabel: 'Выбрать язык',
@@ -304,8 +304,8 @@ export const ui = {
       { id: 'review', label: 'Проверка', alt: 'Экран проверки обращения Pole parkla' },
       { id: 'report', label: 'Обращение', alt: 'Экран готового обращения Pole parkla' }
     ],
-    socialImageAlt: 'Знак Pole parkla и русскоязычный экран проверки автомобиля',
-    rssTitle: 'Изменения Pole parkla',
+    socialImageAlt: 'Знак Pole parkla! и русскоязычный экран проверки автомобиля',
+    rssTitle: 'Изменения Pole parkla!',
     rssDescription: 'Изменения в публичных версиях Pole parkla на русском языке.',
     latestReleaseEyebrow: 'Последняя версия',
     releaseDateLabel: 'Опубликовано',

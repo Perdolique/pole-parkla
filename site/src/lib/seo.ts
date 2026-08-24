@@ -119,7 +119,7 @@ export function buildStructuredData(seo: SeoMetadata): string {
     '@type': 'WebSite',
     '@id': websiteId,
     url: `${siteConfig.siteUrl}/`,
-    name: 'Pole parkla',
+    name: 'Pole parkla!',
     inLanguage: locales.map((locale) => localeLanguageTags[locale]),
     publisher: {
       '@id': personId
@@ -157,7 +157,7 @@ export function buildStructuredData(seo: SeoMetadata): string {
     graph.push({
       '@type': 'MobileApplication',
       '@id': applicationId,
-      name: 'Pole parkla',
+      name: 'Pole parkla!',
       url: `${siteConfig.siteUrl}/`,
       description: seo.description,
       applicationCategory: 'UtilitiesApplication',

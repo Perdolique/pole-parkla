@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatorHash": "fcdf61d5680eee8a74c522cfa717e369e4d45dddc7462ce9030bb8b7aac16241",
+  "generatorHash": "a5c0202cc26f2b97dbbfe2342b4ddc79ad35ffc9673902e51122ae1e573d4f01",
   "sources": [
     {
       "path": "src/assets/brand-mark.png",
@@ -258,8 +258,8 @@
     },
     {
       "path": "public/social/pole-parkla-et.jpg",
-      "sha256": "26e3b6b41272ee86e63e921c13ea0deb5fac419d6a6737f702baf562e48d7d3d",
-      "size": 61488,
+      "sha256": "80bfea6485ee6880833a06536b641f8c0ad93985bab16c01ac18058439a91b4a",
+      "size": 61794,
       "format": "jpeg",
       "width": 1200,
       "height": 630,
@@ -267,8 +267,8 @@
     },
     {
       "path": "public/social/pole-parkla-en.jpg",
-      "sha256": "61eb6c4e1c271501461e3319943e8b5a270b7ca7e2d97719a025a8eb1dd3561c",
-      "size": 61780,
+      "sha256": "2c3422e07e15861bf3e6fd40ccacabf808cbc7d5d5742a6427db59aa9339af3b",
+      "size": 62140,
       "format": "jpeg",
       "width": 1200,
       "height": 630,
@@ -276,8 +276,8 @@
     },
     {
       "path": "public/social/pole-parkla-ru.jpg",
-      "sha256": "0793c2f0a9b068b5ba0b5e356dabdc794ce5d25dd58309d020111bba4ba87eef",
-      "size": 71336,
+      "sha256": "3a78b1b36ce5aca1cb4e9c6d6b041ec7c49830ba1b2e9975f535a84515b9459c",
+      "size": 71706,
       "format": "jpeg",
       "width": 1200,
       "height": 630,

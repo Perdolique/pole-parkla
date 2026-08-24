@@ -1,4 +1,4 @@
-# Pole parkla
+# Pole parkla!
 
 Pole parkla is a private, camera-first Android app for preparing reports about vehicles parked on cycle or pedestrian paths. It stores a local draft after the first photo, combines offline plate evidence from every photo, requires explicit verification of the vehicle and place, and opens a pre-filled Estonian letter with one to three attachments in a chosen mail app.
 

@@ -281,7 +281,7 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           assert.equal(application.screenshot.length, 3)
           assert.equal(application.offers, undefined)
           assert.equal(application.installUrl, undefined)
-          assert.match(html, /<h1[^>]*>Pole parkla<\/h1>/)
+          assert.match(html, /<h1[^>]*>Pole parkla!<\/h1>/)
           assert.equal((html.match(/<h1\b/g) ?? []).length, 1)
           assert.match(html, /<dl\b/)
           const images = getTags(html, 'img')

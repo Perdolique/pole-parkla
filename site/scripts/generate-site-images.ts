@@ -108,7 +108,7 @@ function createSocialTextSvg(locale: Locale): Buffer {
         .tagline { fill: #f3f5ef; font-size: 46px; font-weight: 700; letter-spacing: -1.2px; }
         .footer { fill: #d8ff63; font-size: 24px; font-weight: 650; letter-spacing: 0.4px; }
       </style>
-      <text x="192" y="126" class="brand">Pole parkla</text>
+      <text x="192" y="126" class="brand">Pole parkla!</text>
       <rect x="72" y="178" width="112" height="6" rx="3" fill="#d8ff63" />
       ${lineElements}
       <text x="72" y="548" class="footer">${escapeXml(text.footer)}</text>

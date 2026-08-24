@@ -1,4 +1,4 @@
-# Pole parkla website
+# Pole parkla! website
 
 Static Astro website for <https://poleparkla.ee>. It contains the public app landing page, localized release notes, and the public privacy policy required by Google Play.
 
