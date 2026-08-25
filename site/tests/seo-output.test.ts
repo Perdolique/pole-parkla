@@ -320,6 +320,17 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
 
           assert.ok(googlePlayLink, `Missing Google Play link for ${locale}`)
           assert.ok(googlePlayBadge, `Missing localized Google Play badge for ${locale}`)
+          const googlePlayBadgeClass = googlePlayBadge.get('class') ?? ''
+
+          assert.match(googlePlayBadgeClass, /(?:^|\s)google-play-badge(?:\s|$)/)
+
+          if (locale === 'en') {
+            assert.match(googlePlayBadgeClass, /(?:^|\s)google-play-badge--padded(?:\s|$)/)
+            assert.match(html, /\.google-play-badge--padded[^}]*\{width:206px\}/)
+          } else {
+            assert.doesNotMatch(googlePlayBadgeClass, /google-play-badge--padded/)
+          }
+
           assert.deepEqual(
             [...googlePlayBadgeOutput.subarray(0, 8)],
             [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
