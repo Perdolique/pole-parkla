@@ -57,13 +57,11 @@ Published versions must exist in all three locales. The build fails when a non-d
 
 ## Store and source links
 
-External links live in `src/config.ts`. `googlePlay` and `sourceUrl` are `null` until the public destinations exist, so the site does not render placeholder links.
+External links live in `src/config.ts`. The Google Play entry contains the canonical listing URL and locale-specific badge paths; `sourceUrl` stays `null` until a public source destination exists.
 
-When the Google Play listing is public:
+Keep unmodified localized Google Play badges under `public/google-play/`. Before deploying a configured store link, verify the listing opens for a signed-out visitor rather than relying on its authenticated Play Console preview.
 
-1. Download unmodified localized badges from the official Google Play badge generator.
-2. Store them under `public/google-play/`.
-3. Configure the listing URL and the ET, EN, and RU badge paths in `src/config.ts`.
+When replacing the listing or badges, update the URL and all ET, EN, and RU badge paths together in `src/config.ts`.
 
 ## Screenshots
 

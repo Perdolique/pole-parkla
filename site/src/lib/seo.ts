@@ -164,6 +164,7 @@ export function buildStructuredData(seo: SeoMetadata): string {
       operatingSystem: 'Android',
       countriesSupported: 'EE',
       inLanguage: localeLanguageTags[seo.locale],
+      installUrl: siteConfig.googlePlay?.url,
       screenshot: ['camera', 'review', 'report'].map((id) =>
         new URL(`/screenshots/${seo.locale}/${id}.webp`, siteConfig.siteUrl).toString()
       ),

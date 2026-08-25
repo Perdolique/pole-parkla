@@ -8,6 +8,8 @@ type Locale = 'et' | 'en' | 'ru'
 type PageName = 'home' | 'privacy' | 'updates'
 
 interface LocaleData {
+  readonly googlePlayAlt: string
+  readonly googlePlayBadge: string
   readonly htmlLanguage: string
   readonly languageTag: string
   readonly openGraphLocale: string
@@ -34,10 +36,13 @@ interface StructuredData {
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distRoot = path.join(siteRoot, 'dist')
 const siteUrl = 'https://poleparkla.ee'
+const googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.perdolique.poleparkla'
 const personId = `${siteUrl}/#person`
 const screenshotSizes = '(max-width: 387px) calc(78vw - 2px), 300px'
 const localeConfig = {
   et: {
+    googlePlayAlt: 'Laadi alla Google Playst',
+    googlePlayBadge: '/google-play/et_badge_web_generic.png',
     htmlLanguage: 'et',
     languageTag: 'et-EE',
     openGraphLocale: 'et_EE',
@@ -46,6 +51,8 @@ const localeConfig = {
     rss: `${siteUrl}/updates.xml`
   },
   en: {
+    googlePlayAlt: 'Get it on Google Play',
+    googlePlayBadge: '/google-play/en_badge_web_generic.png',
     htmlLanguage: 'en',
     languageTag: 'en-EE',
     openGraphLocale: 'en_EE',
@@ -54,6 +61,8 @@ const localeConfig = {
     rss: `${siteUrl}/en/updates.xml`
   },
   ru: {
+    googlePlayAlt: 'Доступно в Google Play',
+    googlePlayBadge: '/google-play/ru_badge_web_generic.png',
     htmlLanguage: 'ru',
     languageTag: 'ru-EE',
     openGraphLocale: 'ru_EE',
@@ -280,7 +289,7 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           assert.ok(Array.isArray(application.screenshot))
           assert.equal(application.screenshot.length, 3)
           assert.equal(application.offers, undefined)
-          assert.equal(application.installUrl, undefined)
+          assert.equal(application.installUrl, googlePlayUrl)
           assert.match(html, /<h1[^>]*>Pole parkla!<\/h1>/)
           assert.equal((html.match(/<h1\b/g) ?? []).length, 1)
           assert.match(html, /<dl\b/)
@@ -294,6 +303,28 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           assert.match(brandImage.get('src') ?? '', /^\/_astro\/brand-mark\..+\.webp$/)
           assert.match(brandImage.get('srcset') ?? '', / 1x,.* 2x,.* 3x/)
           assert.equal(brandImage.get('loading'), 'eager')
+
+          const googlePlayLink = findTag(html, 'a', {
+            href: googlePlayUrl,
+            rel: 'noreferrer'
+          })
+          const googlePlayBadge = findTag(html, 'img', {
+            alt: localeData.googlePlayAlt,
+            height: '250',
+            src: localeData.googlePlayBadge,
+            width: '646'
+          })
+          const googlePlayBadgeOutput = await readFile(
+            path.join(distRoot, localeData.googlePlayBadge.slice(1))
+          )
+
+          assert.ok(googlePlayLink, `Missing Google Play link for ${locale}`)
+          assert.ok(googlePlayBadge, `Missing localized Google Play badge for ${locale}`)
+          assert.deepEqual(
+            [...googlePlayBadgeOutput.subarray(0, 8)],
+            [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+            `Invalid Google Play PNG for ${locale}`
+          )
 
           const cameraImage = findTag(html, 'img', {
             src: `/screenshots/${locale}/camera.webp`
@@ -408,6 +439,7 @@ test('crawler and cache policies protect discovery and static assets', async () 
   assert.doesNotMatch(headers.split('\n\n')[0] ?? '', /Cache-Control/)
   assert.match(headers, /workers\.dev\/\*\n\s+X-Robots-Tag: noindex, nofollow/)
   assert.match(llms, /Pole parkla does not send reports/)
+  assert.ok(llms.includes(googlePlayUrl))
   assert.match(llms, /Search indexing and real-time AI input are allowed/)
 
   for (const locale of locales) {
