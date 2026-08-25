@@ -3,6 +3,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test, { type TestContext } from 'node:test'
+import sharp from 'sharp'
 
 type Locale = 'et' | 'en' | 'ru'
 type PageName = 'home' | 'privacy' | 'updates'
@@ -317,20 +318,23 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           const googlePlayBadgeOutput = await readFile(
             path.join(distRoot, localeData.googlePlayBadge.slice(1))
           )
+          const googlePlayBadgeMetadata = await sharp(googlePlayBadgeOutput).metadata()
+          const googlePlayBadgeVisible = await sharp(googlePlayBadgeOutput)
+            .trim({ threshold: 0 })
+            .toBuffer({ resolveWithObject: true })
 
           assert.ok(googlePlayLink, `Missing Google Play link for ${locale}`)
           assert.ok(googlePlayBadge, `Missing localized Google Play badge for ${locale}`)
           const googlePlayBadgeClass = googlePlayBadge.get('class') ?? ''
 
           assert.match(googlePlayBadgeClass, /(?:^|\s)google-play-badge(?:\s|$)/)
-
-          if (locale === 'en') {
-            assert.match(googlePlayBadgeClass, /(?:^|\s)google-play-badge--padded(?:\s|$)/)
-            assert.match(html, /\.google-play-badge--padded[^}]*\{width:206px\}/)
-          } else {
-            assert.doesNotMatch(googlePlayBadgeClass, /google-play-badge--padded/)
-          }
-
+          assert.match(html, /\.google-play-badge[^}]*\{[^}]*width:206px[^}]*\}/)
+          assert.equal(googlePlayBadgeMetadata.width, 646)
+          assert.equal(googlePlayBadgeMetadata.height, 250)
+          assert.equal(googlePlayBadgeVisible.info.width, 564)
+          assert.equal(googlePlayBadgeVisible.info.height, 168)
+          assert.equal(googlePlayBadgeVisible.info.trimOffsetLeft, -41)
+          assert.equal(googlePlayBadgeVisible.info.trimOffsetTop, -41)
           assert.deepEqual(
             [...googlePlayBadgeOutput.subarray(0, 8)],
             [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],

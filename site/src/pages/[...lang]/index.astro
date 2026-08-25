@@ -32,10 +32,7 @@ const seo = createSeoMetadata({
     {siteConfig.googlePlay && (
       <a class="google-play-link" href={siteConfig.googlePlay.url} rel="noreferrer">
         <img
-          class:list={[
-            'google-play-badge',
-            { 'google-play-badge--padded': locale === 'en' }
-          ]}
+          class="google-play-badge"
           src={siteConfig.googlePlay.badgePaths[locale]}
           width="646"
           height="250"
@@ -113,12 +110,8 @@ const seo = createSeoMetadata({
 
   .google-play-badge {
     display: block;
-    width: 180px;
-    height: auto;
-  }
-
-  .google-play-badge--padded {
     width: 206px;
+    height: auto;
   }
 
   .home-section,

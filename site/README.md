@@ -59,9 +59,9 @@ Published versions must exist in all three locales. The build fails when a non-d
 
 External links live in `src/config.ts`. The Google Play entry contains the canonical listing URL and locale-specific badge paths; `sourceUrl` stays `null` until a public source destination exists.
 
-Keep unmodified localized Google Play badges under `public/google-play/`. Before deploying a configured store link, verify the listing opens for a signed-out visitor rather than relying on its authenticated Play Console preview.
+Keep localized Google Play badges under `public/google-play/` on a common `646x250` transparent canvas. The complete badge artwork must occupy a centered `564x168` area, leaving `41px` on every side; resize the artwork as a whole without changing or rearranging its elements. Before deploying a configured store link, verify the listing opens for a signed-out visitor rather than relying on its authenticated Play Console preview.
 
-When replacing the listing or badges, update the URL and all ET, EN, and RU badge paths together in `src/config.ts`.
+When replacing the listing or badges, normalize all three assets together and update the URL and all ET, EN, and RU badge paths together in `src/config.ts`.
 
 ## Screenshots
 
