@@ -24,3 +24,7 @@ worker/*.cpuprofile
 
 # Android local artifacts
 app/release/
+
+# Xcode user-local state
+**/xcuserdata/
+*.xcuserstate
