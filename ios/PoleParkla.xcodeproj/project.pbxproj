@@ -1,0 +1,762 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04857AAAA7BDBC8C75EAF298 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = E3DAC867C2262E9D8C6B6E7E /* MapLibre */; };
+		05624CBF2D1CAD55F9A7C13B /* Mail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72367BF9BA5B9735D5823946 /* Mail.swift */; };
+		083064FD8818AF221FA01A80 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B31E33D5D3AB02EF4E9276E /* Foundation.framework */; };
+		0FDC7C51355C2532904A6FF7 /* PhotoStoreIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715A4F737608FEB900C65774 /* PhotoStoreIntegrationTests.swift */; };
+		16B3E73FFD122D02D6878E14 /* PhotoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F4B47DC1B6CF74B0D9FF01 /* PhotoStore.swift */; };
+		1B24A3C968F6A9FB0F2E7E30 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E73981F3E4AB4A32846F35 /* AppModel.swift */; };
+		2FD617D9B711BFC5C7227B5F /* PoleParklaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C52CD25AA30C9AB630966A /* PoleParklaApp.swift */; };
+		30CF2E1FB15E248CA9553B8D /* HistoryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9ED0B3D99175DDEF5E1FA34 /* HistoryScreen.swift */; };
+		35649C44A96D308644D5B2B3 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C4B163781826BCBF28D8A97E /* PrivacyInfo.xcprivacy */; };
+		35FFD5A32519DF6550B7D1DD /* street_plate_test_image.png in Resources */ = {isa = PBXBuildFile; fileRef = A51321F6C519C396650C51A5 /* street_plate_test_image.png */; };
+		381BB912A1D82B9FE8F1C91B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20545C680BDC4771D1615583 /* OnboardingView.swift */; };
+		450DE85AB1AD97F8FD225B7E /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F381FDCB83B26299DC4B035 /* Camera.swift */; };
+		4EBA15A2C34E5669CBE556EE /* Recognition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5D414FFC57A63431DF7496 /* Recognition.swift */; };
+		52367A74866752A163FACD51 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B31E33D5D3AB02EF4E9276E /* Foundation.framework */; };
+		536BBDE781422C50970C5233 /* ReportRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5C12C202C67E3C5B7C9A6C /* ReportRules.swift */; };
+		67B9D9ECC3BC2F9FBF547AF0 /* ReportWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D140EE8D87AE5A1EE86144B /* ReportWizardView.swift */; };
+		681CF0703086A6B8CCDB33D1 /* ankandrew-models-MIT.txt in Resources */ = {isa = PBXBuildFile; fileRef = C40BD75792501497AFCA5CDD /* ankandrew-models-MIT.txt */; };
+		745A5764A225027C414920E6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B31E33D5D3AB02EF4E9276E /* Foundation.framework */; };
+		8202F42F43FB351DE20742A4 /* onnxruntime in Frameworks */ = {isa = PBXBuildFile; productRef = 9F41D82F243BBB57FDFC69F7 /* onnxruntime */; };
+		8423B5882521536D21C98480 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21D1E51408504948BB3D69D /* Models.swift */; };
+		87A0F3BEC0F5E68E27DB68B0 /* TestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5EBC6BDF6BDFED525AEB6C /* TestFixtures.swift */; };
+		89B7347E78EB0C4043FD4C98 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037C0BBD209F000606558B18 /* SettingsScreen.swift */; };
+		89E33415B356E634FA19683E /* PersistenceContractsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D857316FD1C71A507FDD7F7C /* PersistenceContractsTests.swift */; };
+		8A400AF22F860CF60E8972A0 /* DomainContractsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B4D02F3D3B4434A9CE0F6B /* DomainContractsTests.swift */; };
+		9E18A1FE1B199290CE17C105 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04320DD4A396AC4A26C7E673 /* SettingsStore.swift */; };
+		BF857FD137D3B490699B3915 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA47F0EF1206119223403A /* Persistence.swift */; };
+		C809BF3A7682EA0198B4F617 /* PoleParklaUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685A0F3C233EE6A9E32371E4 /* PoleParklaUITests.swift */; };
+		D43F1427ACE78D3D805FA770 /* LocationAndNetwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321CAD1664DCFD18B552B198 /* LocationAndNetwork.swift */; };
+		DCACCC1CAE4155FC864EEBBE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 09161530AF1788309787D011 /* Assets.xcassets */; };
+		DE3B4D7C54F3A528F5B982B5 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 17F0D2EC0A634452CCF199A2 /* Localizable.xcstrings */; };
+		E4D22746CA4B4E5EA3919384 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1EBCDCED0B4825B9B95304 /* InfoPlist.xcstrings */; };
+		E69DDC7379EFC1404D5A05D1 /* CameraScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED8A31AABB10E796AB24580 /* CameraScreen.swift */; };
+		EB4C17E4E99BCD48E04563B5 /* Design.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1C1E7639EA6FD1854C018A /* Design.swift */; };
+		ED472BFC573BFAB7040A7399 /* ServiceContractsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BA62D790AFE3B8D33AE739B /* ServiceContractsTests.swift */; };
+		F57B315C8BA6D9D2654EE4DA /* cct_s_v2_global.onnx in Resources */ = {isa = PBXBuildFile; fileRef = 466669F2F341B0E85DE11D3E /* cct_s_v2_global.onnx */; };
+		F99ECB360B3218DD7AE6DBAA /* MapPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E67E9C5D5BE5346136422610 /* MapPicker.swift */; };
+		FAADB9A06922C091B11DAAE9 /* yolo-v9-t-512-license-plates-end2end.onnx in Resources */ = {isa = PBXBuildFile; fileRef = B33F311A86816E40752138B5 /* yolo-v9-t-512-license-plates-end2end.onnx */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		204126D0EE037651485001A1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA4B21BAEFC0C026F932E9B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 34F718879A610EF3C90957CC;
+			remoteInfo = PoleParkla;
+		};
+		E15BE95352923211FD3A30C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA4B21BAEFC0C026F932E9B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 34F718879A610EF3C90957CC;
+			remoteInfo = PoleParkla;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		037C0BBD209F000606558B18 /* SettingsScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SettingsScreen.swift; path = PoleParkla/UI/SettingsScreen.swift; sourceTree = "<group>"; };
+		04320DD4A396AC4A26C7E673 /* SettingsStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SettingsStore.swift; path = PoleParkla/Data/SettingsStore.swift; sourceTree = "<group>"; };
+		09161530AF1788309787D011 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = PoleParkla/Resources/Assets.xcassets; sourceTree = "<group>"; };
+		0F1C1E7639EA6FD1854C018A /* Design.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Design.swift; path = PoleParkla/UI/Design.swift; sourceTree = "<group>"; };
+		17F0D2EC0A634452CCF199A2 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; name = Localizable.xcstrings; path = PoleParkla/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
+		6E1EBCDCED0B4825B9B95304 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; name = InfoPlist.xcstrings; path = PoleParkla/Resources/InfoPlist.xcstrings; sourceTree = "<group>"; };
+		1BA62D790AFE3B8D33AE739B /* ServiceContractsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ServiceContractsTests.swift; path = PoleParklaTests/ServiceContractsTests.swift; sourceTree = "<group>"; };
+		20545C680BDC4771D1615583 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingView.swift; path = PoleParkla/UI/OnboardingView.swift; sourceTree = "<group>"; };
+		2B31E33D5D3AB02EF4E9276E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		2D140EE8D87AE5A1EE86144B /* ReportWizardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ReportWizardView.swift; path = PoleParkla/UI/ReportWizardView.swift; sourceTree = "<group>"; };
+		321CAD1664DCFD18B552B198 /* LocationAndNetwork.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LocationAndNetwork.swift; path = PoleParkla/Services/LocationAndNetwork.swift; sourceTree = "<group>"; };
+		43EA47F0EF1206119223403A /* Persistence.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Persistence.swift; path = PoleParkla/Data/Persistence.swift; sourceTree = "<group>"; };
+		466669F2F341B0E85DE11D3E /* cct_s_v2_global.onnx */ = {isa = PBXFileReference; includeInIndex = 1; name = cct_s_v2_global.onnx; path = ../app/src/main/assets/models/cct_s_v2_global.onnx; sourceTree = "<group>"; };
+		4F381FDCB83B26299DC4B035 /* Camera.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Camera.swift; path = PoleParkla/Services/Camera.swift; sourceTree = "<group>"; };
+		685A0F3C233EE6A9E32371E4 /* PoleParklaUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PoleParklaUITests.swift; path = PoleParklaUITests/PoleParklaUITests.swift; sourceTree = "<group>"; };
+		6DBA13D8315FD291B428A2EF /* PoleParkla.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PoleParkla.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6E5C12C202C67E3C5B7C9A6C /* ReportRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ReportRules.swift; path = PoleParkla/Domain/ReportRules.swift; sourceTree = "<group>"; };
+		715A4F737608FEB900C65774 /* PhotoStoreIntegrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PhotoStoreIntegrationTests.swift; path = PoleParklaTests/PhotoStoreIntegrationTests.swift; sourceTree = "<group>"; };
+		72367BF9BA5B9735D5823946 /* Mail.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Mail.swift; path = PoleParkla/Services/Mail.swift; sourceTree = "<group>"; };
+		7BCAFE0D733CFCF8CE4340B1 /* PoleParklaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PoleParklaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		86F4B47DC1B6CF74B0D9FF01 /* PhotoStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PhotoStore.swift; path = PoleParkla/Services/PhotoStore.swift; sourceTree = "<group>"; };
+		A51321F6C519C396650C51A5 /* street_plate_test_image.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = street_plate_test_image.png; path = ../app/src/androidTest/assets/street_plate_test_image.png; sourceTree = "<group>"; };
+		A7C52CD25AA30C9AB630966A /* PoleParklaApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PoleParklaApp.swift; path = PoleParkla/App/PoleParklaApp.swift; sourceTree = "<group>"; };
+		AEEAD0A6C81113E8D293CB74 /* PoleParklaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PoleParklaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF5EBC6BDF6BDFED525AEB6C /* TestFixtures.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TestFixtures.swift; path = PoleParklaTests/TestFixtures.swift; sourceTree = "<group>"; };
+		B2B4D02F3D3B4434A9CE0F6B /* DomainContractsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DomainContractsTests.swift; path = PoleParklaTests/DomainContractsTests.swift; sourceTree = "<group>"; };
+		B33F311A86816E40752138B5 /* yolo-v9-t-512-license-plates-end2end.onnx */ = {isa = PBXFileReference; includeInIndex = 1; name = "yolo-v9-t-512-license-plates-end2end.onnx"; path = "../app/src/main/assets/models/yolo-v9-t-512-license-plates-end2end.onnx"; sourceTree = "<group>"; };
+		B9ED0B3D99175DDEF5E1FA34 /* HistoryScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HistoryScreen.swift; path = PoleParkla/UI/HistoryScreen.swift; sourceTree = "<group>"; };
+		C40BD75792501497AFCA5CDD /* ankandrew-models-MIT.txt */ = {isa = PBXFileReference; includeInIndex = 1; name = "ankandrew-models-MIT.txt"; path = "../app/src/main/assets/licenses/ankandrew-models-MIT.txt"; sourceTree = "<group>"; };
+		C4B163781826BCBF28D8A97E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = PoleParkla/Resources/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		D857316FD1C71A507FDD7F7C /* PersistenceContractsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PersistenceContractsTests.swift; path = PoleParklaTests/PersistenceContractsTests.swift; sourceTree = "<group>"; };
+		DED8A31AABB10E796AB24580 /* CameraScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CameraScreen.swift; path = PoleParkla/UI/CameraScreen.swift; sourceTree = "<group>"; };
+		DF5D414FFC57A63431DF7496 /* Recognition.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Recognition.swift; path = PoleParkla/Services/Recognition.swift; sourceTree = "<group>"; };
+		E67E9C5D5BE5346136422610 /* MapPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MapPicker.swift; path = PoleParkla/UI/MapPicker.swift; sourceTree = "<group>"; };
+		F21D1E51408504948BB3D69D /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Models.swift; path = PoleParkla/Domain/Models.swift; sourceTree = "<group>"; };
+		F5E73981F3E4AB4A32846F35 /* AppModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppModel.swift; path = PoleParkla/App/AppModel.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2182A7F6A9778CE4C91D8289 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				745A5764A225027C414920E6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		32D107F27B38BB5086E1E19B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				083064FD8818AF221FA01A80 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73DFB87EBEBAA96D4FE826E4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52367A74866752A163FACD51 /* Foundation.framework in Frameworks */,
+				8202F42F43FB351DE20742A4 /* onnxruntime in Frameworks */,
+				04857AAAA7BDBC8C75EAF298 /* MapLibre in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		350D017EC20B70E8873539AF /* Shared Model Assets */ = {
+			isa = PBXGroup;
+			children = (
+				B33F311A86816E40752138B5 /* yolo-v9-t-512-license-plates-end2end.onnx */,
+				466669F2F341B0E85DE11D3E /* cct_s_v2_global.onnx */,
+				C40BD75792501497AFCA5CDD /* ankandrew-models-MIT.txt */,
+			);
+			name = "Shared Model Assets";
+			sourceTree = "<group>";
+		};
+		4D4CC0857F038B637ECAFA5E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6DBA13D8315FD291B428A2EF /* PoleParkla.app */,
+				AEEAD0A6C81113E8D293CB74 /* PoleParklaTests.xctest */,
+				7BCAFE0D733CFCF8CE4340B1 /* PoleParklaUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		58FDC843C25CE1B1582308FE = {
+			isa = PBXGroup;
+			children = (
+				4D4CC0857F038B637ECAFA5E /* Products */,
+				8DF00C3EE1E551ABB000878A /* Frameworks */,
+				6C3468DA901B1126996ABD9C /* PoleParkla */,
+				350D017EC20B70E8873539AF /* Shared Model Assets */,
+				7781F3B32D22616E23632496 /* PoleParklaTests */,
+				F1C9B33EB05E149E1E15B80C /* PoleParklaUITests */,
+				A51321F6C519C396650C51A5 /* street_plate_test_image.png */,
+			);
+			sourceTree = "<group>";
+		};
+		6C3468DA901B1126996ABD9C /* PoleParkla */ = {
+			isa = PBXGroup;
+			children = (
+				F5E73981F3E4AB4A32846F35 /* AppModel.swift */,
+				A7C52CD25AA30C9AB630966A /* PoleParklaApp.swift */,
+				43EA47F0EF1206119223403A /* Persistence.swift */,
+				04320DD4A396AC4A26C7E673 /* SettingsStore.swift */,
+				F21D1E51408504948BB3D69D /* Models.swift */,
+				6E5C12C202C67E3C5B7C9A6C /* ReportRules.swift */,
+				4F381FDCB83B26299DC4B035 /* Camera.swift */,
+				321CAD1664DCFD18B552B198 /* LocationAndNetwork.swift */,
+				72367BF9BA5B9735D5823946 /* Mail.swift */,
+				86F4B47DC1B6CF74B0D9FF01 /* PhotoStore.swift */,
+				DF5D414FFC57A63431DF7496 /* Recognition.swift */,
+				DED8A31AABB10E796AB24580 /* CameraScreen.swift */,
+				0F1C1E7639EA6FD1854C018A /* Design.swift */,
+				B9ED0B3D99175DDEF5E1FA34 /* HistoryScreen.swift */,
+				E67E9C5D5BE5346136422610 /* MapPicker.swift */,
+				20545C680BDC4771D1615583 /* OnboardingView.swift */,
+				2D140EE8D87AE5A1EE86144B /* ReportWizardView.swift */,
+				037C0BBD209F000606558B18 /* SettingsScreen.swift */,
+				A35FFABEC29D62648BAB2328 /* Resources */,
+			);
+			name = PoleParkla;
+			sourceTree = "<group>";
+		};
+		7470BA3AA0933A3CF16C370F /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				2B31E33D5D3AB02EF4E9276E /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		7781F3B32D22616E23632496 /* PoleParklaTests */ = {
+			isa = PBXGroup;
+			children = (
+				B2B4D02F3D3B4434A9CE0F6B /* DomainContractsTests.swift */,
+				D857316FD1C71A507FDD7F7C /* PersistenceContractsTests.swift */,
+				715A4F737608FEB900C65774 /* PhotoStoreIntegrationTests.swift */,
+				1BA62D790AFE3B8D33AE739B /* ServiceContractsTests.swift */,
+				AF5EBC6BDF6BDFED525AEB6C /* TestFixtures.swift */,
+			);
+			name = PoleParklaTests;
+			sourceTree = "<group>";
+		};
+		8DF00C3EE1E551ABB000878A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7470BA3AA0933A3CF16C370F /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A35FFABEC29D62648BAB2328 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				09161530AF1788309787D011 /* Assets.xcassets */,
+				6E1EBCDCED0B4825B9B95304 /* InfoPlist.xcstrings */,
+				17F0D2EC0A634452CCF199A2 /* Localizable.xcstrings */,
+				C4B163781826BCBF28D8A97E /* PrivacyInfo.xcprivacy */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		F1C9B33EB05E149E1E15B80C /* PoleParklaUITests */ = {
+			isa = PBXGroup;
+			children = (
+				685A0F3C233EE6A9E32371E4 /* PoleParklaUITests.swift */,
+			);
+			name = PoleParklaUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		34F718879A610EF3C90957CC /* PoleParkla */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2BC73841E1059BD9E4813142 /* Build configuration list for PBXNativeTarget "PoleParkla" */;
+			buildPhases = (
+				69A5C898BDF8681380A4DED8 /* Sources */,
+				73DFB87EBEBAA96D4FE826E4 /* Frameworks */,
+				DC96E792AEC051172398408F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PoleParkla;
+			packageProductDependencies = (
+				9F41D82F243BBB57FDFC69F7 /* onnxruntime */,
+				E3DAC867C2262E9D8C6B6E7E /* MapLibre */,
+			);
+			productName = PoleParkla;
+			productReference = 6DBA13D8315FD291B428A2EF /* PoleParkla.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7E03D40E9CD5F6053973AED1 /* PoleParklaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A14638B910F211E1E57B4BDC /* Build configuration list for PBXNativeTarget "PoleParklaTests" */;
+			buildPhases = (
+				14C17297987914BCB507FC8C /* Sources */,
+				32D107F27B38BB5086E1E19B /* Frameworks */,
+				BDFEEAB8F0597AD147C39C1C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				82E0FD97C8A3849A35654B66 /* PBXTargetDependency */,
+			);
+			name = PoleParklaTests;
+			productName = PoleParklaTests;
+			productReference = AEEAD0A6C81113E8D293CB74 /* PoleParklaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D95BBBD4BDB3EFBC8AFD7837 /* PoleParklaUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A316F96D8F716F2186777084 /* Build configuration list for PBXNativeTarget "PoleParklaUITests" */;
+			buildPhases = (
+				8AE09274B1097B4F2402674C /* Sources */,
+				2182A7F6A9778CE4C91D8289 /* Frameworks */,
+				31DC04540F14A4F8FC2BCA74 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ADA9D688E28A54B51E20EA0C /* PBXTargetDependency */,
+			);
+			name = PoleParklaUITests;
+			productName = PoleParklaUITests;
+			productReference = 7BCAFE0D733CFCF8CE4340B1 /* PoleParklaUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA4B21BAEFC0C026F932E9B3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+			};
+			buildConfigurationList = 92F9F45A225AA3EF855CA8D5 /* Build configuration list for PBXProject "PoleParkla" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 58FDC843C25CE1B1582308FE;
+			packageReferences = (
+				F217CD6EE2192040A39B5004 /* XCRemoteSwiftPackageReference "onnxruntime-swift-package-manager" */,
+				D73FC999751261BB5F4A5D1A /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
+			);
+			productRefGroup = 4D4CC0857F038B637ECAFA5E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				34F718879A610EF3C90957CC /* PoleParkla */,
+				7E03D40E9CD5F6053973AED1 /* PoleParklaTests */,
+				D95BBBD4BDB3EFBC8AFD7837 /* PoleParklaUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		31DC04540F14A4F8FC2BCA74 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BDFEEAB8F0597AD147C39C1C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				35FFD5A32519DF6550B7D1DD /* street_plate_test_image.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DC96E792AEC051172398408F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCACCC1CAE4155FC864EEBBE /* Assets.xcassets in Resources */,
+				E4D22746CA4B4E5EA3919384 /* InfoPlist.xcstrings in Resources */,
+				DE3B4D7C54F3A528F5B982B5 /* Localizable.xcstrings in Resources */,
+				35649C44A96D308644D5B2B3 /* PrivacyInfo.xcprivacy in Resources */,
+				FAADB9A06922C091B11DAAE9 /* yolo-v9-t-512-license-plates-end2end.onnx in Resources */,
+				F57B315C8BA6D9D2654EE4DA /* cct_s_v2_global.onnx in Resources */,
+				681CF0703086A6B8CCDB33D1 /* ankandrew-models-MIT.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		14C17297987914BCB507FC8C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A400AF22F860CF60E8972A0 /* DomainContractsTests.swift in Sources */,
+				89E33415B356E634FA19683E /* PersistenceContractsTests.swift in Sources */,
+				0FDC7C51355C2532904A6FF7 /* PhotoStoreIntegrationTests.swift in Sources */,
+				ED472BFC573BFAB7040A7399 /* ServiceContractsTests.swift in Sources */,
+				87A0F3BEC0F5E68E27DB68B0 /* TestFixtures.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		69A5C898BDF8681380A4DED8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1B24A3C968F6A9FB0F2E7E30 /* AppModel.swift in Sources */,
+				2FD617D9B711BFC5C7227B5F /* PoleParklaApp.swift in Sources */,
+				BF857FD137D3B490699B3915 /* Persistence.swift in Sources */,
+				9E18A1FE1B199290CE17C105 /* SettingsStore.swift in Sources */,
+				8423B5882521536D21C98480 /* Models.swift in Sources */,
+				536BBDE781422C50970C5233 /* ReportRules.swift in Sources */,
+				450DE85AB1AD97F8FD225B7E /* Camera.swift in Sources */,
+				D43F1427ACE78D3D805FA770 /* LocationAndNetwork.swift in Sources */,
+				05624CBF2D1CAD55F9A7C13B /* Mail.swift in Sources */,
+				16B3E73FFD122D02D6878E14 /* PhotoStore.swift in Sources */,
+				4EBA15A2C34E5669CBE556EE /* Recognition.swift in Sources */,
+				E69DDC7379EFC1404D5A05D1 /* CameraScreen.swift in Sources */,
+				EB4C17E4E99BCD48E04563B5 /* Design.swift in Sources */,
+				30CF2E1FB15E248CA9553B8D /* HistoryScreen.swift in Sources */,
+				F99ECB360B3218DD7AE6DBAA /* MapPicker.swift in Sources */,
+				381BB912A1D82B9FE8F1C91B /* OnboardingView.swift in Sources */,
+				67B9D9ECC3BC2F9FBF547AF0 /* ReportWizardView.swift in Sources */,
+				89B7347E78EB0C4043FD4C98 /* SettingsScreen.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8AE09274B1097B4F2402674C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C809BF3A7682EA0198B4F617 /* PoleParklaUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		82E0FD97C8A3849A35654B66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = PoleParkla;
+			target = 34F718879A610EF3C90957CC /* PoleParkla */;
+			targetProxy = E15BE95352923211FD3A30C4 /* PBXContainerItemProxy */;
+		};
+		ADA9D688E28A54B51E20EA0C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = PoleParkla;
+			target = 34F718879A610EF3C90957CC /* PoleParkla */;
+			targetProxy = 204126D0EE037651485001A1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		17F4EE4F2D4447421BE04B7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		38152AE9D2D937B2609E7D81 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_TESTABILITY = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.perdolique.poleparkla.uitests;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = PoleParkla;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		40994F032F72F2EDCCD12818 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_FILE = PoleParkla/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.perdolique.poleparkla;
+				PRODUCT_NAME = PoleParkla;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		52DAEC34B2E42D1F539FDD2A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.perdolique.poleparkla.tests;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PoleParkla.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PoleParkla";
+			};
+			name = Debug;
+		};
+		88827B80D1994C78034306C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_TESTABILITY = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.perdolique.poleparkla.tests;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PoleParkla.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PoleParkla";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9A913378B22A41EA9F67C411 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.perdolique.poleparkla.uitests;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = PoleParkla;
+			};
+			name = Debug;
+		};
+		B3AC1CECA0FB9111757AA43B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_TESTABILITY = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_FILE = PoleParkla/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.perdolique.poleparkla;
+				PRODUCT_NAME = PoleParkla;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F36D3BDC18079A77C44DF302 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2BC73841E1059BD9E4813142 /* Build configuration list for PBXNativeTarget "PoleParkla" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B3AC1CECA0FB9111757AA43B /* Release */,
+				40994F032F72F2EDCCD12818 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		92F9F45A225AA3EF855CA8D5 /* Build configuration list for PBXProject "PoleParkla" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F36D3BDC18079A77C44DF302 /* Debug */,
+				17F4EE4F2D4447421BE04B7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A14638B910F211E1E57B4BDC /* Build configuration list for PBXNativeTarget "PoleParklaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				88827B80D1994C78034306C6 /* Release */,
+				52DAEC34B2E42D1F539FDD2A /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A316F96D8F716F2186777084 /* Build configuration list for PBXNativeTarget "PoleParklaUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				38152AE9D2D937B2609E7D81 /* Release */,
+				9A913378B22A41EA9F67C411 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D73FC999751261BB5F4A5D1A /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
+			requirement = {
+				kind = exactVersion;
+				version = 6.28.0;
+			};
+		};
+		F217CD6EE2192040A39B5004 /* XCRemoteSwiftPackageReference "onnxruntime-swift-package-manager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/microsoft/onnxruntime-swift-package-manager";
+			requirement = {
+				kind = exactVersion;
+				version = 1.24.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9F41D82F243BBB57FDFC69F7 /* onnxruntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F217CD6EE2192040A39B5004 /* XCRemoteSwiftPackageReference "onnxruntime-swift-package-manager" */;
+			productName = onnxruntime;
+		};
+		E3DAC867C2262E9D8C6B6E7E /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D73FC999751261BB5F4A5D1A /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
+			productName = MapLibre;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = AA4B21BAEFC0C026F932E9B3 /* Project object */;
+}

@@ -1,0 +1,38 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Pole parkla!" } },
+        "et": { "stringUnit": { "state": "translated", "value": "Pole parkla!" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Pole parkla!" } }
+      }
+    },
+    "NSCameraUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Take evidence photos of vehicles blocking cycle or pedestrian paths." } },
+        "et": { "stringUnit": { "state": "translated", "value": "Tee tõendusfotosid sõidukitest, mis takistavad jalgratta- või kõnniteed." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Снимайте автомобили, перекрывающие велосипедные или пешеходные дорожки." } }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Add the incident location while you are preparing a report." } },
+        "et": { "stringUnit": { "state": "translated", "value": "Lisa teate koostamise ajal juhtumi asukoht." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавьте место происшествия при подготовке обращения." } }
+      }
+    },
+    "NSPhotoLibraryUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Select existing evidence photos and read their date and location metadata." } },
+        "et": { "stringUnit": { "state": "translated", "value": "Vali olemasolevad tõendusfotod ning loe nende kuupäeva- ja asukohametaandmeid." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Выбирайте готовые фотографии и считывайте из них дату и данные о месте съёмки." } }
+      }
+    }
+  },
+  "version": "1.0"
+}
