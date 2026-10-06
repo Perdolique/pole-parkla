@@ -11,6 +11,13 @@ test("publication rejects missing, corrupt, extra, or mismatched attachments", a
   const info = { versionName: "1.0.1", versionCode: 3, commitSha: "1".repeat(40) };
   const names = assetNames(info.versionName);
   try {
+    assert.deepEqual(names, [
+      "pole-parkla-1.0.1-arm64-v8a.apk",
+      "pole-parkla-1.0.1.aab",
+      "mapping.txt",
+      "build-info.json",
+      "SHA256SUMS",
+    ]);
     for (const name of names) await writeFile(join(directory, name), name);
     await writeFile(join(directory, "build-info.json"), JSON.stringify(info));
     await writeChecksums(directory, info.versionName);

@@ -20,7 +20,7 @@ test("workflow keeps fork PRs away from production secrets and serializes releas
   const uploads = preview.steps.filter((step: { uses?: string }) => step.uses?.startsWith("actions/upload-artifact@"));
   assert.equal(uploads.length, 2);
   for (const upload of uploads) {
-    assert.equal(upload.with["retention-days"], 90);
+    assert.equal(upload.with["retention-days"], "${{ github.event_name == 'pull_request' && 7 || 90 }}");
     assert.equal(upload.with["if-no-files-found"], "error");
   }
   const production = workflow.jobs["android-production"];
@@ -28,6 +28,13 @@ test("workflow keeps fork PRs away from production secrets and serializes releas
   assert.deepEqual(production.permissions, { contents: "write" });
   assert.deepEqual(production.concurrency, { group: "android-production", queue: "max", "cancel-in-progress": false });
   assert.equal(production.needs, "node");
+  for (const android of [preview, production]) {
+    const checkout = android.steps.findIndex((step: { uses?: string }) => step.uses?.startsWith("actions/checkout@"));
+    const install = android.steps.findIndex((step: { run?: string }) => step.run === "pnpm --dir ci install --frozen-lockfile");
+    assert.ok(checkout >= 0 && checkout < install, "full checkout must precede dependency installation");
+    assert.equal(android.steps[checkout].with["fetch-depth"], 0);
+    assert.equal(android.steps[checkout].with["persist-credentials"], false);
+  }
   assert.deepEqual(workflow.jobs.node.strategy.matrix.project, ["worker", "site", "ci"]);
   assert.match(production.if, /refs\/heads\/master/);
 });

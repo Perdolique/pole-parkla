@@ -64,7 +64,7 @@ export async function loadState(publishedOnly = false): Promise<ReleaseState[]> 
     }
     if (release && !release.draft && !buildInfo) throw new Error(`Published ${tag} is missing build-info.json.`);
     const published = Boolean(release && !release.draft);
-    states.push({ tag, commitSha, draft: release?.draft ?? false, published, buildInfo });
+    states.push({ tag, commitSha, published, buildInfo });
   }
   return states;
 }

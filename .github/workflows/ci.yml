@@ -20,16 +20,15 @@ jobs:
       group: android-test-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v6
+      - name: Set up Node and pnpm
+        uses: Perdolique/automations/.github/actions/setup-pnpm@v4
+        with:
+          working-directory: ci
+      - name: Restore full history and remove checkout credentials
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-      - uses: pnpm/action-setup@v6
-        with:
-          package_json_file: ci/package.json
       - run: pnpm --dir ci install --frozen-lockfile
       - uses: actions/setup-java@v5
         with:
@@ -46,7 +45,7 @@ jobs:
         with:
           name: pole-parkla-debug
           path: ci/artifacts/pole-parkla-debug.apk
-          retention-days: 90
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 90 }}
           compression-level: 0
           if-no-files-found: error
       - name: Upload Preview APK
@@ -54,7 +53,7 @@ jobs:
         with:
           name: pole-parkla-preview
           path: ci/artifacts/pole-parkla-preview.apk
-          retention-days: 90
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 90 }}
           compression-level: 0
           if-no-files-found: error
       - name: Remove temporary signing files
@@ -75,16 +74,15 @@ jobs:
       queue: max
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v6
+      - name: Set up Node and pnpm
+        uses: Perdolique/automations/.github/actions/setup-pnpm@v4
+        with:
+          working-directory: ci
+      - name: Restore full history and remove checkout credentials
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-      - uses: pnpm/action-setup@v6
-        with:
-          package_json_file: ci/package.json
       - run: pnpm --dir ci install --frozen-lockfile
       - uses: actions/setup-java@v5
         with:

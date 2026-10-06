@@ -1,0 +1,3 @@
+# This exact version was already built and tested with the release-tool lockfile.
+minimumReleaseAgeExclude:
+  - handlebars@4.7.10

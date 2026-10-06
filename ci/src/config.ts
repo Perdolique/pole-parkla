@@ -13,6 +13,7 @@ const githubPath = fileURLToPath(githubUrl);
 const adapterPath = fileURLToPath(adapterUrl);
 
 export function releaseOptions(versionCode: number, commitSha: string, dryRun: boolean): Options {
+  const assetPattern = `${artifactDirectory}/*`;
   return {
     branches: ["master"],
     tagFormat: "v${version}",
@@ -23,7 +24,7 @@ export function releaseOptions(versionCode: number, commitSha: string, dryRun: b
       [notesPath, { preset: "conventionalcommits" }],
       [adapterPath, { androidVersionCode: versionCode, androidCommitSha: commitSha }],
       [githubPath, {
-        assets: [`${artifactDirectory}/*`],
+        assets: [assetPattern],
         draftRelease: true,
         successCommentCondition: false,
         failCommentCondition: false,

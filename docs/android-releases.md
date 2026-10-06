@@ -8,7 +8,7 @@ build integration. Google Play AAB uploads remain manual.
 
 | Trigger | Build | Download |
 |---|---|---|
-| PR to `master`, including forks | Debug APK and optimized Preview APK | Two Actions artifacts, 90 days |
+| PR to `master`, including forks | Debug APK and optimized Preview APK | Two Actions artifacts, 7 days |
 | Push to `master` | Signed production APK and AAB | Stable GitHub Release |
 | Manual CI on `master` | Signed production APK and AAB, no publication | Actions artifact, 90 days |
 | Manual CI on another branch | Debug APK and Preview APK, no publication | Two Actions artifacts, 90 days |
@@ -35,6 +35,16 @@ APK. Production runs `lintRelease`, `testReleaseUnitTest`, `assembleRelease`, an
 Instrumentation tests need a disposable test device; mail checks must stop at the
 populated draft, without sending a message.
 
+All Node and Android jobs use `Perdolique/automations/.github/actions/setup-pnpm@v4`
+with pnpm `12.9.1` pinned in each package. The shared action performs a shallow
+checkout. Android jobs then fetch full history and tags with a second checkout
+that removes saved Git credentials, before installing dependencies. Release
+version checks and recovery need that history. The shared Cloudflare deploy
+workflow is not used here; existing deploy integrations keep their own setup.
+Worker and site settings allow the `esbuild` and `workerd` install scripts needed
+by their build tools. The release-tool package keeps pnpm's one-day minimum
+release age, with one exact exception for the already tested `handlebars@4.7.10`.
+
 ## Versions and files
 
 The private `ci/` package runs pinned semantic-release and plugins with Node
@@ -46,6 +56,11 @@ commit. The release branch is `master`; tags use `v${version}`.
 - `feat` selects minor.
 - All other new commits select patch, including messages without a conventional type.
 - A range uses the largest increase. Release notes are generated in English.
+
+The analyzer reads the full Git range from the previous release to `HEAD`.
+Reverted feature and breaking commits still count. `[skip release]` and
+`[release skip]` do not suppress a release under this policy. Each commit is
+analyzed separately so upstream revert filtering cannot change the largest bump.
 
 The baseline is `v1.0.0` at `2ba03d59d23ceac77fca4836eaa7835537f27cf5`, with no
 GitHub Release. Its Android `versionCode` is 2. The first automatic release gets
@@ -73,7 +88,7 @@ remote tag to the build SHA. A draft becomes stable Latest only after these chec
 
 GitHub Release assets have no Actions retention timer. They stay while the
 repository, release, and files exist; this is not an independent backup.
-Actions artifacts expire after 90 days. See the official
+PR Actions artifacts expire after 7 days; manual build artifacts expire after 90 days. See the official
 [retention rules](https://docs.github.com/en/organizations/managing-organization-settings/configuring-the-retention-period-for-github-actions-artifacts-and-logs-in-your-organization)
 and [release limits](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
 

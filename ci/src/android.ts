@@ -67,7 +67,8 @@ async function verifyApk(path: string, info: BuildInfo, id: string, debug: boole
 }
 
 export function verifyApkCertificate(signature: string, certificate: string): void {
-  const digests = [...signature.matchAll(/^.*certificate SHA-256 digest: ([a-f0-9]{64})$/gm)];
+  const matches = signature.matchAll(/^.*certificate SHA-256 digest: ([a-f0-9]{64})$/gm);
+  const digests = [...matches];
   const signerCount = /^Number of signers: (\d+)$/m.exec(signature)?.[1];
   if (signerCount !== "1" || digests.length === 0 || digests.some((match) => match[1] !== certificate)) {
     throw new Error("APK signing certificate does not match.");
@@ -117,7 +118,8 @@ async function verifyBundle(path: string, info: BuildInfo, mappingPath: string):
   }
   if (/android:debuggable="(?:true|1)"/.test(manifest)) throw new Error("Production AAB must not be debuggable.");
   const entries = await capture("unzip", ["-Z1", path]);
-  const nativeLibraries = [...entries.matchAll(/^base\/lib\/([^/]+)\/.+\.so$/gm)];
+  const libraryMatches = entries.matchAll(/^base\/lib\/([^/]+)\/.+\.so$/gm);
+  const nativeLibraries = [...libraryMatches];
   const abiNames = nativeLibraries.map((match) => match[1]);
   const abis = new Set(abiNames);
   if (abis.size !== 1 || !abis.has("arm64-v8a")) throw new Error("AAB must contain only arm64-v8a native code.");

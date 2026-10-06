@@ -6,20 +6,13 @@ import * as v from "valibot";
 import { buildAndroid, artifactDirectory } from "./android.ts";
 import { baseline, latestPublished, testBuildInfo } from "./model.ts";
 import type { BuildInfo } from "./model.ts";
-import { capture, isAncestor, root } from "./process.ts";
+import { capture, isAncestor, readCommits, root } from "./process.ts";
 import { finalizeRelease, loadState, replaceDraft, verifyGithubRelease } from "./github.ts";
 import { releaseOptions } from "./config.ts";
 import { releaseAndroid } from "./release.ts";
 
 async function recoveryNotes(tag: string, info: BuildInfo, previousTag: string): Promise<string> {
-  const rawLog = await capture("git", ["log", `${previousTag}..${info.commitSha}`, "--format=%H%x00%B%x00"]);
-  const parts = rawLog.split("\0");
-  const commits = [];
-  for (let i = 0; i + 1 < parts.length; i += 2) {
-    const hash = parts[i].trim();
-    const message = parts[i + 1].trim();
-    commits.push({ hash, message });
-  }
+  const commits = await readCommits(previousTag, info.commitSha);
   const previousSha = await capture("git", ["rev-parse", `${previousTag}^{commit}`]);
   // The notes generator only consumes these fields of the semantic-release context.
   const context: NotesContext = {
@@ -52,7 +45,8 @@ async function main(): Promise<void> {
     const info = testBuildInfo(version, commitSha, runNumber, prNumber);
     await buildAndroid("pr", info);
     if (process.env.GITHUB_STEP_SUMMARY) {
-      await appendFile(process.env.GITHUB_STEP_SUMMARY, `Built Debug and Preview **${info.versionName}** (Android ${info.versionCode}). Both use the public test key. Download the two APK artifacts from this run.\n`);
+      const summary = `Built Debug and Preview **${info.versionName}** (Android ${info.versionCode}). Both use the public test key. Download the two APK artifacts from this run.\n`;
+      await appendFile(process.env.GITHUB_STEP_SUMMARY, summary);
     }
     return;
   }
@@ -78,7 +72,9 @@ async function main(): Promise<void> {
     build: async (expected) => { await buildAndroid("production", expected); },
   }, commitSha, mode);
   if (info && process.env.GITHUB_STEP_SUMMARY) {
-    await appendFile(process.env.GITHUB_STEP_SUMMARY, `Android **${info.versionName}** (${info.versionCode}), commit \`${info.commitSha}\`. ${command === "production" ? "Manual build: no publication." : "Release state verified."}\n`);
+    const status = command === "production" ? "Manual build: no publication." : "Release state verified.";
+    const summary = `Android **${info.versionName}** (${info.versionCode}), commit \`${info.commitSha}\`. ${status}\n`;
+    await appendFile(process.env.GITHUB_STEP_SUMMARY, summary);
   }
 }
 

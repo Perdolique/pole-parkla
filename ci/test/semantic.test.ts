@@ -20,7 +20,7 @@ test("configured semantic-release API loads native TS, skips prepare in dry-run,
     await capture("git", ["commit", "--allow-empty", "-m", "chore: baseline"], checkout);
     await capture("git", ["tag", "v1.0.0"], checkout);
     await capture("git", ["push", "origin", "master", "--tags"], checkout);
-    await capture("git", ["commit", "--allow-empty", "-m", "feat: build preview APKs"], checkout);
+    await capture("git", ["commit", "--allow-empty", "-m", "feat: build preview APKs [skip release]"], checkout);
     await capture("git", ["push", "origin", "master"], checkout);
     const sha = await capture("git", ["rev-parse", "HEAD"], checkout);
     await writeFile(events, "");
@@ -35,16 +35,34 @@ test("configured semantic-release API loads native TS, skips prepare in dry-run,
     assert.ok(dry);
     assert.equal(dry.nextRelease.version, "1.1.0");
     assert.match(dry.nextRelease.notes ?? "", /Features/);
-    assert.equal(await readFile(events, "utf8"), "");
-    assert.equal(await capture("git", ["tag", "--list"], checkout), "v1.0.0");
+    let recordedEvents = await readFile(events, "utf8");
+    assert.equal(recordedEvents, "");
+    const dryTags = await capture("git", ["tag", "--list"], checkout);
+    assert.equal(dryTags, "v1.0.0");
     options.dryRun = false;
     const released = await semanticRelease(options, { cwd: checkout, env });
     assert.ok(released);
     assert.equal(released.nextRelease.gitHead, sha);
-    assert.equal(await capture("git", ["rev-parse", "v1.1.0"], checkout), sha);
-    assert.equal(await readFile(events, "utf8"), "prepare 1.1.0\npublish 1.1.0\n");
+    const releasedSha = await capture("git", ["rev-parse", "v1.1.0"], checkout);
+    assert.equal(releasedSha, sha);
+    recordedEvents = await readFile(events, "utf8");
+    assert.equal(recordedEvents, "prepare 1.1.0\npublish 1.1.0\n");
     const again = await semanticRelease(options, { cwd: checkout, env });
     assert.equal(again, false);
+    const markedCommits = [
+      ["docs: explain install [skip release]", "1.1.1"],
+      ["docs: explain upgrade [release skip]", "1.1.2"],
+      ["feat: add export [release skip]", "1.2.0"],
+      ["feat!: replace storage [skip release]", "2.0.0"],
+      ["feat!: replace format [release skip]", "3.0.0"],
+    ];
+    for (const [message, version] of markedCommits) {
+      await capture("git", ["commit", "--allow-empty", "-m", message], checkout);
+      await capture("git", ["push", "origin", "master"], checkout);
+      const result = await semanticRelease(options, { cwd: checkout, env });
+      assert.ok(result, message);
+      assert.equal(result.nextRelease.version, version, message);
+    }
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

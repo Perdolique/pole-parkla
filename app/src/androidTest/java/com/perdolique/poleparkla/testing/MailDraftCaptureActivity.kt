@@ -2,15 +2,19 @@ package com.perdolique.poleparkla.testing
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.test.platform.app.InstrumentationRegistry
 
 class MailDraftCaptureActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // The mail activity can run outside the instrumented app process.
+        @Suppress("DEPRECATION")
+        val testPackage = packageManager.getPackageInfo(packageName, PackageManager.GET_INSTRUMENTATION)
+        val targetPackage = requireNotNull(testPackage.instrumentation?.singleOrNull()?.targetPackage)
         sendBroadcast(
             Intent(ACTION_DRAFT_CAPTURED)
-                .setPackage(InstrumentationRegistry.getInstrumentation().targetContext.packageName)
+                .setPackage(targetPackage)
                 .putExtra(EXTRA_DRAFT_INTENT, Intent(intent)),
         )
         finish()

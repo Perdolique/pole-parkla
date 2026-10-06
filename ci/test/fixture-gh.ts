@@ -16,10 +16,16 @@ interface FixtureRelease {
   body: string | null;
   assets: FixtureAsset[];
 }
+interface PublicationFields {
+  draft?: string;
+  prerelease?: string;
+  make_latest?: string;
+}
 export interface FixtureState {
   sha: string;
   releases: FixtureRelease[];
   events: string[];
+  publication?: PublicationFields;
 }
 
 const path = process.env.PP_TEST_GITHUB_STATE!;
@@ -35,21 +41,46 @@ if (args[0] === "git") {
   const methodIndex = args.indexOf("--method");
   const method = methodIndex < 0 ? "GET" : args[methodIndex + 1];
   if (method === "DELETE") {
-    const id = Number(endpoint.split("/").at(-1));
+    const parts = endpoint.split("/");
+    const lastPart = parts.at(-1);
+    const id = Number(lastPart);
     state.events.push(`delete ${id}`);
     for (const release of state.releases) release.assets = release.assets.filter((asset) => asset.id !== id);
   } else if (method === "PATCH") {
-    const id = Number(endpoint.split("/").at(-1));
+    const parts = endpoint.split("/");
+    const lastPart = parts.at(-1);
+    const id = Number(lastPart);
+    const fields = new Map<string, string>();
+    for (let i = 0; i + 1 < args.length; i += 1) {
+      if (args[i] !== "-F" && args[i] !== "-f") continue;
+      const field = args[i + 1];
+      const separator = field.indexOf("=");
+      const name = field.slice(0, separator);
+      const value = field.slice(separator + 1);
+      fields.set(name, value);
+    }
+    const publication: PublicationFields = {
+      draft: fields.get("draft"),
+      prerelease: fields.get("prerelease"),
+      make_latest: fields.get("make_latest"),
+    };
+    state.publication = publication;
     state.events.push(`publish ${id}`);
-    state.releases.find((release) => release.id === id)!.draft = false;
+    const release = state.releases.find((item) => item.id === id)!;
+    if (publication.draft !== undefined) release.draft = publication.draft === "true";
+    if (publication.prerelease !== undefined) release.prerelease = publication.prerelease === "true";
   } else if (endpoint.includes("/commits/")) {
     process.stdout.write(state.sha);
   } else if (endpoint.includes("/releases/assets/")) {
-    const id = Number(endpoint.split("/").at(-1));
-    const asset = state.releases.flatMap((release) => release.assets).find((item) => item.id === id)!;
+    const parts = endpoint.split("/");
+    const lastPart = parts.at(-1);
+    const id = Number(lastPart);
+    const assets = state.releases.flatMap((release) => release.assets);
+    const asset = assets.find((item) => item.id === id)!;
     process.stdout.write(asset.content);
   } else {
-    process.stdout.write(JSON.stringify([state.releases]));
+    const json = JSON.stringify([state.releases]);
+    process.stdout.write(json);
   }
 } else if (args[0] === "release" && args[1] === "upload") {
   const release = state.releases.find((item) => item.tag_name === args[2])!;
@@ -57,7 +88,8 @@ if (args[0] === "git") {
   state.events.push(`upload ${paths.length}`);
   for (const assetPath of paths) {
     const content = await readFile(assetPath, "utf8");
-    release.assets.push({ id: 100 + release.assets.length, name: basename(assetPath), size: content.length, state: "uploaded", content });
+    const name = basename(assetPath);
+    release.assets.push({ id: 100 + release.assets.length, name, size: content.length, state: "uploaded", content });
   }
 } else if (args[0] === "release" && args[1] === "create") {
   const content = await readFile(args[args.indexOf("--notes-file") + 1], "utf8");
@@ -66,4 +98,5 @@ if (args[0] === "git") {
 } else {
   throw new Error(`Unexpected gh call: ${args.join(" ")}`);
 }
-await writeFile(path, JSON.stringify(state));
+const updatedJson = JSON.stringify(state);
+await writeFile(path, updatedJson);

@@ -18,7 +18,6 @@ export type BuildInfo = v.InferOutput<typeof BuildInfoSchema>;
 export interface ReleaseState {
   tag: string;
   commitSha: string;
-  draft: boolean;
   published: boolean;
   buildInfo?: BuildInfo;
 }
@@ -32,7 +31,8 @@ export interface ReleaseDecision {
 
 export function versionFromTag(tag: string): string | null {
   const match = /^v(\d+\.\d+\.\d+)$/.exec(tag);
-  return match ? semver.valid(match[1]) : null;
+  if (!match) return null;
+  return semver.valid(match[1]);
 }
 
 export function assetNames(version: string): string[] {
@@ -117,5 +117,6 @@ export async function decideRelease(
 
 export function testBuildInfo(version: string, commitSha: string, runNumber: number, prNumber?: number): BuildInfo {
   const suffix = prNumber ? `pr.${prNumber}.${runNumber}` : `ci.${runNumber}`;
-  return v.parse(BuildInfoSchema, { versionName: `${version}-${suffix}`, versionCode: runNumber, commitSha });
+  const versionName = `${version}-${suffix}`;
+  return v.parse(BuildInfoSchema, { versionName, versionCode: runNumber, commitSha });
 }

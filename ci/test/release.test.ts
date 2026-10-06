@@ -8,7 +8,7 @@ import type { ReleaseServices } from "../src/release.ts";
 const firstSha = "1".repeat(40);
 const nextSha = "2".repeat(40);
 const firstInfo: BuildInfo = { versionName: "1.0.1", versionCode: 3, commitSha: firstSha };
-const published: ReleaseState = { tag: "v1.0.1", commitSha: firstSha, draft: false, published: true, buildInfo: firstInfo };
+const published: ReleaseState = { tag: "v1.0.1", commitSha: firstSha, published: true, buildInfo: firstInfo };
 
 function services(states: ReleaseState[], events: string[], version: string | null = "1.0.2"): ReleaseServices {
   return {
@@ -45,19 +45,17 @@ test("published SHA is verified and never rebuilt, retagged, or overwritten", as
   assert.deepEqual(events, ["verify v1.0.1"]);
 });
 
-test("orphan tag and partial draft reuse the version and finish in order", async () => {
-  for (const draft of [false, true]) {
-    const pending: ReleaseState = { tag: "v1.0.2", commitSha: nextSha, draft, published: false };
-    const events: string[] = [];
-    const result = await releaseAndroid(services([published, pending], events), nextSha, "publish");
-    assert.equal(result?.versionName, "1.0.2");
-    assert.equal(result?.versionCode, 4);
-    assert.deepEqual(events, ["recover v1.0.2 4 after v1.0.1", "finalize v1.0.2"]);
-  }
+test("an unfinished tag reuses the version and finishes in order", async () => {
+  const pending: ReleaseState = { tag: "v1.0.2", commitSha: nextSha, published: false };
+  const events: string[] = [];
+  const result = await releaseAndroid(services([published, pending], events), nextSha, "publish");
+  assert.equal(result?.versionName, "1.0.2");
+  assert.equal(result?.versionCode, 4);
+  assert.deepEqual(events, ["recover v1.0.2 4 after v1.0.1", "finalize v1.0.2"]);
 });
 
 test("unfinished other SHA, unrelated history, and inconsistent metadata block all writes", async () => {
-  const pending: ReleaseState = { tag: "v1.0.2", commitSha: nextSha, draft: true, published: false };
+  const pending: ReleaseState = { tag: "v1.0.2", commitSha: nextSha, published: false };
   for (const [states, sha] of [
     [[published, pending], firstSha],
     [[published], "3".repeat(40)],
@@ -75,7 +73,7 @@ test("unfinished other SHA, unrelated history, and inconsistent metadata block a
 });
 
 test("late SHA cannot publish after a newer release", async () => {
-  const newer: ReleaseState = { tag: "v1.0.2", commitSha: nextSha, draft: false, published: true, buildInfo: { versionName: "1.0.2", versionCode: 4, commitSha: nextSha } };
+  const newer: ReleaseState = { tag: "v1.0.2", commitSha: nextSha, published: true, buildInfo: { versionName: "1.0.2", versionCode: 4, commitSha: nextSha } };
   const events: string[] = [];
   const result = await releaseAndroid(services([published, newer], events), firstSha, "publish");
   assert.equal(result, null);
@@ -83,7 +81,7 @@ test("late SHA cannot publish after a newer release", async () => {
 });
 
 test("dry-run skips recovery/build/finalize; manual build uses next or last version", async () => {
-  const pending: ReleaseState = { tag: "v1.0.2", commitSha: nextSha, draft: true, published: false };
+  const pending: ReleaseState = { tag: "v1.0.2", commitSha: nextSha, published: false };
   const dryEvents: string[] = [];
   const dryInfo = await releaseAndroid(services([published, pending], dryEvents), nextSha, "dry-run");
   assert.equal(dryInfo?.versionName, "1.0.2");

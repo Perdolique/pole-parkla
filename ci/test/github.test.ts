@@ -36,11 +36,15 @@ test("GitHub finalizer verifies downloads before publication and recovery replac
     process.env.PATH = `${directory}:${originalPath}`;
     process.env.PP_TEST_GITHUB_STATE = statePath;
     await finalizeRelease(tag, info, directory);
-    let saved: FixtureState = JSON.parse(await readFile(statePath, "utf8"));
+    let savedJson = await readFile(statePath, "utf8");
+    let saved: FixtureState = JSON.parse(savedJson);
     assert.equal(saved.releases[0].draft, false);
+    assert.equal(saved.releases[0].prerelease, false);
+    assert.deepEqual(saved.publication, { draft: "false", prerelease: "false", make_latest: "true" });
     assert.deepEqual(saved.events, ["publish 10"]);
     await finalizeRelease(tag, info);
-    saved = JSON.parse(await readFile(statePath, "utf8"));
+    savedJson = await readFile(statePath, "utf8");
+    saved = JSON.parse(savedJson);
     assert.deepEqual(saved.events, ["publish 10"]);
     await assert.rejects(replaceDraft(tag, info, directory, "new notes"), /never be replaced/);
 
@@ -51,7 +55,8 @@ test("GitHub finalizer verifies downloads before publication and recovery replac
       if (failure === "corrupt") altered.releases[0].assets[0].content = "corrupt upload";
       await writeFile(statePath, JSON.stringify(altered));
       await assert.rejects(finalizeRelease(tag, info));
-      saved = JSON.parse(await readFile(statePath, "utf8"));
+      savedJson = await readFile(statePath, "utf8");
+      saved = JSON.parse(savedJson);
       assert.equal(saved.releases[0].draft, true);
       assert.deepEqual(saved.events, []);
     }
@@ -62,18 +67,24 @@ test("GitHub finalizer verifies downloads before publication and recovery replac
     const pending = await loadState();
     assert.equal(pending[0].published, false);
     assert.equal(pending[0].buildInfo, undefined);
-    assert.deepEqual(await loadState(true), []);
+    const publishedOnly = await loadState(true);
+    assert.deepEqual(publishedOnly, []);
     await replaceDraft(tag, info, directory, "notes");
     await finalizeRelease(tag, info);
-    saved = JSON.parse(await readFile(statePath, "utf8"));
+    savedJson = await readFile(statePath, "utf8");
+    saved = JSON.parse(savedJson);
     assert.deepEqual(saved.events, ["delete 9", "upload 5", "publish 10"]);
-    assert.deepEqual(saved.releases[0].assets.map((asset) => asset.name).sort(), names.sort());
+    const recoveredNames = saved.releases[0].assets.map((asset) => asset.name);
+    recoveredNames.sort();
+    const expectedNames = names.toSorted();
+    assert.deepEqual(recoveredNames, expectedNames);
 
     const orphan: FixtureState = { sha: info.commitSha, releases: [], events: [] };
     await writeFile(statePath, JSON.stringify(orphan));
     await replaceDraft(tag, info, directory, "recovered notes");
     await finalizeRelease(tag, info);
-    saved = JSON.parse(await readFile(statePath, "utf8"));
+    savedJson = await readFile(statePath, "utf8");
+    saved = JSON.parse(savedJson);
     assert.deepEqual(saved.events, [`create ${tag}`, "upload 5", "publish 10"]);
     assert.equal(saved.releases[0].body, "recovered notes");
   } finally {
