@@ -28,6 +28,34 @@ export async function listReleases(): Promise<GithubRelease[]> {
   return releases.filter((release) => !release.prerelease && versionFromTag(release.tag_name));
 }
 
+// Keep a verified published build for the Play uploader; never rebuild a release.
+export async function downloadPublishedRelease(tag: string, directory: string): Promise<BuildInfo> {
+  const version = versionFromTag(tag);
+  if (!version) throw new Error("Google Play requires a stable release tag.");
+  const releases = await listReleases();
+  const release = releases.find((item) => item.tag_name === tag);
+  if (!release || release.draft) throw new Error(`Published GitHub release ${tag} does not exist.`);
+  const expectedNames = assetNames(version);
+  for (const asset of release.assets) {
+    if (asset.state !== "uploaded" || asset.size === 0 || !expectedNames.includes(asset.name)) {
+      throw new Error(`Unexpected or unfinished release asset: ${asset.name}`);
+    }
+    const path = join(directory, asset.name);
+    await downloadAsset(asset.id, path);
+  }
+  const metadataPath = join(directory, "build-info.json");
+  const rawInfo = await readFile(metadataPath, "utf8");
+  const parsedInfo = JSON.parse(rawInfo);
+  const info = v.parse(BuildInfoSchema, parsedInfo);
+  const sha = await remoteTagSha(tag);
+  if (info.versionName !== version || info.commitSha !== sha) {
+    throw new Error("Published build does not match the requested version and remote tag.");
+  }
+  const names = release.assets.map((asset) => asset.name);
+  await verifyArtifactSet(directory, info, names);
+  return info;
+}
+
 async function remoteTagSha(tag: string): Promise<string> {
   const sha = await capture("gh", ["api", `${apiRoot}/commits/${tag}`, "--jq", ".sha"]);
   return v.parse(v.pipe(v.string(), v.regex(/^[a-f0-9]{40}$/)), sha);
