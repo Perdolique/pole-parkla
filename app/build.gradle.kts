@@ -6,6 +6,18 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val ppBuildChannel = providers.gradleProperty("ppBuildChannel").getOrElse("local")
+require(ppBuildChannel in setOf("local", "pr", "production")) {
+    "ppBuildChannel must be local, pr, or production"
+}
+val ppVersionName = providers.gradleProperty("ppVersionName").getOrElse("1.0.0")
+val ppVersionCode = providers.gradleProperty("ppVersionCode").getOrElse("2").toInt()
+require(ppVersionCode in 1..2100000000) { "ppVersionCode is outside the Android range" }
+if (ppBuildChannel != "local") {
+    require(providers.gradleProperty("ppVersionName").isPresent) { "CI requires ppVersionName" }
+    require(providers.gradleProperty("ppVersionCode").isPresent) { "CI requires ppVersionCode" }
+}
+
 android {
     namespace = "com.perdolique.poleparkla"
     compileSdk = 36
@@ -14,8 +26,9 @@ android {
         applicationId = "com.perdolique.poleparkla"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.0"
+        versionCode = ppVersionCode
+        versionName = ppVersionName
+        manifestPlaceholders["ppLauncherLabel"] = "@string/app_name"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -33,7 +46,18 @@ android {
     }
 
     signingConfigs {
-        if (keystorePropertiesFile.exists()) {
+        if (ppBuildChannel != "local") {
+            create("ci") {
+                fun signingValue(name: String): String =
+                    providers.environmentVariable(name).orNull?.takeIf { it.isNotBlank() }
+                        ?: error("$ppBuildChannel requires $name")
+                storeFile = file(signingValue("ANDROID_KEYSTORE_PATH"))
+                require(storeFile!!.isFile) { "CI keystore file does not exist" }
+                storePassword = signingValue("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("ANDROID_KEY_ALIAS")
+                keyPassword = signingValue("ANDROID_KEY_PASSWORD")
+            }
+        } else if (keystorePropertiesFile.exists()) {
             create("release") {
                 storeFile = rootProject.file(requireNotNull(keystoreProperties.getProperty("storeFile")))
                 storePassword = requireNotNull(keystoreProperties.getProperty("storePassword"))
@@ -44,6 +68,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            if (ppBuildChannel == "pr") {
+                applicationIdSuffix = ".debug"
+                manifestPlaceholders["ppLauncherLabel"] = "Pole parkla! Debug"
+                signingConfig = signingConfigs.getByName("ci")
+            }
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -51,7 +82,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfigs.findByName("release")?.let { signingConfig = it }
+            if (ppBuildChannel == "pr") {
+                applicationIdSuffix = ".preview"
+                manifestPlaceholders["ppLauncherLabel"] = "Pole parkla! Preview"
+            }
+            val signingName = if (ppBuildChannel == "local") "release" else "ci"
+            signingConfigs.findByName(signingName)?.let { signingConfig = it }
         }
     }
 

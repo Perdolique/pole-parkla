@@ -4,7 +4,7 @@
   "license": "AGPL-3.0-only",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@12.9.1",
   "scripts": {
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test",
     "cf-typegen": "wrangler types --env-file .dev.vars.example",

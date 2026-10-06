@@ -13,6 +13,8 @@ captures/
 
 # Node local artifacts
 /.pnpm-store/
+ci/node_modules/
+ci/artifacts/
 
 # Cloudflare Worker
 worker/node_modules/
