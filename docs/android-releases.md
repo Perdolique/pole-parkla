@@ -2,7 +2,9 @@
 
 The existing [CI workflow](../.github/workflows/ci.yml) builds Android APKs and runs
 Worker, website, and release-tool checks. The website still uses its own Cloudflare
-build integration. Google Play AAB uploads remain manual.
+build integration. The [Google Play draft workflow](../.github/workflows/google-play.yml)
+uploads a verified published AAB automatically. Review submission and publication
+remain manual in Play Console.
 
 ## Build channels
 
@@ -91,6 +93,90 @@ repository, release, and files exist; this is not an independent backup.
 PR Actions artifacts expire after 7 days; manual build artifacts expire after 90 days. See the official
 [retention rules](https://docs.github.com/en/organizations/managing-organization-settings/configuring-the-retention-period-for-github-actions-artifacts-and-logs-in-your-organization)
 and [release limits](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
+
+## Google Play drafts
+
+After successful push CI on `master`, the Google Play workflow downloads the
+latest stable GitHub Release. It verifies all five assets, their SHA-256 values,
+the Android version, and the remote tag's commit. It uploads the existing signed
+AAB, without another Android build. Manual dispatch can select a published tag,
+such as `v1.1.0`. PR and manual build CI runs do not trigger a Play upload.
+
+The uploader creates a `production` release with status `draft`. It preserves
+existing active releases and rejects a different pending draft. A retry reuses
+an uploaded bundle only when its SHA-256 matches. An already released version
+is left unchanged. The workflow reads back the saved draft and its translations.
+It does not submit a release for review or roll it out. A running review is not
+cancelled: the commit uses `changesInReviewBehavior=ERROR_IF_IN_REVIEW`.
+
+In Play Console, open the draft, check its files and notes, and submit it for
+review when ready. Keep **Managed publishing** on in **Publishing overview**.
+After Google approves the update, select **Publish changes** to release it.
+Managed publishing is enabled for this app. See Google's
+[draft release API](https://developers.google.com/android-publisher/tracks#draft_releases)
+and [managed publishing guide](https://support.google.com/googleplay/android-developer/answer/9859654).
+
+### Localized notes
+
+Keep reviewed user-facing notes in `ci/play-notes/<version>.json`, with exactly
+`et`, `en-US`, and `ru-RU`. Each value must be nonempty and at most 500 Unicode
+characters. Notes for `1.1.0` describe the GitHub source and feedback links added
+after the `1.0.0 (2)` build published on September 8, 2026. The later Git tag
+`v1.0.0` already contains those links, so its diff is not the right basis for
+that first Play update.
+
+For a later release without reviewed notes, the uploader compares Android source
+and build files with the previous stable tag. If any changed, it stops before
+Google authentication and asks for reviewed notes. If Android files did not
+change, it uses a short build-process note in all three languages. GitHub release
+notes remain separate and are generated from commits.
+
+### Google access
+
+Use Google Cloud project `pole-parkla-play` (number `76053822492`) and a dedicated
+service account `github-play@pole-parkla-play.iam.gserviceaccount.com`. Enable
+`androidpublisher.googleapis.com`, `iamcredentials.googleapis.com`, and
+`sts.googleapis.com`. The service account needs no project-level roles or JSON
+key. Add it in Play Console **Users and permissions**, with access only to
+`com.perdolique.poleparkla`, **View app information (read-only)** and **Release to
+production, exclude devices, and use Play App Signing**. Play's production
+permission can publish releases; the uploader's draft-only contract and Managed
+publishing keep the requested release flow manual.
+
+Authenticate through Workload Identity Federation. Create pool `github-play`
+and OIDC provider `pole-parkla`, with issuer
+`https://token.actions.githubusercontent.com` and mappings:
+
+```text
+google.subject=assertion.sub
+attribute.repository_id=assertion.repository_id
+attribute.repository_owner_id=assertion.repository_owner_id
+```
+
+Use this provider condition to accept only the dedicated trusted workflow:
+
+```text
+assertion.repository_owner_id == '161577745' && assertion.repository_id == '1342880600' && assertion.ref == 'refs/heads/master' && assertion.workflow_ref == 'Perdolique/pole-parkla/.github/workflows/google-play.yml@refs/heads/master'
+```
+
+Grant `roles/iam.workloadIdentityUser` on the service account only to:
+
+```text
+principalSet://iam.googleapis.com/projects/76053822492/locations/global/workloadIdentityPools/github-play/attribute.repository_id/1342880600
+```
+
+Create the GitHub environment `google-play`, limited to `master`, and set its
+variables:
+
+- `PLAY_SERVICE_ACCOUNT`: `github-play@pole-parkla-play.iam.gserviceaccount.com`;
+- `PLAY_WORKLOAD_IDENTITY_PROVIDER`:
+  `projects/76053822492/locations/global/workloadIdentityPools/github-play/providers/pole-parkla`.
+
+The workflow obtains a ten-minute OAuth access token with only the
+`androidpublisher` scope after downloading and checking the build. It writes no
+Google credential file and stores no long-lived Google secret. See
+[Google's GitHub authentication action](https://github.com/google-github-actions/auth)
+and [its security guidance](https://github.com/google-github-actions/auth/blob/main/docs/SECURITY_CONSIDERATIONS.md).
 
 ## Production signing
 

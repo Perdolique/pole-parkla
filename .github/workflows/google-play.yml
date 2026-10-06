@@ -1,0 +1,71 @@
+name: Google Play draft
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published stable GitHub release tag (empty selects the latest)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  draft:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master') ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'master')
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    environment: google-play
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: google-play-draft
+      queue: max
+      cancel-in-progress: false
+    steps:
+      - name: Set up Node and pnpm
+        uses: Perdolique/automations/.github/actions/setup-pnpm@v4
+        with:
+          working-directory: ci
+      - name: Check out trusted release tools
+        uses: actions/checkout@v7
+        with:
+          ref: master
+          fetch-depth: 0
+          persist-credentials: false
+      - run: pnpm --dir ci install --frozen-lockfile
+      - name: Download and verify the published release
+        id: prepare
+        run: node ci/src/play-cli.ts prepare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PP_PLAY_TAG: ${{ inputs.tag }}
+      - name: Authenticate for Google Play
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.PLAY_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.PLAY_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
+          access_token_lifetime: 600s
+          create_credentials_file: false
+          export_environment_variables: false
+      - name: Save the production draft
+        run: node ci/src/play-cli.ts upload "$PP_PLAY_DIRECTORY"
+        env:
+          PP_PLAY_DIRECTORY: ${{ steps.prepare.outputs.directory }}
+          PP_PLAY_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+      - name: Remove downloaded release files
+        if: always() && steps.prepare.outputs.directory != ''
+        run: rm -rf -- "$PP_PLAY_DIRECTORY"
+        env:
+          PP_PLAY_DIRECTORY: ${{ steps.prepare.outputs.directory }}
