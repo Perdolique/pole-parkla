@@ -28,6 +28,10 @@ test("workflow keeps fork PRs away from production secrets and serializes releas
   assert.deepEqual(production.permissions, { contents: "write" });
   assert.deepEqual(production.concurrency, { group: "android-production", queue: "max", "cancel-in-progress": false });
   assert.equal(production.needs, "node");
+  const releaseStep = production.steps.find((step: { name?: string }) => step.name === "Build and release production Android");
+  // semantic-release uses the GitHub App Git auth prefix only for GITHUB_TOKEN.
+  assert.equal(releaseStep.env.GITHUB_TOKEN, "${{ github.token }}");
+  assert.equal(releaseStep.env.GH_TOKEN, undefined);
   for (const android of [preview, production]) {
     const checkout = android.steps.findIndex((step: { uses?: string }) => step.uses?.startsWith("actions/checkout@"));
     const install = android.steps.findIndex((step: { run?: string }) => step.run === "pnpm --dir ci install --frozen-lockfile");
