@@ -12,6 +12,8 @@ Pole parkla does not send reports. It opens an editable Estonian draft with temp
 - [English home](https://poleparkla.ee/en/) — English product information.
 - [Русский](https://poleparkla.ee/ru/) — Russian product information.
 - [Google Play](https://play.google.com/store/apps/details?id=com.perdolique.poleparkla) — Install the Android app.
+- [Source code](https://github.com/Perdolique/pole-parkla) — Public app, Worker, and website source code.
+- [Bugs and ideas](https://github.com/Perdolique/pole-parkla/issues) — Report bugs or suggest ideas. External pull requests are not accepted for now.
 - [Eesti privacy policy](https://poleparkla.ee/privacy/) — Detailed data handling and service disclosures.
 - [English privacy policy](https://poleparkla.ee/en/privacy/) — Detailed data handling and service disclosures in English.
 - [Russian privacy policy](https://poleparkla.ee/ru/privacy/) — Detailed data handling and service disclosures in Russian.

@@ -2807,6 +2807,29 @@
         }
       }
     },
+    "settings.feedback": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bugs and ideas on GitHub"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vead ja ideed GitHubis"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Баги и идеи на GitHub"
+          }
+        }
+      }
+    },
     "settings.language": {
       "extractionState": "manual",
       "localizations": {
@@ -2941,6 +2964,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Получатель"
+          }
+        }
+      }
+    },
+    "settings.source": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source code on GitHub"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lähtekood GitHubis"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Исходники на GitHub"
           }
         }
       }

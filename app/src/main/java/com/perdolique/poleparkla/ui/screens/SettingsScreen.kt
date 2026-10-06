@@ -1,5 +1,10 @@
 package com.perdolique.poleparkla.ui.screens
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,11 +32,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.perdolique.poleparkla.R
 import com.perdolique.poleparkla.model.AppSettings
 import com.perdolique.poleparkla.model.CloudProvider
@@ -53,6 +60,8 @@ import com.perdolique.poleparkla.ui.components.PpSheetHeader
 import com.perdolique.poleparkla.ui.components.PpTopBar
 import com.perdolique.poleparkla.ui.components.PpTextButton
 import java.net.URI
+
+private const val PROJECT_URL = "https://github.com/Perdolique/pole-parkla"
 
 private enum class SettingsSection {
     LANGUAGE,
@@ -78,6 +87,7 @@ fun SettingsScreen(
     onDeleteTemplate: (String) -> Unit,
     onDeleteAll: () -> Unit,
 ) {
+    val context = LocalContext.current
     var section by remember { mutableStateOf<SettingsSection?>(null) }
     var editingTemplate by remember { mutableStateOf<CustomViolationTemplate?>(null) }
     var templateToDelete by remember { mutableStateOf<CustomViolationTemplate?>(null) }
@@ -155,6 +165,20 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("settings_rate_app"),
+                )
+                PpTextButton(
+                    text = stringResource(R.string.project_source),
+                    onClick = { context.openProjectPage(PROJECT_URL) },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .testTag("settings_project_source"),
+                )
+                PpTextButton(
+                    text = stringResource(R.string.project_feedback),
+                    onClick = { context.openProjectPage("$PROJECT_URL/issues") },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .testTag("settings_project_feedback"),
                 )
                 Text(
                     text = stringResource(R.string.app_version, appVersion),
@@ -284,6 +308,15 @@ fun SettingsScreen(
     }
     if (showPrivacyPolicy) {
         PrivacyPolicyDialog(onDismiss = { showPrivacyPolicy = false })
+    }
+}
+
+private fun Context.openProjectPage(url: String) {
+    try {
+        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+    } catch (error: ActivityNotFoundException) {
+        Log.w("PoleParkla", "Could not open project page", error)
+        Toast.makeText(this, R.string.open_link_failed, Toast.LENGTH_LONG).show()
     }
 }
 

@@ -33,6 +33,7 @@ interface UiText {
   privacyLink: string
   updatesLink: string
   sourceLink: string
+  feedbackLink: string
   googlePlayAlt: string
   heroDescription: string
   howItWorksTitle: string
@@ -78,7 +79,8 @@ export const ui = {
     languageSwitcherLabel: 'Vali keel',
     privacyLink: 'Privaatsus',
     updatesLink: 'Muudatused',
-    sourceLink: 'Lähtekood',
+    sourceLink: 'GitHub',
+    feedbackLink: 'Vead ja ideed',
     googlePlayAlt: 'Laadi alla Google Playst',
     heroDescription: 'Pole parkla aitab Eestis ette valmistada tõenditega teate jalgratta- või kõnniteele pargitud sõidukist.',
     howItWorksTitle: 'Kuidas teade valmib',
@@ -164,7 +166,8 @@ export const ui = {
     languageSwitcherLabel: 'Choose language',
     privacyLink: 'Privacy',
     updatesLink: 'Updates',
-    sourceLink: 'Source',
+    sourceLink: 'GitHub',
+    feedbackLink: 'Bugs and ideas',
     googlePlayAlt: 'Get it on Google Play',
     heroDescription: 'Pole parkla helps you prepare an evidence-based report about a vehicle parked on a cycle path or footway in Estonia.',
     howItWorksTitle: 'How a report is prepared',
@@ -250,7 +253,8 @@ export const ui = {
     languageSwitcherLabel: 'Выбрать язык',
     privacyLink: 'Приватность',
     updatesLink: 'Изменения',
-    sourceLink: 'Исходники',
+    sourceLink: 'GitHub',
+    feedbackLink: 'Баги и идеи',
     googlePlayAlt: 'Доступно в Google Play',
     heroDescription: 'Pole parkla помогает подготовить обращение с доказательствами о машине на велодорожке или тротуаре в Эстонии.',
     howItWorksTitle: 'Как готовится обращение',

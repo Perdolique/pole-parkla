@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    name: Android
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Check and build debug APKs
+        run: >-
+          env JAVA_HOME="$JAVA_HOME" ANDROID_HOME="$ANDROID_HOME"
+          ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
+
+  node:
+    name: ${{ matrix.project }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [worker, site]
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - name: Set up Node, pnpm, and dependencies
+        uses: Perdolique/automations/.github/actions/setup-pnpm@v4
+        with:
+          working-directory: ${{ matrix.project }}
+          install-dependencies: true
+      - name: Check recognition Worker
+        if: matrix.project == 'worker'
+        run: pnpm run check
+      - name: Package recognition Worker without deployment
+        if: matrix.project == 'worker'
+        run: pnpm run deploy:dry
+      - name: Check website types
+        if: matrix.project == 'site'
+        run: pnpm test:typecheck
+      - name: Build website and check SEO
+        if: matrix.project == 'site'
+        run: pnpm run test:seo

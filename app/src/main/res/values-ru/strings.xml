@@ -169,6 +169,9 @@
     <string name="unknown_plate">Номер не введён</string>
     <string name="settings_title">Настройки</string>
     <string name="rate_app">Оценить приложение</string>
+    <string name="project_source">Исходники на GitHub</string>
+    <string name="project_feedback">Баги и идеи на GitHub</string>
+    <string name="open_link_failed">Не удалось открыть ссылку. Установите или включите браузер и попробуйте снова.</string>
     <string name="app_version">Версия %1$s</string>
     <string name="recognition_settings">Распознавание</string>
     <string name="cloud_disabled">Не настроено</string>
