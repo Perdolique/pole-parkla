@@ -29,7 +29,8 @@ test("configured semantic-release API loads native TS, skips prepare in dry-run,
     options.repositoryUrl = pathToFileURL(repository).href;
     options.ci = false;
     options.plugins = [analyzerPath, [notesPath, { preset: "conventionalcommits" }], fixture];
-    const env = { ...process.env, PP_TEST_EVENTS: events };
+    // CI branch variables refer to the outer PR, not this temporary master branch.
+    const env = { PATH: process.env.PATH, PP_TEST_EVENTS: events };
     const dry = await semanticRelease(options, { cwd: checkout, env });
     assert.ok(dry);
     assert.equal(dry.nextRelease.version, "1.1.0");
