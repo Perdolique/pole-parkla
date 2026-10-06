@@ -10,28 +10,112 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  android:
-    name: Android
+  android-test:
+    name: Android test APKs
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/master')
     runs-on: ubuntu-26.04
-    timeout-minutes: 30
+    timeout-minutes: 45
+    concurrency:
+      group: android-test-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v6
         with:
+          fetch-depth: 0
           persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: ci/package.json
+      - run: pnpm --dir ci install --frozen-lockfile
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v5
-      - name: Check and build debug APKs
-        run: >-
-          env JAVA_HOME="$JAVA_HOME" ANDROID_HOME="$ANDROID_HOME"
-          ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
+      - name: Check and build Debug and Preview
+        run: pnpm --dir ci run build:test
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PP_PR_NUMBER: ${{ github.event.pull_request.number }}
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: pole-parkla-debug
+          path: ci/artifacts/pole-parkla-debug.apk
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload Preview APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: pole-parkla-preview
+          path: ci/artifacts/pole-parkla-preview.apk
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+      - name: Remove temporary signing files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/pole-parkla-signing"
+
+  android-production:
+    name: Android production
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    needs: node
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    environment: android-production
+    permissions:
+      contents: write
+    concurrency:
+      group: android-production
+      queue: max
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: ci/package.json
+      - run: pnpm --dir ci install --frozen-lockfile
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Build and release production Android
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            pnpm --dir ci run build:production
+          else
+            pnpm --dir ci run release
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      - name: Upload manual production build
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v7
+        with:
+          name: pole-parkla-production
+          path: ci/artifacts/*
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+      - name: Remove temporary signing files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/pole-parkla-signing"
 
   node:
     name: ${{ matrix.project }}
@@ -40,7 +124,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [worker, site]
+        project: [worker, site, ci]
     defaults:
       run:
         working-directory: ${{ matrix.project }}
@@ -62,3 +146,6 @@ jobs:
       - name: Build website and check SEO
         if: matrix.project == 'site'
         run: pnpm run test:seo
+      - name: Check release tools
+        if: matrix.project == 'ci'
+        run: pnpm run check

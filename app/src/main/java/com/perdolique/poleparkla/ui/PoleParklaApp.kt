@@ -290,9 +290,10 @@ private fun Context.appVersionName(): String {
 }
 
 private fun Context.openPlayStorePage() {
+    val productionPackage = "com.perdolique.poleparkla"
     val playStoreIntent = Intent(
         Intent.ACTION_VIEW,
-        "market://details?id=$packageName".toUri(),
+        "market://details?id=$productionPackage".toUri(),
     ).setPackage("com.android.vending")
 
     try {
@@ -302,7 +303,7 @@ private fun Context.openPlayStorePage() {
             startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
-                    "https://play.google.com/store/apps/details?id=$packageName".toUri(),
+                    "https://play.google.com/store/apps/details?id=$productionPackage".toUri(),
                 ),
             )
         }

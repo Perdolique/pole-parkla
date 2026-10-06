@@ -136,6 +136,9 @@ ANDROID_HOME="$HOME/Library/Android/sdk" \
 
 Without `keystore.properties`, the debug build remains available and the release variant is not signed for installation.
 
+For PR APKs, automatic production releases, CI signing, version rules, and failed
+release recovery, see [Android CI and releases](android-releases.md).
+
 ## Local data and permissions
 
 Pole parkla requests only camera, foreground location and network access. Gallery access uses the platform photo picker and needs no broad storage permission. Photos stay under each app's private directory. Android backup and cleartext HTTP are disabled; iOS excludes its SwiftData/photo directory from device backup and protects files while the device is locked.
