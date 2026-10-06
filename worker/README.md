@@ -1,5 +1,9 @@
 # Pole parkla! recognition Worker
 
+Repository-owned Worker code, tests, configuration, and documentation are licensed
+under the GNU Affero General Public License, version 3 only (`AGPL-3.0-only`). See
+[LICENSE](LICENSE) and the repository [licensing scope](../LICENSING.md).
+
 This stateless Cloudflare Worker exposes one authenticated endpoint for optional recognition of the Android app's primary vehicle photo. It has no D1, KV, R2 or queue bindings.
 
 ```http

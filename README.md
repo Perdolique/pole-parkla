@@ -150,3 +150,11 @@ Deleting one report also deletes its stored photos and temporary attachment copi
 - `worker/` — stateless Cloudflare Worker proxy for explicitly requested image recognition.
 - `app/src/test/` — deterministic domain unit tests.
 - `app/src/androidTest/` — Compose/instrumentation tests that require an Android device or emulator.
+
+## License
+
+Repository-owned app code is licensed under GPL version 3 only. The recognition
+Worker is licensed under AGPL version 3 only. The mobile app has additional
+permissions for Google SDK linking and Apple App Store distribution; application
+source disclosure remains required. Third-party models, fonts, and code retain
+their own licenses. See [LICENSING.md](LICENSING.md) for the scope and full notices.
