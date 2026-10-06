@@ -17,6 +17,17 @@ struct SettingsScreen: View {
             category("settings.templates", value: String(model.templates.count), icon: "doc.text", destination: .templates)
             category("settings.privacy", value: model.localized("privacy.local.title"), icon: "hand.raised", destination: .privacy)
 
+            Link("settings.source", destination: URL(string: "https://github.com/Perdolique/pole-parkla")!)
+                .buttonStyle(PpSecondaryButtonStyle())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .accessibilityIdentifier("settings.source")
+            Link("settings.feedback", destination: URL(string: "https://github.com/Perdolique/pole-parkla/issues")!)
+                .buttonStyle(PpSecondaryButtonStyle())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .accessibilityIdentifier("settings.feedback")
+
             HStack {
                 Text("settings.version").foregroundStyle(PpColor.muted)
                 Spacer()

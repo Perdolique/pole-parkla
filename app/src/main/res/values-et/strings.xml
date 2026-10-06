@@ -165,6 +165,9 @@
     <string name="unknown_plate">Number sisestamata</string>
     <string name="settings_title">Seaded</string>
     <string name="rate_app">Hinda rakendust</string>
+    <string name="project_source">Lähtekood GitHubis</string>
+    <string name="project_feedback">Vead ja ideed GitHubis</string>
+    <string name="open_link_failed">Linki ei saanud avada. Paigalda või luba brauser ja proovi uuesti.</string>
     <string name="app_version">Versioon %1$s</string>
     <string name="recognition_settings">Tuvastamine</string>
     <string name="cloud_disabled">Seadistamata</string>

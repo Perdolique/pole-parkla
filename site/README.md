@@ -57,7 +57,7 @@ Published versions must exist in all three locales. The build fails when a non-d
 
 ## Store and source links
 
-External links live in `src/config.ts`. The Google Play entry contains the canonical listing URL and locale-specific badge paths; `sourceUrl` stays `null` until a public source destination exists.
+External links live in `src/config.ts`. The Google Play entry contains the canonical listing URL and locale-specific badge paths. The public [GitHub repository](https://github.com/Perdolique/pole-parkla) appears in navigation and the footer; [Issues](https://github.com/Perdolique/pole-parkla/issues) accepts bugs and ideas. Set `sourceUrl` to `null` to hide both GitHub destinations when no public source URL is available.
 
 Keep localized Google Play badges under `public/google-play/` on a common `646x250` transparent canvas. The complete badge artwork must occupy a centered `564x168` area, leaving `41px` on every side; resize the artwork as a whole without changing or rearranging its elements. Before deploying a configured store link, verify the listing opens for a signed-out visitor rather than relying on its authenticated Play Console preview.
 
@@ -105,14 +105,14 @@ The public translations are stored in `src/data/privacy/`. Review them together 
 
 ## Cloudflare Workers Builds
 
-Create or connect a Worker named `pole-parkla-site` and use these settings:
+Create or connect a Worker named `pole-parkla`, matching `wrangler.jsonc`, and use these settings:
 
 | Setting | Value |
 | --- | --- |
-| Production branch | `main` |
+| Production branch | `master` |
 | Root directory | `site` |
 | Build command | `pnpm run build` |
-| Deploy command | `pnpm exec wrangler deploy` |
-| Non-production deploy command | `pnpm exec wrangler versions upload` |
+| Deploy command | `pnpm run deploy` |
+| Non-production deploy command | `pnpm run deploy:preview` |
 
 Attach `poleparkla.ee` as the custom domain and create a Cloudflare redirect from `www.poleparkla.ee` to the apex domain. No SSR adapter or Worker script is required; Wrangler uploads `dist/` as static assets.

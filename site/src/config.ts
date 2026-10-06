@@ -25,5 +25,5 @@ export const siteConfig: SiteConfig = {
       ru: '/google-play/ru_badge_web_generic.png'
     }
   },
-  sourceUrl: null
+  sourceUrl: 'https://github.com/Perdolique/pole-parkla'
 }
