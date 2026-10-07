@@ -10,6 +10,7 @@ import { capture, isAncestor, readCommits, root } from "./process.ts";
 import { finalizeRelease, loadState, replaceDraft, verifyGithubRelease } from "./github.ts";
 import { releaseOptions } from "./config.ts";
 import { releaseAndroid } from "./release.ts";
+import { checkNextPlayNotes, readPlayNotes } from "./play-notes.ts";
 
 async function recoveryNotes(tag: string, info: BuildInfo, previousTag: string): Promise<string> {
   const commits = await readCommits(previousTag, info.commitSha);
@@ -29,10 +30,18 @@ async function recoveryNotes(tag: string, info: BuildInfo, previousTag: string):
 async function main(): Promise<void> {
   const command = process.argv[2];
   const dryRun = process.argv.includes("--dry-run");
-  if (!["release", "test", "production"].includes(command)) {
-    throw new Error("Usage: node ci/src/cli.ts release [--dry-run] | test | production");
+  if (!["release", "test", "production", "check-play-notes"].includes(command)) {
+    throw new Error("Usage: node ci/src/cli.ts release [--dry-run] | test | production | check-play-notes");
   }
   const commitSha = await capture("git", ["rev-parse", "HEAD"]);
+  if (command === "check-play-notes") {
+    if (dryRun) throw new Error("--dry-run applies only to release.");
+    const states = await loadState(true);
+    const previous = latestPublished(states);
+    const info = await checkNextPlayNotes(previous, commitSha);
+    console.log(`Google Play notes verified for ${info.versionName} (Android ${info.versionCode}).`);
+    return;
+  }
   if (command === "test") {
     if (dryRun) throw new Error("--dry-run applies only to release.");
     const states = await loadState(true);
@@ -56,6 +65,7 @@ async function main(): Promise<void> {
   const mode = command === "production" ? "build" : dryRun ? "dry-run" : "publish";
   const info = await releaseAndroid({
     readState: loadState,
+    readPlayNotes,
     isAncestor,
     verifyPublished: async (tag, expected) => { await verifyGithubRelease(tag, expected); },
     recover: async (tag, expected, previousTag) => {

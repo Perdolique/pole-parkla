@@ -9,6 +9,7 @@
   },
   "scripts": {
     "check": "pnpm run typecheck && pnpm test",
+    "check:play-notes": "node src/cli.ts check-play-notes",
     "typecheck": "tsc --noEmit",
     "test": "node --test test/*.test.ts",
     "release": "node src/cli.ts release",

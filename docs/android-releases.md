@@ -125,11 +125,24 @@ after the `1.0.0 (2)` build published on September 8, 2026. The later Git tag
 `v1.0.0` already contains those links, so its diff is not the right basis for
 that first Play update.
 
-For a later release without reviewed notes, the uploader compares Android source
-and build files with the previous stable tag. If any changed, it stops before
-Google authentication and asks for reviewed notes. If Android files did not
-change, it uses a short build-process note in all three languages. GitHub release
-notes remain separate and are generated from commits.
+Before building PR test APKs, CI forecasts the next version with the same commit
+analyzer used for releases and checks that version's Play notes. This read-only
+check needs a full checkout with tags and a GitHub token:
+
+```sh
+pnpm --dir ci run check:play-notes
+```
+
+Production checks the actual version during `verifyRelease`, including dry-run,
+before the Android build, tag creation, or publication. Recovery checks notes
+before rebuilding an unfinished release. The Play uploader checks them again
+before Google authentication.
+
+For a later release without reviewed notes, all these checks compare Android
+source and build files with the previous stable tag. If any changed, they ask for
+reviewed notes. If Android files did not change, they use a short build-process
+note in all three languages. GitHub release notes remain separate and are
+generated from commits.
 
 ### Google access
 
