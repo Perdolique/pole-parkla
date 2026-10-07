@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pole parkla!</string>
+    <string name="shortcut_new_report">Новый репорт</string>
     <string name="back">Назад</string>
     <string name="close">Закрыть</string>
     <string name="save">Сохранить</string>

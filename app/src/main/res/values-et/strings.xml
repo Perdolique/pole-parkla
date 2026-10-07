@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pole parkla!</string>
+    <string name="shortcut_new_report">Uus teade</string>
     <string name="back">Tagasi</string>
     <string name="close">Sulge</string>
     <string name="save">Salvesta</string>

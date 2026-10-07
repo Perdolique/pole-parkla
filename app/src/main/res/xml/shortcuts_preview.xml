@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="new_report"
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_new_report"
+        android:shortcutShortLabel="@string/shortcut_new_report"
+        android:shortcutLongLabel="@string/shortcut_new_report">
+        <intent
+            android:action="com.perdolique.poleparkla.action.NEW_REPORT"
+            android:targetPackage="com.perdolique.poleparkla.preview"
+            android:targetClass="com.perdolique.poleparkla.MainActivity" />
+    </shortcut>
+</shortcuts>

@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -60,10 +61,12 @@ private object Routes {
 internal fun rememberInitialRoute(
     onboardingComplete: Boolean,
     reports: List<Report>,
-): String = remember {
+    startNewReport: Boolean = false,
+): String = rememberSaveable {
     val restoredDraft = reports.firstOrNull { it.photos.isNotEmpty() }
     when {
         !onboardingComplete -> Routes.Onboarding
+        startNewReport -> Routes.Camera
         restoredDraft != null -> Routes.review(restoredDraft.id)
         else -> Routes.Camera
     }
@@ -81,6 +84,7 @@ fun PoleParklaApp(
     viewModel: PoleParklaViewModel,
     photoStore: PhotoStore,
     onRequestInAppReview: () -> Unit,
+    startNewReport: Boolean = false,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val reports by viewModel.reports.collectAsStateWithLifecycle()
@@ -99,7 +103,7 @@ fun PoleParklaApp(
         viewModel.notices.collect { notice -> snackbar.showSnackbar(context.noticeMessage(notice)) }
     }
     CollectUiEffects(viewModel.effects, onRequestInAppReview)
-    val initialRoute = rememberInitialRoute(settings.onboardingComplete, reports.orEmpty())
+    val initialRoute = rememberInitialRoute(settings.onboardingComplete, reports.orEmpty(), startNewReport)
     val navController = rememberNavController()
 
     Box(Modifier.fillMaxSize()) {

@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
                 PoleParklaApp(
                     viewModel = viewModel,
                     photoStore = container.photoStore,
+                    startNewReport = intent.action == ACTION_NEW_REPORT,
                     onRequestInAppReview = {
                         lifecycleScope.launch {
                             container.playReviewLauncher.launch(this@MainActivity)
@@ -35,5 +36,9 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    private companion object {
+        const val ACTION_NEW_REPORT = "com.perdolique.poleparkla.action.NEW_REPORT"
     }
 }
