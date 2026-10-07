@@ -29,6 +29,7 @@ android {
         versionCode = ppVersionCode
         versionName = ppVersionName
         manifestPlaceholders["ppLauncherLabel"] = "@string/app_name"
+        manifestPlaceholders["ppShortcutsResource"] = "@xml/shortcuts"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -72,6 +73,7 @@ android {
             if (ppBuildChannel == "pr") {
                 applicationIdSuffix = ".debug"
                 manifestPlaceholders["ppLauncherLabel"] = "Pole parkla! Debug"
+                manifestPlaceholders["ppShortcutsResource"] = "@xml/shortcuts_debug"
                 signingConfig = signingConfigs.getByName("ci")
             }
         }
@@ -85,6 +87,7 @@ android {
             if (ppBuildChannel == "pr") {
                 applicationIdSuffix = ".preview"
                 manifestPlaceholders["ppLauncherLabel"] = "Pole parkla! Preview"
+                manifestPlaceholders["ppShortcutsResource"] = "@xml/shortcuts_preview"
             }
             val signingName = if (ppBuildChannel == "local") "release" else "ci"
             signingConfigs.findByName(signingName)?.let { signingConfig = it }

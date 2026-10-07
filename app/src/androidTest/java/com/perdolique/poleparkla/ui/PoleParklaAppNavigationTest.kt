@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -65,6 +66,55 @@ class PoleParklaAppNavigationTest {
             assertEquals("review/draft", readyRoute)
             assertEquals("review/draft", handedOffRoute)
         }
+    }
+
+    @Test
+    fun newReportShortcutStartsOnCameraInsteadOfRestoringSavedReport() {
+        composeRule.setContent {
+            Text(
+                text = rememberInitialRoute(
+                    onboardingComplete = true,
+                    reports = listOf(draftReport()),
+                    startNewReport = true,
+                ),
+                modifier = Modifier.testTag("initial_route"),
+            )
+        }
+
+        composeRule.onNodeWithTag("initial_route").assertTextEquals("camera")
+    }
+
+    @Test
+    fun onboardingTakesPriorityOverNewReportShortcut() {
+        composeRule.setContent {
+            Text(
+                text = rememberInitialRoute(
+                    onboardingComplete = false,
+                    reports = listOf(draftReport()),
+                    startNewReport = true,
+                ),
+                modifier = Modifier.testTag("initial_route"),
+            )
+        }
+
+        composeRule.onNodeWithTag("initial_route").assertTextEquals("onboarding")
+    }
+
+    @Test
+    fun savingDraftDoesNotReplaceStartRouteAfterStateRestoration() {
+        var reports by mutableStateOf(emptyList<Report>())
+        val restorationTester = StateRestorationTester(composeRule)
+        restorationTester.setContent {
+            Text(
+                text = rememberInitialRoute(onboardingComplete = true, reports = reports),
+                modifier = Modifier.testTag("initial_route"),
+            )
+        }
+
+        composeRule.runOnIdle { reports = listOf(draftReport()) }
+        restorationTester.emulateSavedInstanceStateRestore()
+
+        composeRule.onNodeWithTag("initial_route").assertTextEquals("camera")
     }
 
     @Test
