@@ -39,6 +39,11 @@ test("workflow keeps fork PRs away from production secrets and serializes releas
     assert.equal(android.steps[checkout].with["fetch-depth"], 0);
     assert.equal(android.steps[checkout].with["persist-credentials"], false);
   }
+  const notes = preview.steps.findIndex((step: { run?: string }) => step.run === "pnpm --dir ci run check:play-notes");
+  const previewBuild = preview.steps.findIndex((step: { run?: string }) => step.run === "pnpm --dir ci run build:test");
+  const previewInstall = preview.steps.findIndex((step: { run?: string }) => step.run === "pnpm --dir ci install --frozen-lockfile");
+  assert.ok(notes > previewInstall && notes < previewBuild, "PR notes must be checked before Android builds");
+  assert.equal(preview.steps[notes].env.GH_TOKEN, "${{ github.token }}");
   assert.deepEqual(workflow.jobs.node.strategy.matrix.project, ["worker", "site", "ci"]);
   assert.match(production.if, /refs\/heads\/master/);
 });

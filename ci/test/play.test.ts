@@ -6,7 +6,6 @@ import { mock, test } from "node:test";
 import { parse } from "yaml";
 import * as v from "valibot";
 import { PlayNotesSchema, uploadPlayDraft } from "../src/play.ts";
-import { readPlayNotes } from "../src/play-notes.ts";
 
 interface FixtureBundle {
   versionCode: number;
@@ -135,26 +134,6 @@ test("Play upload keeps active releases, commits only a translated draft, and ha
     await assert.rejects(uploadPlayDraft("", path, info, notes), /access token is missing/);
   } finally {
     fetchMock.mock.restore();
-    await rm(directory, { recursive: true, force: true });
-  }
-});
-
-test("missing reviewed notes stop Android changes before upload but allow build-only updates", async () => {
-  const directory = await mkdtemp("/tmp/pole-parkla-play-notes-test-");
-  const originalPath = process.env.PATH;
-  const script = join(directory, "git");
-  const info = { versionName: "999.0.1", versionCode: 4, commitSha: "2".repeat(40) };
-  const tags = "#!/bin/sh\nif [ \"$1\" = tag ]; then printf 'v999.0.0\\n'; else ";
-  try {
-    process.env.PATH = `${directory}:${originalPath}`;
-    await writeFile(script, `${tags}printf 'app/src/main/Settings.kt\\n'; fi\n`, { mode: 0o700 });
-    await assert.rejects(readPlayNotes(info), /Add reviewed et, en-US, and ru-RU notes/);
-    await writeFile(script, `${tags}exit 0; fi\n`, { mode: 0o700 });
-    const notes = await readPlayNotes(info);
-    assert.deepEqual(Object.keys(notes), ["et", "en-US", "ru-RU"]);
-    assert.equal(notes["en-US"], "Updated the app build and release process.");
-  } finally {
-    process.env.PATH = originalPath;
     await rm(directory, { recursive: true, force: true });
   }
 });

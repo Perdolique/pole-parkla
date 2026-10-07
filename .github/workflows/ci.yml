@@ -30,6 +30,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - run: pnpm --dir ci install --frozen-lockfile
+      - name: Check Google Play release notes
+        run: pnpm --dir ci run check:play-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
       - uses: actions/setup-java@v5
         with:
           distribution: temurin

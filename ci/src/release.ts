@@ -1,8 +1,10 @@
 import { baseline, decideRelease } from "./model.ts";
 import type { BuildInfo, ReleaseState } from "./model.ts";
+import type { PlayNotes } from "./play.ts";
 
 export interface ReleaseServices {
   readState: () => Promise<ReleaseState[]>;
+  readPlayNotes: (info: BuildInfo) => Promise<PlayNotes>;
   isAncestor: (older: string, newer: string) => Promise<boolean>;
   verifyPublished: (tag: string, info: BuildInfo) => Promise<void>;
   recover: (tag: string, info: BuildInfo, previousTag: string) => Promise<void>;
@@ -28,6 +30,7 @@ export async function releaseAndroid(
     await services.verifyPublished(decision.tag, info);
     console.log(`${decision.tag} is already published and complete.`);
   } else if (decision.action === "recover") {
+    await services.readPlayNotes(info);
     if (mode === "publish") {
       const published = states.filter((state) => state.published);
       const previousCode = decision.versionCode - 1;
