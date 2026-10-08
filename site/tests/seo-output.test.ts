@@ -488,3 +488,33 @@ test('localized RSS feeds expose only non-draft releases', async () => {
     }
   }
 })
+
+test('the New report update is visible on every localized home page, updates page, and feed', async () => {
+  const titles = {
+    et: 'Otsetee uue teate alustamiseks',
+    en: 'A shortcut to start a new report',
+    ru: 'Ярлык «Новый репорт»'
+  } as const
+  const labels = {
+    et: 'Viimane oluline uuendus',
+    en: 'Latest important update',
+    ru: 'Последнее важное обновление'
+  } as const
+
+  for (const locale of locales) {
+    const prefix = localeConfig[locale].prefix
+    const homePath = path.join(distRoot, prefix, 'index.html')
+    const updatesPath = path.join(distRoot, prefix, 'updates/index.html')
+    const feedPath = path.join(distRoot, prefix, 'updates.xml')
+    const home = await readFile(homePath, 'utf8')
+    const updates = await readFile(updatesPath, 'utf8')
+    const feed = await readFile(feedPath, 'utf8')
+    assert.ok(home.includes(titles[locale]), `${locale} home is missing the shortcut update`)
+    assert.ok(home.includes(labels[locale]), `${locale} home must describe the latest important update`)
+    assert.ok(home.includes('1.2.0'))
+    assert.ok(updates.includes(titles[locale]))
+    assert.ok(updates.includes('id="version-1.2.0"'))
+    assert.ok(feed.includes('#version-1.2.0'))
+    assert.ok(feed.includes('Wed, 07 Oct 2026'))
+  }
+})
