@@ -38,6 +38,13 @@ The native apps use Kotlin and Jetpack Compose on Android, and Swift and SwiftUI
 on iPhone. The optional recognition service runs on Cloudflare Workers, and the
 website uses Astro.
 
+Install the root formatting tool with `pnpm install --frozen-lockfile`. Run
+`pnpm format` to format supported files or `pnpm format:check` to check them.
+Worsier uses its default configuration in `worsier.jsonc`. It formats JavaScript,
+TypeScript, and Vue scripts; it does not format Astro, Kotlin, or Swift files.
+CI checks formatting before Android builds and releases. The `ci/`, `site/`,
+and `worker/` packages keep their own dependencies and lockfiles.
+
 - [Development guide](docs/development.md) — app builds, signing, and architecture.
 - [Recognition Worker](worker/README.md) — setup and deployment.
 - [Website](site/README.md) — local development and deployment.

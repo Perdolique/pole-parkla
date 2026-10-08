@@ -68,6 +68,11 @@ keeps only commits that change production Android inputs:
 - root Gradle settings, build properties, both wrapper scripts, and `gradle/**`;
 - `ci/src/android.ts`, which controls the Android build.
 
+For `ci/src/android.ts`, the policy compares the old and new contents after
+default Worsier formatting with AST verification. A formatting-only change does
+not release Android. Real code changes, file creation or removal, and file-mode
+changes still count. This rule applies regardless of the commit message.
+
 Merge commits use their first-parent diff. Deleted files and files moved outside
 Android still count. Website, Worker, iOS, documentation, tests, Play notes, and
 publication-tool changes alone do not release Android. For example,

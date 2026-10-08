@@ -1,4 +1,5 @@
 import { siteConfig } from '../config'
+
 import {
   getLocalizedPath,
   getLocalizedRssPath,
@@ -12,44 +13,44 @@ import {
 export type SeoPageKind = 'home' | 'privacy' | 'updates' | 'not-found'
 
 export interface SeoAlternate {
-  href: string
-  hreflang: string
-  locale: Locale
+  href: string;
+  hreflang: string;
+  locale: Locale;
 }
 
 export interface SeoImage {
-  alt: string
-  height: number
-  mimeType: 'image/jpeg'
-  url: string
-  width: number
+  alt: string;
+  height: number;
+  mimeType: 'image/jpeg';
+  url: string;
+  width: number;
 }
 
 export interface SeoMetadataInput {
-  dateModified?: string
-  description: string
-  imageAlt: string
-  locale: Locale
-  pageKind: SeoPageKind
-  robots?: string
-  route: RouteName
-  title: string
+  dateModified?: string;
+  description: string;
+  imageAlt: string;
+  locale: Locale;
+  pageKind: SeoPageKind;
+  robots?: string;
+  route: RouteName;
+  title: string;
 }
 
 export interface SeoMetadata {
-  alternateUrls: readonly SeoAlternate[]
-  canonicalUrl: string
-  dateModified?: string
-  defaultUrl: string
-  description: string
-  image: SeoImage
-  locale: Locale
-  openGraphLocale: string
-  pageKind: SeoPageKind
-  robots: string
-  route: RouteName
-  rssUrl: string
-  title: string
+  alternateUrls: readonly SeoAlternate[];
+  canonicalUrl: string;
+  dateModified?: string;
+  defaultUrl: string;
+  description: string;
+  image: SeoImage;
+  locale: Locale;
+  openGraphLocale: string;
+  pageKind: SeoPageKind;
+  robots: string;
+  route: RouteName;
+  rssUrl: string;
+  title: string;
 }
 
 const indexRobots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'
@@ -63,6 +64,7 @@ const socialImagePaths = {
 export function createSeoMetadata(input: SeoMetadataInput): SeoMetadata {
   const canonicalPath = getLocalizedPath(input.locale, input.route)
   const canonicalUrl = new URL(canonicalPath, siteConfig.siteUrl).toString()
+
   const alternateUrls = locales.map((locale) => {
     const path = getLocalizedPath(locale, input.route)
 
@@ -72,6 +74,7 @@ export function createSeoMetadata(input: SeoMetadataInput): SeoMetadata {
       locale
     }
   })
+
   const defaultPath = getLocalizedPath('et', input.route)
   const imageUrl = new URL(socialImagePaths[input.locale], siteConfig.siteUrl).toString()
   const rssPath = getLocalizedRssPath(input.locale)
@@ -82,6 +85,7 @@ export function createSeoMetadata(input: SeoMetadataInput): SeoMetadata {
     dateModified: input.dateModified,
     defaultUrl: new URL(defaultPath, siteConfig.siteUrl).toString(),
     description: input.description,
+
     image: {
       alt: input.imageAlt,
       height: 630,
@@ -89,6 +93,7 @@ export function createSeoMetadata(input: SeoMetadataInput): SeoMetadata {
       url: imageUrl,
       width: 1200
     },
+
     locale: input.locale,
     openGraphLocale: openGraphLocales[input.locale],
     pageKind: input.pageKind,
@@ -109,28 +114,33 @@ export function buildStructuredData(seo: SeoMetadata): string {
   const websiteId = `${siteConfig.siteUrl}/#website`
   const applicationId = `${siteConfig.siteUrl}/#application`
   const pageId = `${seo.canonicalUrl}#webpage`
+
   const person = {
     '@type': 'Person',
     '@id': personId,
     name: siteConfig.developerName,
     url: 'https://perd.dev/'
   }
+
   const website = {
     '@type': 'WebSite',
     '@id': websiteId,
     url: `${siteConfig.siteUrl}/`,
     name: 'Pole parkla!',
     inLanguage: locales.map((locale) => localeLanguageTags[locale]),
+
     publisher: {
       '@id': personId
     }
   }
+
   const pageTypes = {
     home: 'WebPage',
     privacy: 'WebPage',
     updates: 'CollectionPage',
     'not-found': 'WebPage'
   } as const satisfies Record<SeoPageKind, string>
+
   const webPage: Record<string, unknown> = {
     '@type': pageTypes[seo.pageKind],
     '@id': pageId,
@@ -138,6 +148,7 @@ export function buildStructuredData(seo: SeoMetadata): string {
     name: seo.title,
     description: seo.description,
     inLanguage: localeLanguageTags[seo.locale],
+
     isPartOf: {
       '@id': websiteId
     }
@@ -165,9 +176,11 @@ export function buildStructuredData(seo: SeoMetadata): string {
       countriesSupported: 'EE',
       inLanguage: localeLanguageTags[seo.locale],
       installUrl: siteConfig.googlePlay?.url,
+
       screenshot: ['camera', 'review', 'report'].map((id) =>
         new URL(`/screenshots/${seo.locale}/${id}.webp`, siteConfig.siteUrl).toString()
       ),
+
       author: {
         '@id': personId
       }
