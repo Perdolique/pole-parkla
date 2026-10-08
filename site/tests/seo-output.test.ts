@@ -9,20 +9,20 @@ type Locale = 'et' | 'en' | 'ru'
 type PageName = 'home' | 'privacy' | 'updates'
 
 interface LocaleData {
-  readonly googlePlayAlt: string
-  readonly googlePlayBadge: string
-  readonly htmlLanguage: string
-  readonly languageTag: string
-  readonly openGraphLocale: string
-  readonly prefix: string
-  readonly rss: string
-  readonly socialImage: string
+  readonly googlePlayAlt: string;
+  readonly googlePlayBadge: string;
+  readonly htmlLanguage: string;
+  readonly languageTag: string;
+  readonly openGraphLocale: string;
+  readonly prefix: string;
+  readonly rss: string;
+  readonly socialImage: string;
 }
 
 interface PageData {
-  readonly output: string
-  readonly pageType: 'CollectionPage' | 'WebPage'
-  readonly segment: string
+  readonly output: string;
+  readonly pageType: 'CollectionPage' | 'WebPage';
+  readonly segment: string;
 }
 
 type HtmlAttributes = Map<string, string>
@@ -30,8 +30,8 @@ type ExpectedAttributes = Readonly<Record<string, string>>
 type StructuredDataNode = Record<string, unknown>
 
 interface StructuredData {
-  readonly '@context': 'https://schema.org'
-  readonly '@graph': readonly StructuredDataNode[]
+  readonly '@context': 'https://schema.org';
+  readonly '@graph': readonly StructuredDataNode[];
 }
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -40,6 +40,7 @@ const siteUrl = 'https://poleparkla.ee'
 const googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.perdolique.poleparkla'
 const personId = `${siteUrl}/#person`
 const screenshotSizes = '(max-width: 387px) calc(78vw - 2px), 300px'
+
 const localeConfig = {
   et: {
     googlePlayAlt: 'Laadi alla Google Playst',
@@ -51,6 +52,7 @@ const localeConfig = {
     socialImage: `${siteUrl}/social/pole-parkla-et.jpg`,
     rss: `${siteUrl}/updates.xml`
   },
+
   en: {
     googlePlayAlt: 'Get it on Google Play',
     googlePlayBadge: '/google-play/en_badge_web_generic.png',
@@ -61,6 +63,7 @@ const localeConfig = {
     socialImage: `${siteUrl}/social/pole-parkla-en.jpg`,
     rss: `${siteUrl}/en/updates.xml`
   },
+
   ru: {
     googlePlayAlt: 'Доступно в Google Play',
     googlePlayBadge: '/google-play/ru_badge_web_generic.png',
@@ -72,23 +75,27 @@ const localeConfig = {
     rss: `${siteUrl}/ru/updates.xml`
   }
 } satisfies Record<Locale, LocaleData>
+
 const pageConfig = {
   home: {
     output: 'index.html',
     pageType: 'WebPage',
     segment: ''
   },
+
   privacy: {
     output: 'privacy/index.html',
     pageType: 'WebPage',
     segment: 'privacy/'
   },
+
   updates: {
     output: 'updates/index.html',
     pageType: 'CollectionPage',
     segment: 'updates/'
   }
 } satisfies Record<PageName, PageData>
+
 const locales = ['et', 'en', 'ru'] as const satisfies readonly Locale[]
 const pages = ['home', 'privacy', 'updates'] as const satisfies readonly PageName[]
 
@@ -129,6 +136,7 @@ function getMetaContent(html: string, selectorName: string, selectorValue: strin
   const meta = findTag(html, 'meta', { [selectorName]: selectorValue })
 
   assert.ok(meta, `Missing meta ${selectorName}="${selectorValue}"`)
+
   const content = meta.get('content')
 
   if (content === undefined) {
@@ -142,6 +150,7 @@ function getLinkHref(html: string, expectedAttributes: ExpectedAttributes): stri
   const link = findTag(html, 'link', expectedAttributes)
 
   assert.ok(link, `Missing link ${JSON.stringify(expectedAttributes)}`)
+
   const href = link.get('href')
 
   if (href === undefined) {
@@ -155,6 +164,7 @@ function getTitle(html: string): string {
   const match = html.match(/<title>([^<]+)<\/title>/)
 
   assert.ok(match, 'Missing title')
+
   const title = match[1]
 
   assert.notEqual(title, undefined, 'Title is empty')
@@ -170,13 +180,16 @@ function getStructuredData(html: string): StructuredData {
   const match = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)
 
   assert.ok(match, 'Missing JSON-LD')
+
   const json = match[1]
 
   assert.notEqual(json, undefined, 'JSON-LD is empty')
+
   const value: unknown = JSON.parse(json)
 
   assert.ok(isStructuredDataNode(value), 'JSON-LD must be an object')
   assert.equal(value['@context'], 'https://schema.org')
+
   const graph = value['@graph']
 
   assert.ok(Array.isArray(graph), 'JSON-LD @graph must be an array')
@@ -221,9 +234,17 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
         assert.match(robots, /^index,follow/)
         assert.match(robots, /max-image-preview:large/)
         assert.equal(getLinkHref(html, { rel: 'canonical' }), canonicalUrl)
-        assert.equal(getLinkHref(html, { rel: 'describedby', type: 'text/plain' }), '/llms.txt')
+
+        assert.equal(getLinkHref(html, {
+          rel: 'describedby',
+          type: 'text/plain'
+        }), '/llms.txt')
+
         assert.equal(
-          getLinkHref(html, { rel: 'alternate', type: 'application/rss+xml' }),
+          getLinkHref(html, {
+            rel: 'alternate',
+            type: 'application/rss+xml'
+          }),
           localeData.rss
         )
 
@@ -232,15 +253,22 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           const alternateUrl = getCanonicalUrl(alternateLocale, page)
 
           assert.equal(
-            getLinkHref(html, { rel: 'alternate', hreflang: alternateData.languageTag }),
+            getLinkHref(html, {
+              rel: 'alternate',
+              hreflang: alternateData.languageTag
+            }),
             alternateUrl
           )
         }
 
         assert.equal(
-          getLinkHref(html, { rel: 'alternate', hreflang: 'x-default' }),
+          getLinkHref(html, {
+            rel: 'alternate',
+            hreflang: 'x-default'
+          }),
           getCanonicalUrl('et', page)
         )
+
         assert.equal(getMetaContent(html, 'property', 'og:title'), title)
         assert.equal(getMetaContent(html, 'property', 'og:description'), description)
         assert.equal(getMetaContent(html, 'property', 'og:url'), canonicalUrl)
@@ -294,7 +322,9 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           assert.match(html, /<h1[^>]*>Pole parkla!<\/h1>/)
           assert.equal((html.match(/<h1\b/g) ?? []).length, 1)
           assert.match(html, /<dl\b/)
+
           const images = getTags(html, 'img')
+
           const brandImage = images.find(
             (attributes) =>
               attributes.get('width') === '42' && attributes.get('height') === '42'
@@ -309,22 +339,27 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
             href: googlePlayUrl,
             rel: 'noreferrer'
           })
+
           const googlePlayBadge = findTag(html, 'img', {
             alt: localeData.googlePlayAlt,
             height: '250',
             src: localeData.googlePlayBadge,
             width: '646'
           })
+
           const googlePlayBadgeOutput = await readFile(
             path.join(distRoot, localeData.googlePlayBadge.slice(1))
           )
+
           const googlePlayBadgeMetadata = await sharp(googlePlayBadgeOutput).metadata()
+
           const googlePlayBadgeVisible = await sharp(googlePlayBadgeOutput)
             .trim({ threshold: 0 })
             .toBuffer({ resolveWithObject: true })
 
           assert.ok(googlePlayLink, `Missing Google Play link for ${locale}`)
           assert.ok(googlePlayBadge, `Missing localized Google Play badge for ${locale}`)
+
           const googlePlayBadgeClass = googlePlayBadge.get('class') ?? ''
 
           assert.match(googlePlayBadgeClass, /(?:^|\s)google-play-badge(?:\s|$)/)
@@ -335,6 +370,7 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           assert.equal(googlePlayBadgeVisible.info.height, 168)
           assert.equal(googlePlayBadgeVisible.info.trimOffsetLeft, -41)
           assert.equal(googlePlayBadgeVisible.info.trimOffsetTop, -41)
+
           assert.deepEqual(
             [...googlePlayBadgeOutput.subarray(0, 8)],
             [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
@@ -344,9 +380,11 @@ test('all indexable pages expose a complete localized SEO contract', async (cont
           const cameraImage = findTag(html, 'img', {
             src: `/screenshots/${locale}/camera.webp`
           })
+
           const reviewImage = findTag(html, 'img', {
             src: `/screenshots/${locale}/review.webp`
           })
+
           const reportImage = findTag(html, 'img', {
             src: `/screenshots/${locale}/report.webp`
           })
@@ -383,6 +421,7 @@ test('sitemap contains only the nine canonical localized HTML pages', async () =
   const sitemap = await readFile(path.join(distRoot, 'sitemap-0.xml'), 'utf8')
   const sitemapIndex = await readFile(path.join(distRoot, 'sitemap-index.xml'), 'utf8')
   const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
+
   const expectedLocations = locales.flatMap((locale) =>
     pages.map((page) => getCanonicalUrl(locale, page))
   )
@@ -420,6 +459,7 @@ test('crawler and cache policies protect discovery and static assets', async () 
   const robots = await readFile(path.join(distRoot, 'robots.txt'), 'utf8')
   const headers = await readFile(path.join(distRoot, '_headers'), 'utf8')
   const llms = await readFile(path.join(distRoot, 'llms.txt'), 'utf8')
+
   const blockedCrawlers = [
     'GPTBot',
     'ClaudeBot',
@@ -443,14 +483,17 @@ test('crawler and cache policies protect discovery and static assets', async () 
   }
 
   assert.match(headers, /Content-Signal: search=yes, ai-input=yes, ai-train=no, use=reference/)
+
   assert.match(
     headers,
     /\/_astro\/\*\n\s+Cache-Control: public, max-age=31536000, immutable/
   )
+
   assert.match(
     headers,
     /\/screenshots\/\*\n\s+Cache-Control: public, max-age=86400, must-revalidate/
   )
+
   assert.doesNotMatch(headers.split('\n\n')[0] ?? '', /Cache-Control/)
   assert.match(headers, /workers\.dev\/\*\n\s+X-Robots-Tag: noindex, nofollow/)
   assert.match(llms, /Pole parkla does not send reports/)
@@ -495,6 +538,7 @@ test('the New report update is visible on every localized home page, updates pag
     en: 'A shortcut to start a new report',
     ru: 'Ярлык «Новый репорт»'
   } as const
+
   const labels = {
     et: 'Viimane oluline uuendus',
     en: 'Latest important update',
@@ -509,6 +553,7 @@ test('the New report update is visible on every localized home page, updates pag
     const home = await readFile(homePath, 'utf8')
     const updates = await readFile(updatesPath, 'utf8')
     const feed = await readFile(feedPath, 'utf8')
+
     assert.ok(home.includes(titles[locale]), `${locale} home is missing the shortcut update`)
     assert.ok(home.includes(labels[locale]), `${locale} home must describe the latest important update`)
     assert.ok(home.includes('1.2.0'))

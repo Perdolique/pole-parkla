@@ -9,25 +9,25 @@ type ScreenshotId = 'camera' | 'review' | 'report'
 type ResponsiveWidth = 420 | 600
 
 interface SocialText {
-  readonly footer: string
-  readonly lines: readonly string[]
+  readonly footer: string;
+  readonly lines: readonly string[];
 }
 
 interface ImageFileRecord {
-  readonly format: string | undefined
-  readonly hasExif: boolean
-  readonly height: number | undefined
-  readonly path: string
-  readonly sha256: string
-  readonly size: number
-  readonly width: number | undefined
+  readonly format: string | undefined;
+  readonly hasExif: boolean;
+  readonly height: number | undefined;
+  readonly path: string;
+  readonly sha256: string;
+  readonly size: number;
+  readonly width: number | undefined;
 }
 
 interface ImageManifest {
-  readonly generatorHash: string
-  readonly outputs: readonly ImageFileRecord[]
-  readonly schemaVersion: 1
-  readonly sources: readonly ImageFileRecord[]
+  readonly generatorHash: string;
+  readonly outputs: readonly ImageFileRecord[];
+  readonly schemaVersion: 1;
+  readonly sources: readonly ImageFileRecord[];
 }
 
 const scriptPath = fileURLToPath(import.meta.url)
@@ -36,15 +36,18 @@ const manifestPath = path.join(siteRoot, 'scripts/site-images-manifest.json')
 const locales = ['et', 'en', 'ru'] as const satisfies readonly Locale[]
 const screenshotIds = ['camera', 'review', 'report'] as const satisfies readonly ScreenshotId[]
 const responsiveWidths = [420, 600] as const satisfies readonly ResponsiveWidth[]
+
 const socialText = {
   et: {
     lines: ['Teade valesti pargitud', 'sõidukist'],
     footer: 'Android · Eesti'
   },
+
   en: {
     lines: ['Report a vehicle', 'blocking a path'],
     footer: 'Android · Estonia'
   },
+
   ru: {
     lines: ['Обращение о машине', 'на велодорожке', 'или тротуаре'],
     footer: 'Android · Эстония'
@@ -87,11 +90,12 @@ function escapeXml(text: string): string {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&apos;')
+    .replaceAll('\'', '&apos;')
 }
 
 function createSocialTextSvg(locale: Locale): Buffer {
   const text = socialText[locale]
+
   const lineElements = text.lines
     .map((line, index) => {
       const y = 276 + index * 58
@@ -128,9 +132,15 @@ async function createSocialCard(locale: Locale, brandMark: Buffer): Promise<void
   const reviewPath = getSourcePath(locale, 'review')
   const screenshotWidth = 316
   const screenshotHeight = 612
+
   const screenshot = await sharp(reviewPath)
     .resize({ width: screenshotWidth })
-    .extract({ left: 0, top: 0, width: screenshotWidth, height: screenshotHeight })
+    .extract({
+      left: 0,
+      top: 0,
+      width: screenshotWidth,
+      height: screenshotHeight
+    })
     .composite([
       {
         input: createRoundedMask(screenshotWidth, screenshotHeight, 28),
@@ -139,12 +149,17 @@ async function createSocialCard(locale: Locale, brandMark: Buffer): Promise<void
     ])
     .png()
     .toBuffer()
+
   const phoneBackground = Buffer.from(`
     <svg width="352" height="630" xmlns="http://www.w3.org/2000/svg">
       <rect width="352" height="670" x="0" y="0" rx="44" fill="#f3f5ef" />
     </svg>
   `)
-  const resizedMark = await sharp(brandMark).resize({ width: 96, height: 96 }).png().toBuffer()
+
+  const resizedMark = await sharp(brandMark).resize({
+    width: 96,
+    height: 96
+  }).png().toBuffer()
 
   await sharp({
     create: {
@@ -155,13 +170,32 @@ async function createSocialCard(locale: Locale, brandMark: Buffer): Promise<void
     }
   })
     .composite([
-      { input: phoneBackground, left: 824, top: 0 },
-      { input: screenshot, left: 842, top: 18 },
-      { input: resizedMark, left: 72, top: 58 },
-      { input: createSocialTextSvg(locale), left: 0, top: 0 }
+      {
+        input: phoneBackground,
+        left: 824,
+        top: 0
+      },
+      {
+        input: screenshot,
+        left: 842,
+        top: 18
+      },
+      {
+        input: resizedMark,
+        left: 72,
+        top: 58
+      },
+      {
+        input: createSocialTextSvg(locale),
+        left: 0,
+        top: 0
+      }
     ])
     .flatten({ background: '#174b38' })
-    .jpeg({ quality: 86, chromaSubsampling: '4:4:4' })
+    .jpeg({
+      quality: 86,
+      chromaSubsampling: '4:4:4'
+    })
     .toFile(getSocialPath(locale))
 }
 
@@ -180,8 +214,14 @@ async function generateImages(): Promise<void> {
         const outputPath = getResponsivePath(locale, screenshotId, width)
 
         await sharp(sourcePath)
-          .resize({ width, withoutEnlargement: true })
-          .webp({ quality: 82, effort: 6 })
+          .resize({
+            width,
+            withoutEnlargement: true
+          })
+          .webp({
+            quality: 82,
+            effort: 6
+          })
           .toFile(outputPath)
       }
     }
@@ -189,7 +229,10 @@ async function generateImages(): Promise<void> {
     await createSocialCard(locale, brandMark)
   }
 
-  const resizedMark = await sharp(brandMark).resize({ width: 116, height: 116 }).png().toBuffer()
+  const resizedMark = await sharp(brandMark).resize({
+    width: 116,
+    height: 116
+  }).png().toBuffer()
 
   await sharp({
     create: {
@@ -199,7 +242,11 @@ async function generateImages(): Promise<void> {
       background: '#174b38'
     }
   })
-    .composite([{ input: resizedMark, left: 32, top: 32 }])
+    .composite([{
+      input: resizedMark,
+      left: 32,
+      top: 32
+    }])
     .png({ compressionLevel: 9 })
     .toFile(path.join(siteRoot, 'public/apple-touch-icon.png'))
 }
@@ -218,6 +265,7 @@ function getOutputPaths(): string[] {
       responsiveWidths.map((width) => getResponsivePath(locale, screenshotId, width))
     )
   )
+
   const socialPaths = locales.map(getSocialPath)
 
   return [...responsivePaths, ...socialPaths, path.join(siteRoot, 'public/apple-touch-icon.png')]
@@ -346,6 +394,7 @@ if (process.argv.includes('--check')) {
   await checkImages()
 } else {
   await generateImages()
+
   const manifest = await createManifest()
 
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`)

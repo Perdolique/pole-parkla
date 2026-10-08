@@ -12,6 +12,7 @@ captures/
 .DS_Store
 
 # Node local artifacts
+/node_modules/
 /.pnpm-store/
 ci/node_modules/
 ci/artifacts/

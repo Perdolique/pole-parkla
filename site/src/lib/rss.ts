@@ -10,6 +10,7 @@ export async function createUpdatesFeed(locale: Locale, configuredSite: URL | un
   const updates = await getPublishedUpdates(locale)
   const site = configuredSite ?? new URL(siteConfig.siteUrl)
   const updatesPath = getLocalizedPath(locale, 'updates')
+
   const items = updates.map((entry) => ({
     title: `${entry.data.version} — ${entry.data.title}`,
     description: entry.data.highlights.join(' '),

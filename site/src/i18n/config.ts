@@ -19,8 +19,8 @@ export const openGraphLocales = {
 export type RouteName = 'home' | 'privacy' | 'updates'
 
 export interface LocaleRouteProps {
-  [key: string]: unknown
-  locale: Locale
+  [key: string]: unknown;
+  locale: Locale;
 }
 
 const routeSegments = {
@@ -47,13 +47,14 @@ export function getLocalizedRssPath(locale: Locale): string {
 }
 
 export function getStaticLocalePaths(): Array<{
-  params: { lang: string | undefined }
-  props: LocaleRouteProps
+  params: { lang: string | undefined };
+  props: LocaleRouteProps;
 }> {
   return locales.map((locale) => ({
     params: {
       lang: locale === defaultLocale ? undefined : locale
     },
+
     props: {
       locale
     }

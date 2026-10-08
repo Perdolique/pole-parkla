@@ -11,9 +11,21 @@ permissions:
   contents: read
 
 jobs:
+  format:
+    name: Code format
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - name: Set up Node, pnpm, and formatting tools
+        uses: Perdolique/automations/.github/actions/setup-pnpm@v4
+        with:
+          install-dependencies: true
+      - run: pnpm run format:check
+
   android-test:
     name: Android test APKs
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/master')
+    needs: format
     runs-on: ubuntu-26.04
     timeout-minutes: 45
     concurrency:
@@ -67,7 +79,7 @@ jobs:
   android-production:
     name: Android production
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
-    needs: node
+    needs: [format, node]
     runs-on: ubuntu-26.04
     timeout-minutes: 45
     environment: android-production

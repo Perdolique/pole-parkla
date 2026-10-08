@@ -1,0 +1,17 @@
+{
+  "name": "pole-parkla-tools",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": ">=26.7.0"
+  },
+  "scripts": {
+    "format": "worsier --write .",
+    "format:check": "worsier --check ."
+  },
+  "devDependencies": {
+    "worsier": "3.6.1"
+  }
+}

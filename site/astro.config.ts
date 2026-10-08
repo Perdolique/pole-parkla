@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap'
 
 const localized404Pages: AstroIntegration = {
   name: 'localized-404-pages',
+
   hooks: {
     'astro:build:done': async ({ dir }) => {
       await Promise.all(
@@ -40,8 +41,10 @@ export default defineConfig({
 
         return !pathname.includes('/404/') && !pathname.endsWith('.xml')
       },
+
       i18n: {
         defaultLocale: 'et',
+
         locales: {
           et: 'et-EE',
           en: 'en-EE',
