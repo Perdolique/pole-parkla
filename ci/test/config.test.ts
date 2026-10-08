@@ -63,3 +63,17 @@ test("semantic-release publishes only a draft without npm, comments, issues, or 
   assert.equal(github[1].releasedLabels, false);
   assert.equal(github[1].labels, false);
 });
+
+test("automatic Play uploads use the originating CI SHA and skip authentication without its release", async () => {
+  const source = await readFile(new URL("../../.github/workflows/google-play.yml", import.meta.url), "utf8");
+  const workflow = parse(source);
+  assert.deepEqual(workflow.on.workflow_run.workflows, ["CI"]);
+  const steps = workflow.jobs.draft.steps;
+  const prepare = steps.find((step: { id?: string }) => step.id === "prepare");
+  assert.equal(prepare.env.PP_PLAY_COMMIT_SHA, "${{ github.event.workflow_run.head_sha }}");
+  assert.equal(prepare.env.PP_PLAY_TAG, "${{ inputs.tag }}");
+  const auth = steps.find((step: { id?: string }) => step.id === "auth");
+  const upload = steps.find((step: { name?: string }) => step.name === "Save the production draft");
+  assert.equal(auth.if, "steps.prepare.outputs.should_upload == 'true'");
+  assert.equal(upload.if, "steps.prepare.outputs.should_upload == 'true'");
+});

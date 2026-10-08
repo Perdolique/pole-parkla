@@ -109,6 +109,15 @@ test("dry-run skips recovery/build/finalize; manual build uses next or last vers
   }
 });
 
+test("no Android changes skip publication and dry-run without building, notes, or finalization", async () => {
+  for (const mode of ["publish", "dry-run"] as const) {
+    const events: string[] = [];
+    const result = await releaseAndroid(services([published], events, null), nextSha, mode);
+    assert.equal(result, null);
+    assert.deepEqual(events, [`semantic 4 dry=${mode === "dry-run"}`]);
+  }
+});
+
 test("a failed draft verification cannot report publication success", async () => {
   const events: string[] = [];
   const api = services([published], events);

@@ -12,7 +12,7 @@ export async function capture(command: string, args: string[], cwd = root): Prom
   return result.stdout.trim();
 }
 
-// Read the same unfiltered Git range for version policy and recovery notes.
+// Read the full range before applying the production Android input policy.
 export async function readCommits(from: string, to: string, cwd = root): Promise<Pick<Commit, "hash" | "message">[]> {
   const range = `${from}..${to}`;
   const rawLog = await capture("git", ["log", range, "--format=%H%x00%B%x00"], cwd);

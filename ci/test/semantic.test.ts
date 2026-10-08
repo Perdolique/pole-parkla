@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import semanticRelease from "semantic-release";
@@ -20,7 +20,12 @@ test("configured semantic-release API loads native TS, skips prepare in dry-run,
     await capture("git", ["commit", "--allow-empty", "-m", "chore: baseline"], checkout);
     await capture("git", ["tag", "v1.0.0"], checkout);
     await capture("git", ["push", "origin", "master", "--tags"], checkout);
-    await capture("git", ["commit", "--allow-empty", "-m", "feat: build preview APKs [skip release]"], checkout);
+    const appDirectory = join(checkout, "app/src/main");
+    await mkdir(appDirectory, { recursive: true });
+    const appPath = join(appDirectory, "Main.kt");
+    await writeFile(appPath, "// Add preview builds\n");
+    await capture("git", ["add", "app"], checkout);
+    await capture("git", ["commit", "-m", "feat: build preview APKs [skip release]"], checkout);
     await capture("git", ["push", "origin", "master"], checkout);
     const sha = await capture("git", ["rev-parse", "HEAD"], checkout);
     await writeFile(events, "");
@@ -49,6 +54,19 @@ test("configured semantic-release API loads native TS, skips prepare in dry-run,
     assert.equal(recordedEvents, "prepare 1.1.0\npublish 1.1.0\n");
     const again = await semanticRelease(options, { cwd: checkout, env });
     assert.equal(again, false);
+    const website = join(checkout, "site");
+    await mkdir(website);
+    const websitePath = join(website, "index.html");
+    await writeFile(websitePath, "New website\n");
+    await capture("git", ["add", "site"], checkout);
+    await capture("git", ["commit", "-m", "feat(site)!: replace layout"], checkout);
+    await capture("git", ["push", "origin", "master"], checkout);
+    const websiteRelease = await semanticRelease(options, { cwd: checkout, env });
+    assert.equal(websiteRelease, false);
+    const websiteEvents = await readFile(events, "utf8");
+    assert.equal(websiteEvents, "prepare 1.1.0\npublish 1.1.0\n");
+    const websiteTags = await capture("git", ["tag", "--list"], checkout);
+    assert.equal(websiteTags, "v1.0.0\nv1.1.0");
     const markedCommits = [
       ["docs: explain install [skip release]", "1.1.1"],
       ["docs: explain upgrade [release skip]", "1.1.2"],
@@ -57,11 +75,15 @@ test("configured semantic-release API loads native TS, skips prepare in dry-run,
       ["feat!: replace format [release skip]", "3.0.0"],
     ];
     for (const [message, version] of markedCommits) {
-      await capture("git", ["commit", "--allow-empty", "-m", message], checkout);
+      const source = `${message}\n`;
+      await writeFile(appPath, source);
+      await capture("git", ["add", "app"], checkout);
+      await capture("git", ["commit", "-m", message], checkout);
       await capture("git", ["push", "origin", "master"], checkout);
       const result = await semanticRelease(options, { cwd: checkout, env });
       assert.ok(result, message);
       assert.equal(result.nextRelease.version, version, message);
+      assert.doesNotMatch(result.nextRelease.notes ?? "", /replace layout/);
     }
   } finally {
     await rm(directory, { recursive: true, force: true });

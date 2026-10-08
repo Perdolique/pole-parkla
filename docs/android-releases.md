@@ -11,7 +11,8 @@ remain manual in Play Console.
 | Trigger | Build | Download |
 |---|---|---|
 | PR to `master`, including forks | Debug APK and optimized Preview APK | Two Actions artifacts, 7 days |
-| Push to `master` | Signed production APK and AAB | Stable GitHub Release |
+| Push to `master` with production Android changes | Signed production APK and AAB | Stable GitHub Release |
+| Push to `master` without production Android changes | Node checks, no production build | No new Android release |
 | Manual CI on `master` | Signed production APK and AAB, no publication | Actions artifact, 90 days |
 | Manual CI on another branch | Debug APK and Preview APK, no publication | Two Actions artifacts, 90 days |
 
@@ -54,15 +55,34 @@ The private `ci/` package runs pinned semantic-release and plugins with Node
 are TypeScript executed directly by Node. There is no npm publication or version
 commit. The release branch is `master`; tags use `v${version}`.
 
-- Breaking commits (`!`, `BREAKING CHANGE:`, or `BREAKING-CHANGE:`) select major.
-- `feat` selects minor.
-- All other new commits select patch, including messages without a conventional type.
-- A range uses the largest increase. Release notes are generated in English.
+- Breaking Android commits (`!`, `BREAKING CHANGE:`, or `BREAKING-CHANGE:`) select major.
+- Android `feat` commits select minor.
+- All other Android commits select patch, including messages without a conventional type.
+- A range uses the largest Android increase. Release notes are generated in English.
 
-The analyzer reads the full Git range from the previous release to `HEAD`.
-Reverted feature and breaking commits still count. `[skip release]` and
-`[release skip]` do not suppress a release under this policy. Each commit is
-analyzed separately so upstream revert filtering cannot change the largest bump.
+The analyzer reads the full Git range from the previous release to `HEAD`, then
+keeps only commits that change production Android inputs:
+
+- `app/src/main/**`, including bundled models and resources;
+- `app/build.gradle.kts` and `app/proguard-rules.pro`;
+- root Gradle settings, build properties, both wrapper scripts, and `gradle/**`;
+- `ci/src/android.ts`, which controls the Android build.
+
+Merge commits use their first-parent diff. Deleted files and files moved outside
+Android still count. Website, Worker, iOS, documentation, tests, Play notes, and
+publication-tool changes alone do not release Android. For example,
+`feat(site)` followed by `fix(app)` selects patch. Changes to shared Gradle files
+still count even when they only update a test dependency.
+
+The PR version forecast, release analyzer, and normal and recovery release notes
+use this same input policy. With no Android commits, automatic publication exits
+without a production build, tag, release, or version increase. PR APK builds and
+the Worker, site, and release-tool checks still run.
+
+Reverted Android feature and breaking commits still count. `[skip release]` and
+`[release skip]` do not suppress an Android release under this policy. Each
+eligible commit is analyzed separately so upstream revert filtering cannot change
+the largest bump. Existing releases and their version codes stay unchanged.
 
 The baseline is `v1.0.0` at `2ba03d59d23ceac77fca4836eaa7835537f27cf5`, with no
 GitHub Release. Its Android `versionCode` is 2. The first automatic release gets
@@ -72,7 +92,7 @@ The adapter reads the previous release's `build-info.json`, not a Git commit cou
 PR names are `<stable-version>-pr.<PR-number>.<run-number>`. Other test builds use
 `<stable-version>-ci.<run-number>`. Both use `github.run_number` as `versionCode`.
 A manual production build uses the next calculated version and code; when there
-are no new commits, it uses the latest published version and code.
+are no new Android commits, it uses the latest published version and code.
 
 Each production release has exactly these assets:
 
@@ -96,11 +116,19 @@ and [release limits](https://docs.github.com/en/repositories/releasing-projects-
 
 ## Google Play drafts
 
-After successful push CI on `master`, the Google Play workflow downloads the
-latest stable GitHub Release. It verifies all five assets, their SHA-256 values,
-the Android version, and the remote tag's commit. It uploads the existing signed
+After successful push CI on `master`, the Google Play workflow looks for a stable
+published GitHub Release at the triggering run's `head_sha`. It passes that SHA
+as `PP_PLAY_COMMIT_SHA`; the prepare step returns `should_upload`. If this commit
+has no published Android release, it skips Google authentication and upload.
+The triggering SHA is separate from this workflow's own `GITHUB_SHA`, which can
+already point to a newer `master` commit.
+
+For a matching release, it verifies all five assets, their SHA-256 values, the
+Android version, and the remote tag and build metadata against the triggering
+commit. API and verification errors fail the run. It uploads the existing signed
 AAB, without another Android build. Manual dispatch can select a published tag,
-such as `v1.1.0`. PR and manual build CI runs do not trigger a Play upload.
+such as `v1.2.0`, or select the latest published release by leaving the tag empty.
+PR and manual build CI runs do not trigger a Play upload.
 
 The uploader creates a `production` release with status `draft`. It preserves
 existing active releases and rejects a different pending draft. A retry reuses
@@ -125,8 +153,9 @@ after the `1.0.0 (2)` build published on September 8, 2026. The later Git tag
 `v1.0.0` already contains those links, so its diff is not the right basis for
 that first Play update.
 
-Before building PR test APKs, CI forecasts the next version with the same commit
-analyzer used for releases and checks that version's Play notes. This read-only
+Before building PR test APKs, CI forecasts the next version with the same Android
+commit policy used for releases. It checks Play notes only when a new Android
+release is needed. This read-only
 check needs a full checkout with tags and a GitHub token:
 
 ```sh

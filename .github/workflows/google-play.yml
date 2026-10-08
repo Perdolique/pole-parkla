@@ -48,7 +48,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PP_PLAY_TAG: ${{ inputs.tag }}
+          PP_PLAY_COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
       - name: Authenticate for Google Play
+        if: steps.prepare.outputs.should_upload == 'true'
         id: auth
         uses: google-github-actions/auth@v3
         with:
@@ -60,6 +62,7 @@ jobs:
           create_credentials_file: false
           export_environment_variables: false
       - name: Save the production draft
+        if: steps.prepare.outputs.should_upload == 'true'
         run: node ci/src/play-cli.ts upload "$PP_PLAY_DIRECTORY"
         env:
           PP_PLAY_DIRECTORY: ${{ steps.prepare.outputs.directory }}

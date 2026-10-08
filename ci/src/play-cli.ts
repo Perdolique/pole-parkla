@@ -2,7 +2,7 @@ import { appendFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import * as v from "valibot";
 import semver from "semver";
-import { downloadPublishedRelease, listReleases } from "./github.ts";
+import { downloadPublishedRelease, listReleases, publishedReleaseTagForCommit } from "./github.ts";
 import { assetNames, BuildInfoSchema } from "./model.ts";
 import { PlayNotesSchema, uploadPlayDraft } from "./play.ts";
 import { readPlayNotes } from "./play-notes.ts";
@@ -11,8 +11,18 @@ import { verifyArtifactSet } from "./artifacts.ts";
 async function main(): Promise<void> {
   const command = process.argv[2];
   if (command === "prepare") {
+    const commitSha = process.env.PP_PLAY_COMMIT_SHA;
     let tag = process.env.PP_PLAY_TAG;
-    if (!tag) {
+    if (commitSha) {
+      const releaseTag = await publishedReleaseTagForCommit(commitSha);
+      tag = releaseTag ?? undefined;
+      if (!tag) {
+        console.log(`Skip Google Play: no published Android release for CI commit ${commitSha}.`);
+        if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, "should_upload=false\n");
+        if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, "Google Play upload skipped: this CI commit has no published Android release.\n");
+        return;
+      }
+    } else if (!tag) {
       const releases = await listReleases();
       const published = releases.filter((release) => !release.draft);
       published.sort((a, b) => semver.rcompare(a.tag_name.slice(1), b.tag_name.slice(1)));
@@ -23,12 +33,13 @@ async function main(): Promise<void> {
     const directory = await mkdtemp(prefix);
     try {
       const info = await downloadPublishedRelease(tag, directory);
+      if (commitSha && info.commitSha !== commitSha) throw new Error("Published Android build does not match the triggering CI commit.");
       const notes = await readPlayNotes(info);
       const notesPath = join(directory, "play-notes.json");
       const content = JSON.stringify(notes, null, 2);
       await writeFile(notesPath, content);
       if (process.env.GITHUB_OUTPUT) {
-        const output = `directory=${directory}\ntag=${tag}\n`;
+        const output = `should_upload=true\ndirectory=${directory}\ntag=${tag}\n`;
         await appendFile(process.env.GITHUB_OUTPUT, output);
       }
       console.log(`Verified ${tag} (Android ${info.versionCode}); Play upload files: ${directory}`);

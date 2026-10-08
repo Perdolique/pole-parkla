@@ -61,6 +61,18 @@ async function remoteTagSha(tag: string): Promise<string> {
   return v.parse(v.pipe(v.string(), v.regex(/^[a-f0-9]{40}$/)), sha);
 }
 
+// An automatic Play upload belongs to the CI commit, not the latest release.
+export async function publishedReleaseTagForCommit(commitSha: string): Promise<string | null> {
+  const expectedSha = v.parse(BuildInfoSchema.entries.commitSha, commitSha);
+  const releases = await listReleases();
+  for (const release of releases) {
+    if (release.draft) continue;
+    const sha = await remoteTagSha(release.tag_name);
+    if (sha === expectedSha) return release.tag_name;
+  }
+  return null;
+}
+
 export async function loadState(publishedOnly = false): Promise<ReleaseState[]> {
   const baselineSha = await capture("git", ["rev-parse", `${baseline.tag}^{commit}`]);
   if (baselineSha !== baseline.commitSha) throw new Error("Baseline v1.0.0 does not point to the approved commit.");
