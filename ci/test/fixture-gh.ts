@@ -23,6 +23,7 @@ interface PublicationFields {
 }
 export interface FixtureState {
   sha: string;
+  tagShas?: Record<string, string>;
   releases: FixtureRelease[];
   events: string[];
   publication?: PublicationFields;
@@ -70,7 +71,8 @@ if (args[0] === "git") {
     if (publication.draft !== undefined) release.draft = publication.draft === "true";
     if (publication.prerelease !== undefined) release.prerelease = publication.prerelease === "true";
   } else if (endpoint.includes("/commits/")) {
-    process.stdout.write(state.sha);
+    const tag = endpoint.split("/").at(-1)!;
+    process.stdout.write(state.tagShas?.[tag] ?? state.sha);
   } else if (endpoint.includes("/releases/assets/")) {
     const parts = endpoint.split("/");
     const lastPart = parts.at(-1);

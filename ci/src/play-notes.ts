@@ -2,7 +2,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import * as v from "valibot";
 import semver from "semver";
-import { capture, readCommits, root } from "./process.ts";
+import { capture, root } from "./process.ts";
+import { readAndroidCommits } from "./android-changes.ts";
 import { baseline, versionFromTag } from "./model.ts";
 import type { BuildInfo, ReleaseState } from "./model.ts";
 import { analyzeReleaseType } from "./analyzer.ts";
@@ -40,13 +41,13 @@ export async function checkNextPlayNotes(previous: ReleaseState | undefined, com
   const previousTag = previous?.tag ?? baseline.tag;
   const previousVersion = previous?.buildInfo?.versionName ?? baseline.version;
   const previousCode = previous?.buildInfo?.versionCode ?? baseline.versionCode;
-  const commits = await readCommits(previousTag, commitSha, cwd);
+  const commits = await readAndroidCommits(previousTag, commitSha, cwd);
   const context = { cwd, logger: console, commits };
   const releaseType = await analyzeReleaseType(context);
   const versionName = releaseType ? semver.inc(previousVersion, releaseType) : previousVersion;
   if (!versionName) throw new Error("Cannot calculate the next Google Play version.");
   const versionCode = releaseType ? previousCode + 1 : previousCode;
   const info = { versionName, versionCode, commitSha };
-  await readPlayNotes(info, cwd);
+  if (releaseType) await readPlayNotes(info, cwd);
   return info;
 }

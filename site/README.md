@@ -53,7 +53,17 @@ draft: false
 ---
 ```
 
-Published versions must exist in all three locales. The build fails when a non-draft translation is missing. The newest non-draft release is displayed on the home page.
+Published versions must exist in all three locales. The build fails when a non-draft translation is missing. The newest non-draft entry is displayed on the home page as the latest important update. Its version is the release that introduced that change, even if a newer technical release exists.
+
+Add notes by hand for important changes that users can see. Use the app version
+that first introduced the change and its public release date. The `1.2.0` entry
+describes the New report launcher shortcut released on October 7, 2026. Reviewed
+Google Play notes in `../ci/play-notes/` are a useful source for localized copy.
+Keep the label of an app action exactly as it appears in that locale.
+
+Website notes do not create an Android release or change its version. The site
+still deploys through Cloudflare Workers Builds. Android releases use a separate
+file-based policy described in [Android CI and releases](../docs/android-releases.md).
 
 ## Store and source links
 

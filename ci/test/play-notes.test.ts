@@ -26,8 +26,8 @@ async function createRepository(): Promise<NotesRepository> {
   await capture("git", ["clone", remote, checkout], directory);
   await capture("git", ["config", "user.email", "ci@example.invalid"], checkout);
   await capture("git", ["config", "user.name", "CI Test"], checkout);
-  const app = join(checkout, "app");
-  await mkdir(app);
+  const app = join(checkout, "app/src/main");
+  await mkdir(app, { recursive: true });
   const appPath = join(app, "Main.kt");
   await writeFile(appPath, "// Previous app version\n");
   await capture("git", ["add", "app"], checkout);
@@ -48,21 +48,24 @@ test("PR notes check forecasts the exact version and rejects missing or invalid 
       published: true,
       buildInfo: { versionName: "1.1.0", versionCode: 3, commitSha: repo.baselineSha },
     };
+    const notesDirectory = join(repo.checkout, "ci/play-notes");
+    await mkdir(notesDirectory, { recursive: true });
+    const currentNotesPath = join(notesDirectory, "1.1.0.json");
+    await writeFile(currentNotesPath, "{");
     await capture("git", ["commit", "--allow-empty", "-m", "ci: update release tools [skip release]"], repo.checkout);
     const buildSha = await capture("git", ["rev-parse", "HEAD"], repo.checkout);
     const buildInfo = await checkNextPlayNotes(previous, buildSha, repo.checkout);
-    assert.deepEqual(buildInfo, { versionName: "1.1.1", versionCode: 4, commitSha: buildSha });
+    assert.deepEqual(buildInfo, { versionName: "1.1.0", versionCode: 3, commitSha: buildSha });
+    await rm(currentNotesPath);
     const fallback = await readPlayNotes(buildInfo, repo.checkout);
     assert.deepEqual(Object.keys(fallback), ["et", "en-US", "ru-RU"]);
     assert.equal(fallback["en-US"], "Updated the app build and release process.");
 
-    const appPath = join(repo.checkout, "app/Main.kt");
+    const appPath = join(repo.checkout, "app/src/main/Main.kt");
     await writeFile(appPath, "// Added the launcher shortcut\n");
     await capture("git", ["add", "app"], repo.checkout);
     await capture("git", ["commit", "-m", "feat(app): add new report shortcut [release skip]"], repo.checkout);
     const appSha = await capture("git", ["rev-parse", "HEAD"], repo.checkout);
-    const notesDirectory = join(repo.checkout, "ci/play-notes");
-    await mkdir(notesDirectory, { recursive: true });
     const content = JSON.stringify(notes);
     const otherVersionPath = join(notesDirectory, "1.1.1.json");
     await writeFile(otherVersionPath, content);
@@ -92,7 +95,7 @@ test("PR notes check forecasts the exact version and rejects missing or invalid 
 test("production verifies Play notes in dry-run and before prepare or tag creation", async () => {
   const repo = await createRepository();
   try {
-    const appPath = join(repo.checkout, "app/Main.kt");
+    const appPath = join(repo.checkout, "app/src/main/Main.kt");
     await writeFile(appPath, "// Added the launcher shortcut\n");
     await capture("git", ["add", "app"], repo.checkout);
     await capture("git", ["commit", "-m", "feat(app): add new report shortcut"], repo.checkout);

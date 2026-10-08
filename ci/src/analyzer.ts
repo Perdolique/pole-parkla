@@ -1,7 +1,7 @@
 import { analyzeCommits as conventionalAnalyze } from "@semantic-release/commit-analyzer";
 import type { AnalysisContext } from "@semantic-release/commit-analyzer";
 import type { AnalyzeCommitsContext } from "semantic-release";
-import { readCommits } from "./process.ts";
+import { readAndroidCommits } from "./android-changes.ts";
 
 export const analyzerOptions = {
   preset: "conventionalcommits",
@@ -27,7 +27,7 @@ export async function analyzeReleaseType(context: AnalysisContext) {
 
 export async function analyzeCommits(_config: unknown, context: AnalyzeCommitsContext) {
   // semantic-release removes skip markers before this hook; our policy includes them.
-  const commits = await readCommits(context.lastRelease.gitHead, "HEAD", context.cwd);
+  const commits = await readAndroidCommits(context.lastRelease.gitHead, "HEAD", context.cwd);
   const analysisContext: AnalysisContext = { cwd: context.cwd, logger: context.logger, commits };
   return analyzeReleaseType(analysisContext);
 }

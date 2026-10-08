@@ -6,14 +6,15 @@ import * as v from "valibot";
 import { buildAndroid, artifactDirectory } from "./android.ts";
 import { baseline, latestPublished, testBuildInfo } from "./model.ts";
 import type { BuildInfo } from "./model.ts";
-import { capture, isAncestor, readCommits, root } from "./process.ts";
+import { capture, isAncestor, root } from "./process.ts";
+import { readAndroidCommits } from "./android-changes.ts";
 import { finalizeRelease, loadState, replaceDraft, verifyGithubRelease } from "./github.ts";
 import { releaseOptions } from "./config.ts";
 import { releaseAndroid } from "./release.ts";
 import { checkNextPlayNotes, readPlayNotes } from "./play-notes.ts";
 
 async function recoveryNotes(tag: string, info: BuildInfo, previousTag: string): Promise<string> {
-  const commits = await readCommits(previousTag, info.commitSha);
+  const commits = await readAndroidCommits(previousTag, info.commitSha);
   const previousSha = await capture("git", ["rev-parse", `${previousTag}^{commit}`]);
   // The notes generator only consumes these fields of the semantic-release context.
   const context: NotesContext = {
@@ -39,7 +40,7 @@ async function main(): Promise<void> {
     const states = await loadState(true);
     const previous = latestPublished(states);
     const info = await checkNextPlayNotes(previous, commitSha);
-    console.log(`Google Play notes verified for ${info.versionName} (Android ${info.versionCode}).`);
+    console.log(`Google Play version checked: ${info.versionName} (Android ${info.versionCode}). Notes are required only for a new Android release.`);
     return;
   }
   if (command === "test") {
@@ -85,6 +86,8 @@ async function main(): Promise<void> {
     const status = command === "production" ? "Manual build: no publication." : "Release state verified.";
     const summary = `Android **${info.versionName}** (${info.versionCode}), commit \`${info.commitSha}\`. ${status}\n`;
     await appendFile(process.env.GITHUB_STEP_SUMMARY, summary);
+  } else if (process.env.GITHUB_STEP_SUMMARY) {
+    await appendFile(process.env.GITHUB_STEP_SUMMARY, "Android release skipped. No new version was published.\n");
   }
 }
 

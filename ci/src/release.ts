@@ -48,6 +48,10 @@ export async function releaseAndroid(
       const tag = `v${version}`;
       if (mode === "publish") await services.finalize(tag, info);
     } else {
+      if (mode !== "build") {
+        console.log(`Skip Android release: no production build inputs changed. Keep ${decision.version}, Android versionCode ${decision.versionCode - 1}.`);
+        return null;
+      }
       info = { versionName: decision.version, versionCode: decision.versionCode - 1, commitSha };
     }
   }

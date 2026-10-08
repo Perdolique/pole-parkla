@@ -5,7 +5,7 @@ import { repository } from "./github.ts";
 
 const analyzerUrl = new URL("./analyzer.ts", import.meta.url);
 const adapterUrl = new URL("./adapter.ts", import.meta.url);
-const notesUrl = import.meta.resolve("@semantic-release/release-notes-generator");
+const notesUrl = new URL("./notes.ts", import.meta.url);
 const githubUrl = import.meta.resolve("@semantic-release/github");
 export const analyzerPath = fileURLToPath(analyzerUrl);
 export const notesPath = fileURLToPath(notesUrl);

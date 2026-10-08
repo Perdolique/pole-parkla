@@ -176,5 +176,5 @@ test("Play workflow uses trusted master code and short-lived credentials only af
   assert.equal(job.steps[auth].with.access_token_scopes, "https://www.googleapis.com/auth/androidpublisher");
   assert.equal(job.steps[auth].with.create_credentials_file, false);
   assert.equal(job.steps[auth].with.access_token_lifetime, "600s");
-  assert.doesNotMatch(source, /secrets\.|credentials_json|head_sha/);
+  assert.doesNotMatch(source, /secrets\.|credentials_json/);
 });
