@@ -1,0 +1,31 @@
+Use case: ads-marketing
+Asset type: final Facebook Page cover for the Pole parkla! app
+Primary request: Turn the provided square app icon into a wide, polished brand cover, approximately 1702 by 630 pixels, aspect ratio 2.7:1.
+Input image: the approved Pole parkla app icon. Keep the lime crossed-P symbol exactly the same shape. This is the existing brand, not a new logo.
+Style: clean Nordic graphic design, flat solid colors, crisp edges, modern Inter-like sans-serif typography. No texture, no shadows, no gradients.
+Color palette: solid Forest green #174B38 background, Signal lime #D8FF63 logo and small accent, off-white #F3F5EF main type.
+Composition: put the logo and text as one balanced group near the middle, with the logo at center-left and a left-aligned text block next to it. Keep ALL important content inside the central 60 percent of the width and middle 65 percent of the height. Leave the far-left and bottom-left areas empty for the Facebook avatar. Keep the whole text block away from all crop edges.
+Text, exactly:
+"Pole parkla!"
+"Kõnnitee ja rattatee ei ole parkla."
+"poleparkla.ee"
+Make the app name largest and bold. Make the slogan medium-sized and highly readable, wrapping into two lines if needed. Make the site address smaller. Preserve the Estonian õ in Kõnnitee, spelling, spaces, punctuation, exclamation mark, and lowercase website exactly.
+Constraints: one existing logo only, no new symbols, no phone, no screenshot, no invented UI, no people, no car photos, no QR code, no badge, no other text, no border, no watermark. Opaque green background. Deliver the cover artwork alone.
+
+Layout refinement:
+Edit the generated cover. Scale the complete logo-and-text group to 80 percent and center it on the canvas. Keep every word and the brand symbol's shape unchanged. Keep the complete group within the central 58 percent of the width. Use a flat Forest green background. Export the selected output to PNG at 1702 by 630 pixels.
+
+Generated with the built-in imagegen tool. The final export was resized with macOS sips.
+
+Responsive layout refinement after checking the live Facebook Page:
+
+Edit the supplied Facebook cover for Pole parkla! to prevent the centered Facebook profile avatar on narrow screens from covering the words.
+
+Keep the existing crossed-P brand symbol exactly recognizable, with the same shape. Keep all three texts exactly:
+Pole parkla!
+Kõnnitee ja rattatee ei ole parkla.
+poleparkla.ee
+
+Keep the same clean Nordic flat graphic style: Forest green #174B38 background, Signal lime #D8FF63 symbol and small accent, light #F3F5EF type. Opaque background. No texture, shadow, gradient, new icon, phone, screenshot, car, person, QR code, badge, border, watermark, or extra text.
+
+Recompose the cover at a wide 2.7:1 ratio, for a final 1702 x 630 PNG. Place the entire essential logo-and-typography group within the TOP 35% of the canvas and CENTRAL 60% of the width. The lower 65% must stay empty green so the mobile avatar cannot cover any wording. Use compact vertical spacing and generous horizontal spacing. One existing lime logo next to the app name on the first row; a single-line slogan below it; website on the third row. Make the app name bold and largest, the slogan clearly legible, and the website slightly smaller. Preserve Estonian õ exactly. Keep enough margin above the content that the glyphs do not touch the top edge. Every essential word must finish by y=220 on a 630-pixel-high canvas. The supplied composition currently sits too low; move and re-layout it, do not merely rescale the old canvas. The finished artwork alone.

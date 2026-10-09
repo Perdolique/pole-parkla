@@ -1,0 +1,21 @@
+Kõnnitee ja rattatee ei ole parkla.
+
+Pole parkla! on tasuta Androidi rakendus, mis aitab Eestis ette valmistada tõenditega teate jalgratta- või kõnniteele pargitud sõidukist.
+
+Kuidas see töötab?
+
+1. Lisa üks kuni kolm fotot.
+2. Kontrolli numbrimärki, sõidukit, asukohta ja aega.
+3. Ava valmis eestikeelne kiri koos fotodega oma meilirakenduses.
+
+Sina kontrollid andmeid ja otsustad, kas kirja muuta või saata. Rakendus ei saada teadet ise.
+
+Fotod ja teated jäävad sinu seadmesse. Kontot ega reklaame ei ole. Numbrimärgi tuvastus töötab seadmes; pilvetuvastus on valikuline ja vajab sinu nõusolekut.
+
+Rakenduse liides on eesti, inglise ja vene keeles.
+
+Tutvu rakendusega ja laadi see alla: https://poleparkla.ee/
+
+Rakendus on avatud lähtekoodiga. Lähtekood: https://github.com/Perdolique/pole-parkla
+
+Küsimused ja ideed: hello@poleparkla.ee

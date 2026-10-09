@@ -48,6 +48,7 @@ and `worker/` packages keep their own dependencies and lockfiles.
 - [Development guide](docs/development.md) — app builds, signing, and architecture.
 - [Recognition Worker](worker/README.md) — setup and deployment.
 - [Website](site/README.md) — local development and deployment.
+- [Marketing](marketing/README.md) — channel artwork, published text, and page settings.
 - [CI runs](https://github.com/Perdolique/pole-parkla/actions/workflows/ci.yml) — Android, Worker, and website checks. iOS tests are deferred for now.
 
 ## Bug reports and ideas
